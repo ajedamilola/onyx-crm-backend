@@ -68,17 +68,17 @@ module.exports = (app) => {
   //#region adding Stuff
   app.post("/call", async (req, res) => {
     try {
-      const { date, isSuccessful, isAnswered, customerId } = req.body;
+      const { date, isSuccessful, customerId, title, description } = req.body;
       const { uid } = req.cookies;
       const user = await User.findById(uid);
       if (user) {
         const successful = Boolean(isSuccessful);
-        const replied = Boolean(isAnswered);
+        const replied = true;
         const customer = await Customer.findById(customerId);
         const data = {
           date: new Date(date),
           successful,
-          replied,
+          replied,title,description
         };
         customer.calls.push(data);
         customer.save();
