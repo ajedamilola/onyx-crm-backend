@@ -60,7 +60,7 @@ const customerStructure = new mongoose.Schema({
 const User = mongoose.model("user",userStructure);
 const Customer = mongoose.model("customer",customerStructure);
 
-mongoose.connect("mongodb://localhost:27017/telserve-crm",(err)=>{
+mongoose.connect("mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority",(err)=>{
     console.log(err ? "Connection Failed" : "Connection Successful");
 })
 
