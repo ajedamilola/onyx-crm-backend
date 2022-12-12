@@ -24,11 +24,10 @@ module.exports = (app) => {
         email,
         phone,
         name,
-        planIndex,
         purchaseAmount,
-        setUpAmount,
         company,
         payment,
+        product
       } = req.body;
 
       const newCustomer = new Customer({
@@ -39,14 +38,13 @@ module.exports = (app) => {
         purchases: [
           {
             amount: purchaseAmount,
-            plan: plans[planIndex],
+            product,
             pending: payment != "done",
             confirmed: payment == "done",
             date: new Date(),
           },
         ],
         company,
-        setupPayment:setUpAmount
       });
 
       if (req.files && req.files.image) {

@@ -11,14 +11,9 @@ const ContactInstance = {
     description:String
 }
 
-const Plan = {
-    name:String,
-    amount:Number,
-}
-
 const Purchase = {
     amount:Number,
-    plan:Plan,
+    product:mongoose.SchemaTypes.ObjectId,
     date:Date,
     confirmed:Boolean,
     pending:Boolean
@@ -30,7 +25,9 @@ const userStructure = new mongoose.Schema({
     email:String,
     password:String,
     customers:[mongoose.SchemaTypes.ObjectId],
-    tasks:[ContactInstance]
+    tasks:[ContactInstance],
+    privilage:Number,
+    canAddProducts:Boolean
 })
 
 const customerStructure = new mongoose.Schema({
@@ -47,24 +44,45 @@ const customerStructure = new mongoose.Schema({
     emails:[ContactInstance],
     purchases:[Purchase],
     handler:mongoose.SchemaTypes.ObjectId,
-    plan:Plan,
+    mainProduct:mongoose.SchemaTypes.ObjectId,
     company:String,
     active:Boolean,
-    setupPayment:Number
-
 })
+
+
+const productsStructure = mongoose.Schema({
+    name:String,
+    price:Number,
+    owner:mongoose.SchemaTypes.ObjectId,
+    category:String,
+    image:String,
+    featured:Boolean
+})
+
+const category = mongoose.Schema({
+    name:String,
+    description:String,
+    owner:String
+})
+
 
 
 
 
 const User = mongoose.model("user",userStructure);
 const Customer = mongoose.model("customer",customerStructure);
+const Product = mongoose.model("product",productsStructure);
+const Category = mongoose.model("category",category);
+const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
+// const connString = "mongodb://localhost:27017/telserve-crm";
 
-mongoose.connect("mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority",(err)=>{
+mongoose.connect(connString,(err)=>{
     console.log(err ? "Connection Failed" : "Connection Successful");
 })
 
 module.exports = {
     User,
-    Customer
+    Customer,
+    Product,
+    Category
 }
