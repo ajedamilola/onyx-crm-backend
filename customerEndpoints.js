@@ -20,15 +20,8 @@ module.exports = (app) => {
   app.post("/newCustomer", (req, res) => {
     try {
       const { uid } = req.cookies;
-      const {
-        email,
-        phone,
-        name,
-        purchaseAmount,
-        company,
-        payment,
-        product
-      } = req.body;
+      const { email, phone, name, purchaseAmount, company, payment, product } =
+        req.body;
 
       const newCustomer = new Customer({
         name,
@@ -50,7 +43,7 @@ module.exports = (app) => {
       if (req.files && req.files.image) {
         newCustomer.image = `data:${
           req.files.image.mimetype
-        };base64, ${encode64(req.files.image.data)}`;
+        };base64,${encode64(req.files.image.data)}`;
       }
       newCustomer.save();
       res.json({
@@ -76,7 +69,9 @@ module.exports = (app) => {
         const data = {
           date: new Date(date),
           successful,
-          replied,title,description
+          replied,
+          title,
+          description,
         };
         customer.calls.push(data);
         customer.save();
@@ -160,16 +155,17 @@ module.exports = (app) => {
   app.post("/purchase", async (req, res) => {
     try {
       const { uid } = req.cookies;
-      const { planIndex, customerId, amount, isConfirmed, date } = req.body;
+      const { product, customerId, amount, confirmed, date, qty } = req.body;
       const user = await User.findById(uid);
       if (user) {
         const customer = await Customer.findById(customerId);
         const purchase = {
           amount: Number(amount),
-          plan: plans[planIndex],
-          pending: !Boolean(isConfirmed),
-          confirmed: Boolean(isConfirmed),
+          pending: !confirmed,
+          confirmed: confirmed,
           date,
+          product,
+          qty
         };
         customer.purchases.push(purchase);
         customer.save();
@@ -179,6 +175,7 @@ module.exports = (app) => {
       }
     } catch (e) {
       res.json({ err: e.message, msg: "An Error Occured" });
+      console.log(e)
     }
   });
   //#endregion
@@ -236,6 +233,27 @@ module.exports = (app) => {
         return res.json(text);
       }
     });
+  });
+
+  app.patch("/customer", async (req, res) => {
+    try {
+      const { name, email, company, phone, id } = req.body;
+      const customer = await Customer.findById(id);
+      customer.name = name;
+      customer.email = email;
+      customer.company = company;
+      customer.phone = phone;
+      if(req.files && req.files.image){
+        customer.image = `data:${
+          req.files.image.mimetype
+        };base64,${encode64(req.files.image.data)}`
+      }
+      customer.save()
+      res.json({ msg: "Ok", customer });
+    } catch (err) {
+      res.json({ err: "Unable To Edit At This Time Try again later" });
+      console.log(err)
+    }
   });
 
   //#endregion

@@ -16,7 +16,8 @@ const Purchase = {
     product:mongoose.SchemaTypes.ObjectId,
     date:Date,
     confirmed:Boolean,
-    pending:Boolean
+    pending:Boolean,
+    qty:Number
 }
 
 
