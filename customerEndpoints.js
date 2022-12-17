@@ -41,9 +41,9 @@ module.exports = (app) => {
       });
 
       if (req.files && req.files.image) {
-        newCustomer.image = `data:${
-          req.files.image.mimetype
-        };base64,${encode64(req.files.image.data)}`;
+        newCustomer.image = `data:${req.files.image.mimetype};base64,${encode64(
+          req.files.image.data
+        )}`;
       }
       newCustomer.save();
       res.json({
@@ -89,25 +89,21 @@ module.exports = (app) => {
 
   app.post("/text", async (req, res) => {
     try {
-      const { date, isSuccessful, isAnswered, customerId, isPending } =
-        req.body;
+      const { customerId, title, description } = req.body;
       const { uid } = req.cookies;
       const user = await User.findById(uid);
       if (user) {
-        const successful = Boolean(isSuccessful);
-        const replied = Boolean(isAnswered);
-
-        const pending = Boolean(isPending);
         const customer = await Customer.findById(customerId);
         const data = {
-          date: new Date(date),
-          successful,
-          replied,
-          pending,
+          date: new Date(),
+          successful: false,
+          pending: true,
+          title,
+          description,
         };
         customer.texts.push(data);
-        customer.save();
         res.json(customer.texts[customer.texts.length - 1]);
+        customer.save();
       } else {
         throw { message: "UnAuthenticated Requests" };
       }
@@ -116,6 +112,7 @@ module.exports = (app) => {
         err: err.message,
         msg: "An Error Occured",
       });
+      console.log(err);
     }
   });
 
@@ -165,7 +162,7 @@ module.exports = (app) => {
           confirmed: confirmed,
           date,
           product,
-          qty
+          qty,
         };
         customer.purchases.push(purchase);
         customer.save();
@@ -175,7 +172,7 @@ module.exports = (app) => {
       }
     } catch (e) {
       res.json({ err: e.message, msg: "An Error Occured" });
-      console.log(e)
+      console.log(e);
     }
   });
   //#endregion
@@ -207,32 +204,110 @@ module.exports = (app) => {
     });
   });
 
-  app.patch("/email", async (req, res) => {
-    const { status, emailId, customerId, replied } = req.body;
-    const customer = await Customer.findById(customerId);
-    customer.emails.forEach((email) => {
-      if (email._id == emailId) {
-        const successful = status == "successful";
-        email.pending = false;
-        email.successful = successful;
-        email.replied = replied == "yes";
-        return res.json(email);
+  app.patch("/text", async (req, res) => {
+    const { status, textId, customerId } = req.body;
+    try {
+      if (req.cookies.uid) {
+        const customer = await Customer.findById(customerId);
+        customer.texts.forEach((text) => {
+          if (text._id == textId) {
+            const successful = status == "successful";
+            text.pending = false;
+            text.successful = successful;
+            return res.json(text);
+          }
+        });
+        customer.save();
+      } else {
+        res.json({ err: "Unathenticated Request" });
       }
-    });
+    } catch (err) {
+      console.log(err);
+      res.json({ err: "Database Error Try Again later" });
+    }
   });
 
-  app.patch("/text", async (req, res) => {
-    const { status, textId, customerId, replied } = req.body;
-    const customer = await Customer.findById(customerId);
-    customer.texts.forEach((text) => {
-      if (text._id == textId) {
-        const successful = status == "successful";
-        text.pending = false;
-        text.successful = successful;
-        text.replied = replied == "yes";
-        return res.json(text);
+  app.delete("/text", async (req, res) => {
+    
+    const { uid } = req.cookies;
+    try{
+      if (uid) {
+        const user = await User.findById(uid);
+        const { id } = req.headers;
+        const customer = await Customer.findById(req.headers.customer);
+        if (user.privilage > 1) {
+          customer.texts = customer.texts.filter((t) => t._id != id);
+        } else {
+          customer.texts.forEach((text) => {
+            if (text.id == id) {
+              text.pendingDelete = true;
+            }
+          });
+        }
+        customer.save();
+        res.json({msg:"Ok"})
+      } else {
+        res.json({ err: "Unauthenticated Request" });
       }
-    });
+    }catch(err){
+      console.log(err)
+      res.json({err:"Unable To Delete At This Time Try again  later"})
+    }
+    
+  });
+
+  app.delete("/email", async (req, res) => {
+    
+    const { uid } = req.cookies;
+    try{
+      if (uid) {
+        const user = await User.findById(uid);
+        const { id } = req.headers;
+        const customer = await Customer.findById(req.headers.customer);
+        if (user.privilage > 1) {
+          customer.emails = customer.emails.filter((t) => t._id != id);
+        } else {
+          customer.emails.forEach((email) => {
+            if (email.id == id) {
+              email.pendingDelete = true;
+            }
+          });
+        }
+        customer.save();
+        res.json({msg:"Ok"})
+      } else {
+        res.json({ err: "Unauthenticated Request" });
+      }
+    }catch(err){
+      console.log(err)
+      res.json({err:"Unable To Delete At This Time Try again  later"})
+    }
+    
+  });
+
+  app.patch("/email", async (req, res) => {
+    const { status, textId, customerId } = req.body;
+    console.log(textId)
+    try {
+      if (req.cookies.uid) {
+        const customer = await Customer.findById(customerId);
+        customer.emails.forEach((email) => {
+          
+          if (email._id == textId) {
+            const successful = status == "successful";
+            email.pending = false;
+            email.successful = successful;
+            return res.json(email);
+          }
+        });
+        customer.save();
+      } else {
+        res.json({ err: "Unathenticated Request" });
+      }
+    } catch (err) {
+      console.log(err);
+      res.json({ err: "Database Error Try Again later" });
+    }
   });
 
   app.patch("/customer", async (req, res) => {
@@ -243,16 +318,16 @@ module.exports = (app) => {
       customer.email = email;
       customer.company = company;
       customer.phone = phone;
-      if(req.files && req.files.image){
-        customer.image = `data:${
-          req.files.image.mimetype
-        };base64,${encode64(req.files.image.data)}`
+      if (req.files && req.files.image) {
+        customer.image = `data:${req.files.image.mimetype};base64,${encode64(
+          req.files.image.data
+        )}`;
       }
-      customer.save()
+      customer.save();
       res.json({ msg: "Ok", customer });
     } catch (err) {
       res.json({ err: "Unable To Edit At This Time Try again later" });
-      console.log(err)
+      console.log(err);
     }
   });
 

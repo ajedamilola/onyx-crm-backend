@@ -93,8 +93,8 @@ module.exports = (app) => {
         date: new Date(dateEnded),
         description,
         title,
-        replied: false,
         pending: true,
+        successful:false
       });
       user.save();
       res.json(user.tasks[user.tasks.length - 1]);
@@ -120,6 +120,25 @@ module.exports = (app) => {
     } catch (e) {
       console.log(e.message);
       res.json({ err: "A Server Error Ocurred" });
+    }
+  });
+
+  app.delete("/task", async (req, res) => {
+    try {
+      const uid = req.cookies.uid;
+      if (uid) {
+        const user = await User.findById(uid);
+        user.tasks = user.tasks.filter((t) => t.id != req.headers.id);
+        user.save();
+        res.json({ msg: "Ok" });
+      } else {
+        res.json({
+          err: "Unauthenticated Request. Logout, relogin and try again",
+        });
+      }
+    } catch (err) {
+      res.json({err:"Database Error Try again later"});
+      console.log(err);
     }
   });
 
@@ -221,10 +240,9 @@ module.exports = (app) => {
         (product.category = category),
         (product.price = price);
       if (req.files && req.files.image) {
-        product.image =
-         `data:${
-          req.files.image.mimetype
-        };base64,${encode64(req.files.image.data)}`
+        product.image = `data:${req.files.image.mimetype};base64,${encode64(
+          req.files.image.data
+        )}`;
       }
       product.save();
       res.json({ msg: "Ok", product });
