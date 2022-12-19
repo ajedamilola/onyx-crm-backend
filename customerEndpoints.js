@@ -193,15 +193,25 @@ module.exports = (app) => {
 
   app.patch("/call", async (req, res) => {
     const { status, callId, customerId } = req.body;
-    const customer = await Customer.findById(customerId);
-    customer.calls.forEach((call) => {
-      if (call._id == callId) {
-        const successful = status == "successful";
-        call.pending = false;
-        call.successful = successful;
-        return res.json(call);
+    try {
+      if (req.cookies.uid) {
+        const customer = await Customer.findById(customerId);
+        customer.calls.forEach((call) => {
+          if (call.id == callId) {
+            const successful = status == "successful";
+            call.pending = false;
+            call.successful = successful;
+            return res.json(call);
+          }
+        });
+        customer.save();
+      } else {
+        res.json({ err: "Unathenticated Request" });
       }
-    });
+    } catch (err) {
+      console.log(err);
+      res.json({ err: "Database Error Try Again later" });
+    }
   });
 
   app.patch("/text", async (req, res) => {
@@ -241,6 +251,34 @@ module.exports = (app) => {
           customer.texts.forEach((text) => {
             if (text.id == id) {
               text.pendingDelete = true;
+            }
+          });
+        }
+        customer.save();
+        res.json({msg:"Ok"})
+      } else {
+        res.json({ err: "Unauthenticated Request" });
+      }
+    }catch(err){
+      console.log(err)
+      res.json({err:"Unable To Delete At This Time Try again  later"})
+    }
+    
+  });
+  app.delete("/call", async (req, res) => {
+    
+    const { uid } = req.cookies;
+    try{
+      if (uid) {
+        const user = await User.findById(uid);
+        const { id } = req.headers;
+        const customer = await Customer.findById(req.headers.customer);
+        if (user.privilage > 1) {
+          customer.calls = customer.calls.filter((t) => t._id != id);
+        } else {
+          customer.calls.forEach((call) => {
+            if (call.id == id) {
+              call.pendingDelete = true;
             }
           });
         }

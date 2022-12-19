@@ -3,7 +3,6 @@ const app = express();
 app.listen(process.env.PORT || 3000,(err)=>{
     if(!err){
         console.log("Server Running Successfully")
-
     }else{
         console.log("An Error Occured ",err)
     }
@@ -20,5 +19,3 @@ app.use(require("cors")(corsOptions));
 app.use(require("express-fileupload")())
 require("./userEndpoints")(app);
 require("./customerEndpoints")(app)
-
-

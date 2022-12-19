@@ -94,7 +94,7 @@ module.exports = (app) => {
         description,
         title,
         pending: true,
-        successful:false
+        successful: false,
       });
       user.save();
       res.json(user.tasks[user.tasks.length - 1]);
@@ -137,7 +137,7 @@ module.exports = (app) => {
         });
       }
     } catch (err) {
-      res.json({err:"Database Error Try again later"});
+      res.json({ err: "Database Error Try again later" });
       console.log(err);
     }
   });
@@ -249,6 +249,30 @@ module.exports = (app) => {
     } catch (error) {
       console.log(error);
       res.json({ err: "Unable To Edit Product at this time try again later" });
+    }
+  });
+
+  app.get("/all", async (req, res) => {
+    try {
+      const { uid } = req.cookies;
+      if (uid) {
+        const master = await User.findById(uid);
+        if (master) {
+          if(master.privilage > 1){
+            agents = (await User.find({})).filter(u=>u.privilage <= master.privilage)
+            res.json({agents});
+          }else{
+            res.json({err:"Apparently You do not have the proper privilage for this information. Contact A Super Admin"})
+          }
+        }else{
+          res.json({err:"Apparently You Have Been Deleted from the system. Contact A Super Admin"})
+        }
+      } else {
+        res.json({ err: "Unauthenticated Request" });
+      }
+    } catch (err) {
+      console.log(err);
+      res.json({err:"Database Error Try again later"})
     }
   });
 };
