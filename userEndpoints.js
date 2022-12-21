@@ -23,6 +23,83 @@ module.exports = (app) => {
     res.send("Server Running Successfully");
   });
 
+  app.post("/agent", (req, res) => {
+    try {
+      if (req.cookies.uid) {
+        const { uid } = req.cookies;
+        const user = User.findById(uid);
+        if (user) {
+          if (user.privilage < 2) {
+            res.json({
+              err: "You do not have enough clearance for this action",
+            });
+          } else {
+            //good to go
+            const { name, email, privilage, password } = req.body;
+            const agent = new User({
+              name,
+              email,
+              password,
+              privilage,
+              image: d_productImage,
+              canAddProducts:false
+            });
+            if (req.files && req.files.image) {
+              agent.image = `data:${req.files.image.mimetype};base64,${encode64(
+                req.files.image.data
+              )}`;
+            }
+            agent.save();
+            res.json({ agent });
+          }
+        } else {
+          res.json({
+            err: "Aparently You Have Been Deleted. Logout and try again. if this does not work contect your super admin",
+          });
+        }
+      } else {
+        return res.json({ err: "Unauthenticated Request" });
+      }
+    } catch (err) {
+      res.json({ err: "Database Error Try again later" });
+    }
+  });
+
+  app.patch("/agent", async (req, res) => {
+    try {
+      const { id, email, name, canAddProducts,privilage } = req.body;
+      const user = await User.findById(id);
+      user.email = email;
+      user.name = name;
+      user.canAddProducts = canAddProducts;
+      user.privilage = privilage;
+      if(req.files && req.files.image){
+        user.image = `data:${req.files.image.mimetype};base64,${encode64(
+          req.files.image.data
+        )}`;
+      }
+      user.save();
+      res.json({user})
+    } catch (err) {
+      console.log(err)
+      res.json({err:"Databse Error Try again later"});
+    }
+  });
+
+  app.delete("/agent",async (req,res)=>{
+    if(req.cookies.uid){
+      try{
+        await User.findByIdAndDelete(req.headers.id);
+        console.log(req.headers.id)
+        res.json({msg:"Ok"})
+      }catch(err){
+        res.json({err:"Database Error Try Again later"});
+      }
+    }else{
+      res.json({err:"Unauthenticated Request"});
+    }
+  })
+
   app.post("/user", async (req, res) => {
     const { uid } = req.body;
     try {
@@ -258,21 +335,28 @@ module.exports = (app) => {
       if (uid) {
         const master = await User.findById(uid);
         if (master) {
-          if(master.privilage > 1){
-            agents = (await User.find({})).filter(u=>u.privilage <= master.privilage)
-            res.json({agents});
-          }else{
-            res.json({err:"Apparently You do not have the proper privilage for this information. Contact A Super Admin"})
+          if (master.privilage > 1) {
+            agents = (await User.find({})).filter(
+              (u) => u.privilage <= master.privilage
+            );
+            res.json({ agents });
+          } else {
+            res.json({
+              err: "Apparently You do not have the proper privilage for this information. Contact A Super Admin",
+            });
           }
-        }else{
-          res.json({err:"Apparently You Have Been Deleted from the system. Contact A Super Admin"})
+        } else {
+          res.json({
+            err: "Apparently You Have Been Deleted from the system. Contact A Super Admin",
+          });
         }
       } else {
         res.json({ err: "Unauthenticated Request" });
       }
     } catch (err) {
       console.log(err);
-      res.json({err:"Database Error Try again later"})
+      res.json({ err: "Database Error Try again later" });
     }
   });
+
 };

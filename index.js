@@ -19,3 +19,7 @@ app.use(require("cors")(corsOptions));
 app.use(require("express-fileupload")())
 require("./userEndpoints")(app);
 require("./customerEndpoints")(app)
+
+// setInterval(async ()=>{
+//     console.log("Clean Up Systems");
+// },1000)

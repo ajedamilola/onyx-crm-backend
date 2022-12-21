@@ -13,15 +13,19 @@ const ContactInstance = {
     type: Boolean,
     default: false,
   },
+  interval:String,
+  intervalDate:Date,
+  isActive:Boolean
 };
 
 const Purchase = {
   amount: Number,
-  product: mongoose.SchemaTypes.ObjectId,
+  product: String,
   date: Date,
   confirmed: Boolean,
   pending: Boolean,
   qty: Number,
+  pendingDelete:{type:Boolean,default:false}
 };
 
 const userStructure = new mongoose.Schema({
@@ -32,6 +36,11 @@ const userStructure = new mongoose.Schema({
   tasks: [{ ...ContactInstance, bySuper: false }],
   privilage: Number,
   canAddProducts: Boolean,
+  dateAdded:{
+    type:Date,
+    default:()=>new Date()
+  },
+  image:String
 });
 
 const customerStructure = new mongoose.Schema({
@@ -72,8 +81,7 @@ const User = mongoose.model("user", userStructure);
 const Customer = mongoose.model("customer", customerStructure);
 const Product = mongoose.model("product", productsStructure);
 const Category = mongoose.model("category", category);
-const connString =
-  "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
+const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
 // const connString = "mongodb://localhost:27017/telserve-crm";
 
 mongoose.connect(connString, (err) => {

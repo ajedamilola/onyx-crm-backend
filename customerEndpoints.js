@@ -118,7 +118,7 @@ module.exports = (app) => {
 
   app.post("/email", async (req, res) => {
     try {
-      const { message, recipient, subject, email } = req.body;
+      const { message, recipient, subject, interval, intervalDate } = req.body;
       const { uid } = req.cookies;
       const user = await User.findById(uid);
       if (user) {
@@ -133,6 +133,9 @@ module.exports = (app) => {
           pending,
           title: subject,
           description: message,
+          interval:interval || "Once",
+          intervalDate:intervalDate,
+          isActive:true
         };
         //actually send an email later with the "email" param
         customer.emails.push(data);
@@ -179,17 +182,51 @@ module.exports = (app) => {
 
   //#region Patching Stuff
   app.patch("/purchase", async (req, res) => {
-    const { status, purchaseId, customerId } = req.body;
-    const customer = await Customer.findById(customerId);
-    customer.purchases.forEach((purchase) => {
-      if (purchase._id == purchaseId) {
-        const successful = status == "successful";
-        purchase.pending = false;
-        purchase.confirmed = successful;
-        return res.json(purchase);
+    if (req.cookies.uid) {
+      try {
+        const { pending, successful, purchaseId, customerId } = req.body;
+        const customer = await Customer.findById(customerId);
+        customer.purchases.forEach((purchase) => {
+          if (purchase._id == purchaseId) {
+            purchase.pending = pending;
+            purchase.confirmed = successful;
+            return res.json({purchase});
+          }
+        });
+      } catch (err) {
+        res.json({ err: "Database Error Try again later" });
+        console.log(err);
       }
-    });
+    }else{
+      res.json({err:"Unauthenticated Request"});
+    }
   });
+
+  app.delete("/purchase", async (req,res)=>{
+    if(req.cookies.uid){
+      try{
+        const priv = (await User.findById(req.cookies.uid)).privilage;
+        const customer = await Customer.findById(req.headers.customer);
+        if(priv > 1){
+          customer.purchases = customer.purchases.filter(p=>p.id!==req.headers.purchase)
+        }else{
+          customer.purchases.forEach(purchase => {
+            if(purchase.id==req.headers.purchase){
+              purchase.pendingDelete = true;
+            }
+          });
+        }
+        customer.save();
+        res.json({msg:"Ok"})
+      }catch(err){
+        console.log(err);
+        res.json({err:"Databse Error Try again later"});
+      }
+     
+    }else{
+      res.json({err:"Unauthenticated Request"});
+    }
+  })
 
   app.patch("/call", async (req, res) => {
     const { status, callId, customerId } = req.body;
@@ -238,9 +275,8 @@ module.exports = (app) => {
   });
 
   app.delete("/text", async (req, res) => {
-    
     const { uid } = req.cookies;
-    try{
+    try {
       if (uid) {
         const user = await User.findById(uid);
         const { id } = req.headers;
@@ -255,20 +291,19 @@ module.exports = (app) => {
           });
         }
         customer.save();
-        res.json({msg:"Ok"})
+        res.json({ msg: "Ok" });
       } else {
         res.json({ err: "Unauthenticated Request" });
       }
-    }catch(err){
-      console.log(err)
-      res.json({err:"Unable To Delete At This Time Try again  later"})
+    } catch (err) {
+      console.log(err);
+      res.json({ err: "Unable To Delete At This Time Try again  later" });
     }
-    
   });
+
   app.delete("/call", async (req, res) => {
-    
     const { uid } = req.cookies;
-    try{
+    try {
       if (uid) {
         const user = await User.findById(uid);
         const { id } = req.headers;
@@ -283,21 +318,19 @@ module.exports = (app) => {
           });
         }
         customer.save();
-        res.json({msg:"Ok"})
+        res.json({ msg: "Ok" });
       } else {
         res.json({ err: "Unauthenticated Request" });
       }
-    }catch(err){
-      console.log(err)
-      res.json({err:"Unable To Delete At This Time Try again  later"})
+    } catch (err) {
+      console.log(err);
+      res.json({ err: "Unable To Delete At This Time Try again  later" });
     }
-    
   });
 
   app.delete("/email", async (req, res) => {
-    
     const { uid } = req.cookies;
-    try{
+    try {
       if (uid) {
         const user = await User.findById(uid);
         const { id } = req.headers;
@@ -312,25 +345,23 @@ module.exports = (app) => {
           });
         }
         customer.save();
-        res.json({msg:"Ok"})
+        res.json({ msg: "Ok" });
       } else {
         res.json({ err: "Unauthenticated Request" });
       }
-    }catch(err){
-      console.log(err)
-      res.json({err:"Unable To Delete At This Time Try again  later"})
+    } catch (err) {
+      console.log(err);
+      res.json({ err: "Unable To Delete At This Time Try again  later" });
     }
-    
   });
 
   app.patch("/email", async (req, res) => {
     const { status, textId, customerId } = req.body;
-    console.log(textId)
+    console.log(textId);
     try {
       if (req.cookies.uid) {
         const customer = await Customer.findById(customerId);
         customer.emails.forEach((email) => {
-          
           if (email._id == textId) {
             const successful = status == "successful";
             email.pending = false;
@@ -369,8 +400,40 @@ module.exports = (app) => {
     }
   });
 
+  app.post("/assignToAgent", async (req, res) => {
+    try {
+      if (req.cookies.uid) {
+        const { customerId, agent } = req.body;
+        const customer = await Customer.findById(customerId);
+        customer.handler = agent;
+        customer.save();
+        return res.json({ msg: "Ok" });
+      } else {
+        return res.json({ err: "Unathenticated Request" });
+      }
+    } catch (err) {
+      console.log(err);
+      return res.json({ err: "Databse Error Try again later" });
+    }
+  });
+
+  app.post("/setIntervalMessage", async (req,res)=>{
+    try {
+      const {isActive,id} = req.body;
+      const customer = await Customer.findById(req.body.customer);
+      customer.emails.forEach(mail=>{
+        if(mail._id==id){
+          mail.isActive = isActive;
+          return res.json({email:mail})
+        }
+      })
+    } catch (error) {
+      console.log(error);
+      res.json({err:"Database Error Try again later"});
+    }
+  })
+
   //#endregion
 };
 
 //the status of calls,emails,texts should be changed from pending to any
-//pending purchases should be able to be changed from failed or successfull
