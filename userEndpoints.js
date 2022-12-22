@@ -23,6 +23,30 @@ module.exports = (app) => {
     res.send("Server Running Successfully");
   });
 
+  app.post("/editUser", async (req, res) => {
+    if (req.cookies.uid) {
+      try {
+        const {name,password,email} = req.body;
+        const user = await User.findById(req.cookies.uid);
+        user.name = name;
+        user.password = password;
+        user.email = email;
+        if (req.files && req.files.image) {
+          user.image = `data:${req.files.image.mimetype};base64,${encode64(
+            req.files.image.data
+          )}`;
+        }
+        user.save()
+        res.json({msg:"ok"})
+      } catch (error) {
+        res.json({err:"Database Error Try again later"});
+        console.log(error)
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request Logout and try again later" });
+    }
+  });
+
   app.post("/agent", (req, res) => {
     try {
       if (req.cookies.uid) {
@@ -42,7 +66,7 @@ module.exports = (app) => {
               password,
               privilage,
               image: d_productImage,
-              canAddProducts:false
+              canAddProducts: false,
             });
             if (req.files && req.files.image) {
               agent.image = `data:${req.files.image.mimetype};base64,${encode64(
@@ -67,38 +91,38 @@ module.exports = (app) => {
 
   app.patch("/agent", async (req, res) => {
     try {
-      const { id, email, name, canAddProducts,privilage } = req.body;
+      const { id, email, name, canAddProducts, privilage } = req.body;
       const user = await User.findById(id);
       user.email = email;
       user.name = name;
       user.canAddProducts = canAddProducts;
       user.privilage = privilage;
-      if(req.files && req.files.image){
+      if (req.files && req.files.image) {
         user.image = `data:${req.files.image.mimetype};base64,${encode64(
           req.files.image.data
         )}`;
       }
       user.save();
-      res.json({user})
+      res.json({ user });
     } catch (err) {
-      console.log(err)
-      res.json({err:"Databse Error Try again later"});
+      console.log(err);
+      res.json({ err: "Databse Error Try again later" });
     }
   });
 
-  app.delete("/agent",async (req,res)=>{
-    if(req.cookies.uid){
-      try{
+  app.delete("/agent", async (req, res) => {
+    if (req.cookies.uid) {
+      try {
         await User.findByIdAndDelete(req.headers.id);
-        console.log(req.headers.id)
-        res.json({msg:"Ok"})
-      }catch(err){
-        res.json({err:"Database Error Try Again later"});
+        console.log(req.headers.id);
+        res.json({ msg: "Ok" });
+      } catch (err) {
+        res.json({ err: "Database Error Try Again later" });
       }
-    }else{
-      res.json({err:"Unauthenticated Request"});
+    } else {
+      res.json({ err: "Unauthenticated Request" });
     }
-  })
+  });
 
   app.post("/user", async (req, res) => {
     const { uid } = req.body;
@@ -358,5 +382,4 @@ module.exports = (app) => {
       res.json({ err: "Database Error Try again later" });
     }
   });
-
 };

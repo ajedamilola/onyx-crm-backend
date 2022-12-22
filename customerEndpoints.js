@@ -1,6 +1,7 @@
 const { text } = require("express");
 const { Customer, User } = require("./database");
-const { encode64 } = require("./functions");
+const { encode64, sendMail } = require("./functions");
+const nodemailer = require("nodemailer");
 module.exports = (app) => {
   const plans = [
     {
@@ -133,20 +134,34 @@ module.exports = (app) => {
           pending,
           title: subject,
           description: message,
-          interval:interval || "Once",
-          intervalDate:intervalDate,
-          isActive:true
+          interval: interval || "Once",
+          intervalDate: intervalDate,
+          isActive: true,
         };
         //actually send an email later with the "email" param
-        customer.emails.push(data);
-        customer.save();
-        res.json(customer.emails[customer.emails.length - 1]);
+        let testAccount = await nodemailer.createTestAccount();
+        testAccount = { ...testAccount, host: "smtp.ethereal.email" };
+        try {
+          sendMail(
+            `${user.name} <${user.email}>`,
+            `${customer.name} <${customer.email}>`,
+            subject,
+            message,
+            testAccount
+          );
+          customer.emails.push(data);
+          customer.save();
+          res.json(customer.emails[customer.emails.length - 1]);
+        } catch (err) {
+          res.send({err:"Unable To Send Mail Try again later"})
+        }
       } else {
         throw { message: "UnAuthenticated Requests" };
       }
     } catch (err) {
+      console.log(err)
       res.json({
-        err: err.message,
+        err: "An Error Occured. Try Again later",
         msg: "An Error Occured",
       });
     }
@@ -190,43 +205,44 @@ module.exports = (app) => {
           if (purchase._id == purchaseId) {
             purchase.pending = pending;
             purchase.confirmed = successful;
-            return res.json({purchase});
+            return res.json({ purchase });
           }
         });
       } catch (err) {
         res.json({ err: "Database Error Try again later" });
         console.log(err);
       }
-    }else{
-      res.json({err:"Unauthenticated Request"});
+    } else {
+      res.json({ err: "Unauthenticated Request" });
     }
   });
 
-  app.delete("/purchase", async (req,res)=>{
-    if(req.cookies.uid){
-      try{
+  app.delete("/purchase", async (req, res) => {
+    if (req.cookies.uid) {
+      try {
         const priv = (await User.findById(req.cookies.uid)).privilage;
         const customer = await Customer.findById(req.headers.customer);
-        if(priv > 1){
-          customer.purchases = customer.purchases.filter(p=>p.id!==req.headers.purchase)
-        }else{
-          customer.purchases.forEach(purchase => {
-            if(purchase.id==req.headers.purchase){
+        if (priv > 1) {
+          customer.purchases = customer.purchases.filter(
+            (p) => p.id !== req.headers.purchase
+          );
+        } else {
+          customer.purchases.forEach((purchase) => {
+            if (purchase.id == req.headers.purchase) {
               purchase.pendingDelete = true;
             }
           });
         }
         customer.save();
-        res.json({msg:"Ok"})
-      }catch(err){
+        res.json({ msg: "Ok" });
+      } catch (err) {
         console.log(err);
-        res.json({err:"Databse Error Try again later"});
+        res.json({ err: "Databse Error Try again later" });
       }
-     
-    }else{
-      res.json({err:"Unauthenticated Request"});
+    } else {
+      res.json({ err: "Unauthenticated Request" });
     }
-  })
+  });
 
   app.patch("/call", async (req, res) => {
     const { status, callId, customerId } = req.body;
@@ -417,21 +433,21 @@ module.exports = (app) => {
     }
   });
 
-  app.post("/setIntervalMessage", async (req,res)=>{
+  app.post("/setIntervalMessage", async (req, res) => {
     try {
-      const {isActive,id} = req.body;
+      const { isActive, id } = req.body;
       const customer = await Customer.findById(req.body.customer);
-      customer.emails.forEach(mail=>{
-        if(mail._id==id){
+      customer.emails.forEach((mail) => {
+        if (mail._id == id) {
           mail.isActive = isActive;
-          return res.json({email:mail})
+          return res.json({ email: mail });
         }
-      })
+      });
     } catch (error) {
       console.log(error);
-      res.json({err:"Database Error Try again later"});
+      res.json({ err: "Database Error Try again later" });
     }
-  })
+  });
 
   //#endregion
 };
