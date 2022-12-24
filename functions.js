@@ -26,13 +26,11 @@ async function sendMail(sender, recipient, title, message, account) {
   try {
     const customFooter = "";
     const transporter = nodemailer.createTransport({
-      host: account.host,
-      port: 587,
-      secure: false, // true for 465, false for other ports
+      service: 'gmail',
       auth: {
-        user: account.user, // generated ethereal user
-        pass: account.pass, // generated ethereal password
-      },
+        user: 'ajedamilola2005@gmail.com',
+        pass: 'utrsgwdslzwxdlnz'
+      }
     });
     const info = await transporter.sendMail({
       from: sender,
@@ -43,7 +41,7 @@ async function sendMail(sender, recipient, title, message, account) {
     console.log(nodemailer.getTestMessageUrl(info))
     return {err:false}
   } catch (err) {
-    console.log(err);
+    console.log("An Error Occured Here ",err);
     return {err}
   }
 }

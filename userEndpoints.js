@@ -26,7 +26,7 @@ module.exports = (app) => {
   app.post("/editUser", async (req, res) => {
     if (req.cookies.uid) {
       try {
-        const {name,password,email} = req.body;
+        const { name, password, email } = req.body;
         const user = await User.findById(req.cookies.uid);
         user.name = name;
         user.password = password;
@@ -36,11 +36,11 @@ module.exports = (app) => {
             req.files.image.data
           )}`;
         }
-        user.save()
-        res.json({msg:"ok"})
+        user.save();
+        res.json({ msg: "ok" });
       } catch (error) {
-        res.json({err:"Database Error Try again later"});
-        console.log(error)
+        res.json({ err: "Database Error Try again later" });
+        console.log(error);
       }
     } else {
       res.json({ err: "Unauthenticated Request Logout and try again later" });
@@ -129,7 +129,7 @@ module.exports = (app) => {
     try {
       const user = await User.findById(uid);
       if (user) {
-        const customers = await Customer.find({ handler: user.id });
+        const customers = await Customer.find({});
         const categories = await Category.find({});
         const products = await Product.find({});
         res.cookie("uid", user.id, {
@@ -138,12 +138,20 @@ module.exports = (app) => {
           maxAge: 24 * 60 * 60 * 1000,
           secure: true,
         });
+
+        const agents =
+          user.privilage > 1
+            ? (await User.find()).map((a) => {
+                return { ...a.toObject(), password: "" };
+              })
+            : [];
         res.send({
           user: { ...user.toObject(), plans },
           customers,
           plans,
           categories,
           products,
+          agents,
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });
@@ -160,7 +168,7 @@ module.exports = (app) => {
       const products = await Product.find({});
       const user = await User.findOne({ email, password });
       if (user) {
-        const customers = await Customer.find({ handler: user.id });
+        const customers = await Customer.find({});
         const categories = await Category.find({});
         res.cookie("uid", user.id, {
           httpOnly: false,
@@ -168,11 +176,18 @@ module.exports = (app) => {
           maxAge: 24 * 60 * 60 * 1000,
           secure: true,
         });
+        const agents =
+          user.privilage > 1
+            ? (await User.find()).map((a) => {
+                return { ...a.toObject(), password: "" };
+              })
+            : [];
         res.send({
           user: { ...user.toObject(), plans },
           customers,
           categories,
           products,
+          agents,
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });
@@ -213,9 +228,15 @@ module.exports = (app) => {
       for (let index = 0; index < user.tasks.length; index++) {
         const element = user.tasks[index];
         if (element._id == task._id) {
-          user.tasks[index] = task;
+          var msg = "Task Updated Successfully"
+          if(!element.bySuper){
+            user.tasks[index] = task;
+          }else{
+            msg = "Report Sent Successfully";
+            user.tasks[index].pendingDelete = true
+          }
           user.save();
-          return res.json({ msg: "Ok" });
+          return res.json({ msg });
         }
       }
     } catch (e) {
@@ -223,6 +244,24 @@ module.exports = (app) => {
       res.json({ err: "A Server Error Ocurred" });
     }
   });
+
+  app.patch("/agent/doneTask", async (req,res)=>{
+    try {
+      const {agent,task} = req.body;
+      const user = await User.findById(agent);
+      for (let i = 0; i < user.tasks.length; i++) {
+        const t = user.tasks[i];
+        if(t.id==task){
+          t.successful = !t.successful;
+          user.save();
+          return res.json({msg:"Ok"})
+        }
+      }
+    } catch (error) {
+      console.log(error)
+      res.json({err:"Databse Error Try Again Later"});
+    }
+  })
 
   app.delete("/task", async (req, res) => {
     try {
@@ -380,6 +419,25 @@ module.exports = (app) => {
     } catch (err) {
       console.log(err);
       res.json({ err: "Database Error Try again later" });
+    }
+  });
+
+  app.post("/agent/task", async (req, res) => {
+    try {
+      const { agent, title, description, date } = req.body;
+      const Agent = await User.findById(agent);
+      Agent.tasks.push({
+        title,
+        description,
+        date: new Date(date),
+        bySuper: true,
+        pending:true
+      });
+      Agent.save();
+      res.json({ newTask: Agent.tasks[Agent.tasks.length - 1] });
+    } catch (err) {
+      console.log(err);
+      res.json({ err: "Database Error Try Again Later" });
     }
   });
 };

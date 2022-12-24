@@ -140,18 +140,23 @@ module.exports = (app) => {
         };
         //actually send an email later with the "email" param
         let testAccount = await nodemailer.createTestAccount();
-        testAccount = { ...testAccount, host: "smtp.ethereal.email" };
         try {
-          sendMail(
-            `${user.name} <${user.email}>`,
-            `${customer.name} <${customer.email}>`,
+          console.log(testAccount)
+          const {err} = await sendMail(
+            `"${user.name}" <${user.email}>`,
+            `<${customer.email}>`,
             subject,
             message,
             testAccount
           );
-          customer.emails.push(data);
-          customer.save();
-          res.json(customer.emails[customer.emails.length - 1]);
+          if(!err){
+
+            customer.emails.push(data);
+            customer.save();
+            res.json(customer.emails[customer.emails.length - 1]);
+          }else{
+            res.json({err:"Unable To Send Emails At the moment. try again later"})
+          }
         } catch (err) {
           res.send({err:"Unable To Send Mail Try again later"})
         }
