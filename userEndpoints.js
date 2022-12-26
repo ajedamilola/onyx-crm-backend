@@ -32,9 +32,7 @@ module.exports = (app) => {
         user.password = password;
         user.email = email;
         if (req.files && req.files.image) {
-          user.image = `data:${req.files.image.mimetype};base64,${encode64(
-            req.files.image.data
-          )}`;
+          user.image = "data:image/webp;base64,"+await encode64(req.files.image.data);
         }
         user.save();
         res.json({ msg: "ok" });
@@ -47,7 +45,7 @@ module.exports = (app) => {
     }
   });
 
-  app.post("/agent", (req, res) => {
+  app.post("/agent", async (req, res) => {
     try {
       if (req.cookies.uid) {
         const { uid } = req.cookies;
@@ -69,9 +67,7 @@ module.exports = (app) => {
               canAddProducts: false,
             });
             if (req.files && req.files.image) {
-              agent.image = `data:${req.files.image.mimetype};base64,${encode64(
-                req.files.image.data
-              )}`;
+              agent.image = "data:image/webp;base64,"+await encode64(req.files.image.data);
             }
             agent.save();
             res.json({ agent });
@@ -98,9 +94,7 @@ module.exports = (app) => {
       user.canAddProducts = canAddProducts;
       user.privilage = privilage;
       if (req.files && req.files.image) {
-        user.image = `data:${req.files.image.mimetype};base64,${encode64(
-          req.files.image.data
-        )}`;
+        user.image = "data:image/webp;base64,"+await encode64(req.files.image.data)
       }
       user.save();
       res.json({ user });
@@ -282,6 +276,23 @@ module.exports = (app) => {
     }
   });
 
+  app.delete("/agent/task", async (req,res)=>{
+    try{
+      if(req.cookies.uid){
+        const {agent,task} = req.headers;
+        const user = await User.findById(agent);
+        user.tasks = user.tasks.filter(t=>t.id!=task);
+        user.save();
+        res.json({msg:"Ok"})
+      }else{
+        res.json({err:"Unauthenticated Request"})
+      }
+    }catch(err){
+      res.json({err:"Database Error Try Again later"})
+      console.log(err);
+    }
+  })
+
   app.post("/category", async (req, res) => {
     const { name, description } = req.body;
     try {
@@ -315,7 +326,7 @@ module.exports = (app) => {
     }
   });
 
-  app.post("/product", (req, res) => {
+  app.post("/product", async (req, res) => {
     console.log(req.body);
     try {
       const { name, price, category } = req.body;
@@ -330,9 +341,7 @@ module.exports = (app) => {
       });
 
       if (req.files && req.files.image) {
-        product.image = `data:${req.files.image.mimetype};base64,${encode64(
-          req.files.image.data
-        )}`;
+        product.image = "data:image/webp;base64,"+await encode64(req.files.image.data);
       }
       product.save();
       res.json({ msg: "Ok", product });
@@ -380,9 +389,7 @@ module.exports = (app) => {
         (product.category = category),
         (product.price = price);
       if (req.files && req.files.image) {
-        product.image = `data:${req.files.image.mimetype};base64,${encode64(
-          req.files.image.data
-        )}`;
+        product.image = "data:image/webp;base64,"+await encode64(req.files.image.data);
       }
       product.save();
       res.json({ msg: "Ok", product });

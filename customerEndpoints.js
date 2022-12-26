@@ -18,7 +18,7 @@ module.exports = (app) => {
     },
   ];
 
-  app.post("/newCustomer", (req, res) => {
+  app.post("/newCustomer", async (req, res) => {
     try {
       const { uid } = req.cookies;
       const { email, phone, name, purchaseAmount, company, payment, product } =
@@ -42,9 +42,7 @@ module.exports = (app) => {
       });
 
       if (req.files && req.files.image) {
-        newCustomer.image = `data:${req.files.image.mimetype};base64,${encode64(
-          req.files.image.data
-        )}`;
+        newCustomer.image = "data:image/webp;base64,"+await encode64(req.files.image.data)
       }
       newCustomer.save();
       res.json({
@@ -141,30 +139,31 @@ module.exports = (app) => {
         //actually send an email later with the "email" param
         let testAccount = await nodemailer.createTestAccount();
         try {
-          console.log(testAccount)
-          const {err} = await sendMail(
+          console.log(testAccount);
+          const { err } = await sendMail(
             `"${user.name}" <${user.email}>`,
             `<${customer.email}>`,
             subject,
             message,
             testAccount
           );
-          if(!err){
-
+          if (!err) {
             customer.emails.push(data);
             customer.save();
             res.json(customer.emails[customer.emails.length - 1]);
-          }else{
-            res.json({err:"Unable To Send Emails At the moment. try again later"})
+          } else {
+            res.json({
+              err: "Unable To Send Emails At the moment. try again later",
+            });
           }
         } catch (err) {
-          res.send({err:"Unable To Send Mail Try again later"})
+          res.send({ err: "Unable To Send Mail Try again later" });
         }
       } else {
         throw { message: "UnAuthenticated Requests" };
       }
     } catch (err) {
-      console.log(err)
+      console.log(err);
       res.json({
         err: "An Error Occured. Try Again later",
         msg: "An Error Occured",
@@ -409,9 +408,8 @@ module.exports = (app) => {
       customer.company = company;
       customer.phone = phone;
       if (req.files && req.files.image) {
-        customer.image = `data:${req.files.image.mimetype};base64,${encode64(
-          req.files.image.data
-        )}`;
+        customer.image = "data:image/webp;base64,"+await encode64(req.files.image.data)
+        
       }
       customer.save();
       res.json({ msg: "Ok", customer });
@@ -451,6 +449,26 @@ module.exports = (app) => {
     } catch (error) {
       console.log(error);
       res.json({ err: "Database Error Try again later" });
+    }
+  });
+
+  app.delete("/customer", async (req, res) => {
+    try {
+      if (req.cookies.uid) {
+        const user = await User.findById(req.cookies.uid);
+        if (user.privilage > 1) {
+          await Customer.findByIdAndDelete(req.headers.customer);
+          res.json({ msg: "Ok" });
+        } else {
+          res.json({
+            err: "You Do not have the appropriate privilage to complete this action",
+          });
+        }
+      } else {
+        res.json({ err: "Unauthenticated Request" });
+      }
+    } catch (err) {
+      res.json({err:"An Error Occured Try again later"});
     }
   });
 

@@ -1,6 +1,7 @@
 //adding libraries and modules
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const sharp = require("sharp")
 
 async function hashPassword(password) {
   return new Promise((resolve) => {
@@ -18,8 +19,15 @@ async function verifyPassword(password, hash) {
   });
 }
 
-function encode64(data) {
-  return Buffer.from(data).toString("base64");
+async function encode64(data) {
+  try{
+    const buffer  = Buffer.from(data);
+    const output = await sharp(buffer).resize({width:80,fit:"contain"}).webp({quality:60}).toBuffer()
+    return output.toString("base64");
+  }catch(err){
+    console.log(err)
+    return "";
+  }
 }
 
 async function sendMail(sender, recipient, title, message, account) {
