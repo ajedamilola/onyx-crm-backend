@@ -246,7 +246,7 @@ module.exports = (app) => {
       for (let i = 0; i < user.tasks.length; i++) {
         const t = user.tasks[i];
         if(t.id==task){
-          t.successful = !t.successful;
+          user.tasks[i].successful = !t.successful;
           user.save();
           return res.json({msg:"Ok"})
         }
@@ -262,7 +262,16 @@ module.exports = (app) => {
       const uid = req.cookies.uid;
       if (uid) {
         const user = await User.findById(uid);
-        user.tasks = user.tasks.filter((t) => t.id != req.headers.id);
+        if(user.privilage > 1){
+          user.tasks = user.tasks.filter((t) => t.id != req.headers.id);
+        }else{
+          user.tasks.forEach(task=>{
+            if(task._id==req.headers.id){
+              task.pendingDelete = true;
+            }
+          })
+        }
+        
         user.save();
         res.json({ msg: "Ok" });
       } else {

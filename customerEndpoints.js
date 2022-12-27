@@ -42,7 +42,8 @@ module.exports = (app) => {
       });
 
       if (req.files && req.files.image) {
-        newCustomer.image = "data:image/webp;base64,"+await encode64(req.files.image.data)
+        newCustomer.image =
+          "data:image/webp;base64," + (await encode64(req.files.image.data));
       }
       newCustomer.save();
       res.json({
@@ -248,6 +249,28 @@ module.exports = (app) => {
     }
   });
 
+  app.patch("/agent/declineDeletePurchase", async (req, res) => {
+    if (req.cookies.uid) {
+      try {
+        const customer = await Customer.findById(req.body.customer);
+
+        customer.purchases.forEach((purchase) => {
+          if (purchase.id == req.body.purchase) {
+            purchase.pendingDelete = false;
+          }
+        });
+
+        customer.save();
+        res.json({ msg: "Ok" });
+      } catch (err) {
+        console.log(err);
+        res.json({ err: "Databse Error Try again later" });
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" });
+    }
+  });
+
   app.patch("/call", async (req, res) => {
     const { status, callId, customerId } = req.body;
     try {
@@ -408,8 +431,8 @@ module.exports = (app) => {
       customer.company = company;
       customer.phone = phone;
       if (req.files && req.files.image) {
-        customer.image = "data:image/webp;base64,"+await encode64(req.files.image.data)
-        
+        customer.image =
+          "data:image/webp;base64," + (await encode64(req.files.image.data));
       }
       customer.save();
       res.json({ msg: "Ok", customer });
@@ -468,7 +491,7 @@ module.exports = (app) => {
         res.json({ err: "Unauthenticated Request" });
       }
     } catch (err) {
-      res.json({err:"An Error Occured Try again later"});
+      res.json({ err: "An Error Occured Try again later" });
     }
   });
 
