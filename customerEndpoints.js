@@ -210,6 +210,7 @@ module.exports = (app) => {
           if (purchase._id == purchaseId) {
             purchase.pending = pending;
             purchase.confirmed = successful;
+            customer.save()
             return res.json({ purchase });
           }
         });
