@@ -1,5 +1,5 @@
 //import libraries
-const { User, Customer, Category, Product } = require("./database");
+const { User, Customer, Category, Product, Chat } = require("./database");
 const { encode64 } = require("./functions");
 module.exports = (app) => {
   const d_productImage =
@@ -32,7 +32,8 @@ module.exports = (app) => {
         user.password = password;
         user.email = email;
         if (req.files && req.files.image) {
-          user.image = "data:image/webp;base64,"+await encode64(req.files.image.data);
+          user.image =
+            "data:image/webp;base64," + (await encode64(req.files.image.data));
         }
         user.save();
         res.json({ msg: "ok" });
@@ -67,7 +68,9 @@ module.exports = (app) => {
               canAddProducts: false,
             });
             if (req.files && req.files.image) {
-              agent.image = "data:image/webp;base64,"+await encode64(req.files.image.data);
+              agent.image =
+                "data:image/webp;base64," +
+                (await encode64(req.files.image.data));
             }
             agent.save();
             res.json({ agent });
@@ -94,7 +97,8 @@ module.exports = (app) => {
       user.canAddProducts = canAddProducts;
       user.privilage = privilage;
       if (req.files && req.files.image) {
-        user.image = "data:image/webp;base64,"+await encode64(req.files.image.data)
+        user.image =
+          "data:image/webp;base64," + (await encode64(req.files.image.data));
       }
       user.save();
       res.json({ user });
@@ -222,12 +226,12 @@ module.exports = (app) => {
       for (let index = 0; index < user.tasks.length; index++) {
         const element = user.tasks[index];
         if (element._id == task._id) {
-          var msg = "Task Updated Successfully"
-          if(!element.bySuper){
+          var msg = "Task Updated Successfully";
+          if (!element.bySuper) {
             user.tasks[index] = task;
-          }else{
+          } else {
             msg = "Report Sent Successfully";
-            user.tasks[index].pendingDelete = true
+            user.tasks[index].pendingDelete = true;
           }
           user.save();
           return res.json({ msg });
@@ -239,39 +243,39 @@ module.exports = (app) => {
     }
   });
 
-  app.patch("/agent/doneTask", async (req,res)=>{
+  app.patch("/agent/doneTask", async (req, res) => {
     try {
-      const {agent,task} = req.body;
+      const { agent, task } = req.body;
       const user = await User.findById(agent);
       for (let i = 0; i < user.tasks.length; i++) {
         const t = user.tasks[i];
-        if(t.id==task){
+        if (t.id == task) {
           user.tasks[i].successful = !t.successful;
           user.save();
-          return res.json({msg:"Ok"})
+          return res.json({ msg: "Ok" });
         }
       }
     } catch (error) {
-      console.log(error)
-      res.json({err:"Databse Error Try Again Later"});
+      console.log(error);
+      res.json({ err: "Databse Error Try Again Later" });
     }
-  })
+  });
 
   app.delete("/task", async (req, res) => {
     try {
       const uid = req.cookies.uid;
       if (uid) {
         const user = await User.findById(uid);
-        if(user.privilage > 1){
+        if (user.privilage > 1) {
           user.tasks = user.tasks.filter((t) => t.id != req.headers.id);
-        }else{
-          user.tasks.forEach(task=>{
-            if(task._id==req.headers.id){
+        } else {
+          user.tasks.forEach((task) => {
+            if (task._id == req.headers.id) {
               task.pendingDelete = true;
             }
-          })
+          });
         }
-        
+
         user.save();
         res.json({ msg: "Ok" });
       } else {
@@ -285,22 +289,22 @@ module.exports = (app) => {
     }
   });
 
-  app.delete("/agent/task", async (req,res)=>{
-    try{
-      if(req.cookies.uid){
-        const {agent,task} = req.headers;
+  app.delete("/agent/task", async (req, res) => {
+    try {
+      if (req.cookies.uid) {
+        const { agent, task } = req.headers;
         const user = await User.findById(agent);
-        user.tasks = user.tasks.filter(t=>t.id!=task);
+        user.tasks = user.tasks.filter((t) => t.id != task);
         user.save();
-        res.json({msg:"Ok"})
-      }else{
-        res.json({err:"Unauthenticated Request"})
+        res.json({ msg: "Ok" });
+      } else {
+        res.json({ err: "Unauthenticated Request" });
       }
-    }catch(err){
-      res.json({err:"Database Error Try Again later"})
+    } catch (err) {
+      res.json({ err: "Database Error Try Again later" });
       console.log(err);
     }
-  })
+  });
 
   app.post("/category", async (req, res) => {
     const { name, description } = req.body;
@@ -350,7 +354,8 @@ module.exports = (app) => {
       });
 
       if (req.files && req.files.image) {
-        product.image = "data:image/webp;base64,"+await encode64(req.files.image.data);
+        product.image =
+          "data:image/webp;base64," + (await encode64(req.files.image.data));
       }
       product.save();
       res.json({ msg: "Ok", product });
@@ -398,7 +403,8 @@ module.exports = (app) => {
         (product.category = category),
         (product.price = price);
       if (req.files && req.files.image) {
-        product.image = "data:image/webp;base64,"+await encode64(req.files.image.data);
+        product.image =
+          "data:image/webp;base64," + (await encode64(req.files.image.data));
       }
       product.save();
       res.json({ msg: "Ok", product });
@@ -447,13 +453,73 @@ module.exports = (app) => {
         description,
         date: new Date(date),
         bySuper: true,
-        pending:true
+        pending: true,
       });
       Agent.save();
       res.json({ newTask: Agent.tasks[Agent.tasks.length - 1] });
     } catch (err) {
       console.log(err);
       res.json({ err: "Database Error Try Again Later" });
+    }
+  });
+
+  //============= Chat Section
+  app.get("/chats", async (req, res) => {
+    try {
+      const { limit } = req.headers;
+      const allChats = (await Chat.find()).reverse();
+      const chats = allChats.map((chat) => (allChats.indexOf(chat) <= (limit || allChats.length)) && chat);
+      res.json({ chats });
+    } catch (err) {
+      console.log(err);
+      res.json({ err: "Database Error Try again later" });
+    }
+  });
+
+  app.post("/chat", async (req, res) => {
+    try {
+      const { uid } = req.cookies;
+      if (uid) {
+        const { message } = req.body;
+        const chat = new Chat({
+          content: message,
+          sender: uid,
+          files: [],
+        });
+
+        if (req.files) {
+          const keyArray = Object.keys(req.files);
+          keyArray.forEach(async (fileKey) => {
+            const file = req.files[fileKey];
+            const data =
+              "data:image/webp;base64," + (await encode64(file.data));
+            chat.files.push(data);
+            if (keyArray.indexOf(fileKey) == keyArray.length - 1) {
+              //save and return to client if this was the file
+              chat.save();
+              return res.json({ chat });
+            }
+          });
+        } else {
+          chat.save();
+          return res.json({ chat });
+        }
+      } else {
+        res.json({ err: "Unauthenticated Request" });
+      }
+    } catch (error) {
+      console.log(error);
+      res.json({ err: "Database Error Try again later" });
+    }
+  });
+
+  app.delete("/chat", async (req, res) => {
+    try {
+      await Chat.findByIdAndDelete(req.headers.chatid);
+      res.json({ msg: "Ok" });
+    } catch (error) {
+      console.log(error);
+      res.json({ err: "Databse Error Try Again later" });
     }
   });
 };

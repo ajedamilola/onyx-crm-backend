@@ -22,7 +22,7 @@ async function verifyPassword(password, hash) {
 async function encode64(data) {
   try{
     const buffer  = Buffer.from(data);
-    const output = await sharp(buffer).resize({width:80,fit:"contain"}).webp({quality:60}).toBuffer()
+    const output = await sharp(buffer).resize({width:80,fit:"contain"}).webp({quality:90}).toBuffer()
     return output.toString("base64");
   }catch(err){
     console.log(err)
