@@ -469,7 +469,7 @@ module.exports = (app) => {
       const { limit } = req.headers;
       const allChats = (await Chat.find()).reverse();
       const chats = allChats.map((chat) => (allChats.indexOf(chat) <= (limit || allChats.length)) && chat);
-      res.json({ chats });
+      res.json({ chats:chats.reverse() });
     } catch (err) {
       console.log(err);
       res.json({ err: "Database Error Try again later" });

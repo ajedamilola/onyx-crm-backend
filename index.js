@@ -13,7 +13,7 @@ corsOptions = {
     credentials: true, //included credentials as true
 };
 
-app.use(require("body-parser")({extended:false}))
+app.use(require("body-parser")({extended:false,limit:'7mb'}))
 app.use(require("cookie-parser")("secret"))
 app.use(require("cors")(corsOptions));
 app.use(require("express-fileupload")())

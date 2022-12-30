@@ -30,16 +30,18 @@ async function encode64(data) {
   }
 }
 
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'ajedamilola2005@gmail.com',
+    pass: 'utrsgwdslzwxdlnz'
+  }
+});
+var inlineBase64 = require('nodemailer-plugin-inline-base64');
+transporter.use('compile', inlineBase64({cidPrefix: 'somePrefix_'}));
 async function sendMail(sender, recipient, title, message, account) {
   try {
     const customFooter = "";
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'ajedamilola2005@gmail.com',
-        pass: 'utrsgwdslzwxdlnz'
-      }
-    });
     const info = await transporter.sendMail({
       from: sender,
       to: recipient,
