@@ -137,12 +137,7 @@ module.exports = (app) => {
           secure: true,
         });
 
-        const agents =
-          user.privilage > 1
-            ? (await User.find()).map((a) => {
-                return { ...a.toObject(), password: "" };
-              })
-            : [];
+        const agents = (await User.find({})).map(u=>user.privilage < 2 ? ({_id:u.id,image:u.image,name:u.name}) : u);
         res.send({
           user: { ...user.toObject(), plans },
           customers,
@@ -174,12 +169,8 @@ module.exports = (app) => {
           maxAge: 24 * 60 * 60 * 1000,
           secure: true,
         });
-        const agents =
-          user.privilage > 1
-            ? (await User.find()).map((a) => {
-                return { ...a.toObject(), password: "" };
-              })
-            : [];
+        const agents = (await User.find({})).map(u=>user.privilage < 2 ? ({_id:u.id,image:u.image,name:u.name}) : u);
+
         res.send({
           user: { ...user.toObject(), plans },
           customers,
