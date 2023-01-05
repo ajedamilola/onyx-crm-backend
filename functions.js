@@ -46,7 +46,6 @@ transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
 
 async function sendMail(sender, recipient, title, message, account) {
   try {
-    console.log("Sending Mail Nawn");
     const customFooter = "";
     const info = await transporter.sendMail({
       from: sender,
@@ -54,7 +53,6 @@ async function sendMail(sender, recipient, title, message, account) {
       subject: title,
       html: message + customFooter,
     });
-    console.log(nodemailer.getTestMessageUrl(info));
     return { err: false };
   } catch (err) {
     console.log("An Error Occured Here ", err);

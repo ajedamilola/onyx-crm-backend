@@ -39,7 +39,7 @@ module.exports = (app) => {
         res.json({ msg: "ok" });
       } catch (error) {
         res.json({ err: "Database Error Try again later" });
-        console.log(error);
+        console.log(new Date().toLocaleString(),"===>  ", error);
       }
     } else {
       res.json({ err: "Unauthenticated Request Logout and try again later" });
@@ -103,7 +103,7 @@ module.exports = (app) => {
       user.save();
       res.json({ user });
     } catch (err) {
-      console.log(err);
+      console.log(new Date().toLocaleString(),"===>  ", err);
       res.json({ err: "Databse Error Try again later" });
     }
   });
@@ -112,7 +112,7 @@ module.exports = (app) => {
     if (req.cookies.uid) {
       try {
         await User.findByIdAndDelete(req.headers.id);
-        console.log(req.headers.id);
+        console.log(new Date().toLocaleString(),"===>  ", req.headers.id);
         res.json({ msg: "Ok" });
       } catch (err) {
         res.json({ err: "Database Error Try Again later" });
@@ -233,7 +233,7 @@ module.exports = (app) => {
         }
       }
     } catch (e) {
-      console.log(e.message);
+      console.log(new Date().toLocaleString(),"===>  ", e.message);
       res.json({ err: "A Server Error Ocurred" });
     }
   });
@@ -251,7 +251,7 @@ module.exports = (app) => {
         }
       }
     } catch (error) {
-      console.log(error);
+      console.log(new Date().toLocaleString(),"===>  ", error);
       res.json({ err: "Databse Error Try Again Later" });
     }
   });
@@ -280,7 +280,7 @@ module.exports = (app) => {
       }
     } catch (err) {
       res.json({ err: "Database Error Try again later" });
-      console.log(err);
+      console.log(new Date().toLocaleString(),"===>  ", err);
     }
   });
 
@@ -297,7 +297,7 @@ module.exports = (app) => {
       }
     } catch (err) {
       res.json({ err: "Database Error Try Again later" });
-      console.log(err);
+      console.log(new Date().toLocaleString(),"===>  ", err);
     }
   });
 
@@ -312,7 +312,7 @@ module.exports = (app) => {
       category.save();
       res.json({ msg: "Ok", category });
     } catch (err) {
-      console.log(err);
+      console.log(new Date().toLocaleString(),"===>  ", err);
       res.json({
         err: err.message,
         msg: "A Error Occured, Unable to add Category Try again later",
@@ -330,12 +330,12 @@ module.exports = (app) => {
         err: error.message,
         msg: "Unable To Delete category try again later",
       });
-      console.log(error);
+      console.log(new Date().toLocaleString(),"===>  ", error);
     }
   });
 
   app.post("/product", async (req, res) => {
-    console.log(req.body);
+    console.log(new Date().toLocaleString(),"===>  ", req.body);
     try {
       const { name, price, category } = req.body;
       const { uid } = req.cookies;
@@ -355,7 +355,7 @@ module.exports = (app) => {
       product.save();
       res.json({ msg: "Ok", product });
     } catch (err) {
-      console.log(err);
+      console.log(new Date().toLocaleString(),"===>  ", err);
       res.json({
         err: err.message,
         msg: "Unable to create Product At this time try again later",
@@ -372,7 +372,7 @@ module.exports = (app) => {
       res.json({ msg: "Ok" });
     } catch (err) {
       res.json({ err: "Unable to add category try again later" });
-      console.log(err);
+      console.log(new Date().toLocaleString(),"===>  ", err);
     }
   });
 
@@ -386,7 +386,7 @@ module.exports = (app) => {
         err: error.message,
         msg: "Unable To Delete Product try again later",
       });
-      console.log(error);
+      console.log(new Date().toLocaleString(),"===>  ", error);
     }
   });
 
@@ -404,7 +404,7 @@ module.exports = (app) => {
       product.save();
       res.json({ msg: "Ok", product });
     } catch (error) {
-      console.log(error);
+      console.log(new Date().toLocaleString(),"===>  ", error);
       res.json({ err: "Unable To Edit Product at this time try again later" });
     }
   });
@@ -434,7 +434,7 @@ module.exports = (app) => {
         res.json({ err: "Unauthenticated Request" });
       }
     } catch (err) {
-      console.log(err);
+      console.log(new Date().toLocaleString(),"===>  ", err);
       res.json({ err: "Database Error Try again later" });
     }
   });
@@ -453,7 +453,7 @@ module.exports = (app) => {
       Agent.save();
       res.json({ newTask: Agent.tasks[Agent.tasks.length - 1] });
     } catch (err) {
-      console.log(err);
+      console.log(new Date().toLocaleString(),"===>  ", err);
       res.json({ err: "Database Error Try Again Later" });
     }
   });
@@ -468,7 +468,7 @@ module.exports = (app) => {
       );
       res.json({ chats: chats.reverse() });
     } catch (err) {
-      console.log(err);
+      console.log(new Date().toLocaleString(),"===>  ", err);
       res.json({ err: "Database Error Try again later" });
     }
   });
@@ -505,7 +505,7 @@ module.exports = (app) => {
         res.json({ err: "Unauthenticated Request" });
       }
     } catch (error) {
-      console.log(error);
+      console.log(new Date().toLocaleString(),"===>  ", error);
       res.json({ err: "Database Error Try again later" });
     }
   });
@@ -515,7 +515,7 @@ module.exports = (app) => {
       await Chat.findByIdAndDelete(req.headers.chatid);
       res.json({ msg: "Ok" });
     } catch (error) {
-      console.log(error);
+      console.log(new Date().toLocaleString(),"===>  ", error);
       res.json({ err: "Databse Error Try Again later" });
     }
   });
@@ -548,6 +548,7 @@ function isYesterdayOrOlder(date) {
 }
 
 async function sendScheduledEmails() {
+  console.log(new Date().toLocaleString(),"==> Running Scheduled Emails Check....");
   const today = new Date();
   const customers = await Customer.find({});
   customers.forEach(async (customer) => {
@@ -603,7 +604,7 @@ async function sendScheduledEmails() {
               );
             }
           } catch (err) {
-            console.log(err);
+            console.log(new Date().toLocaleString(),"===>  ", err);
           }
         } else {
           //has sent them before
