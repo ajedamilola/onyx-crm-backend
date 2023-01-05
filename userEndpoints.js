@@ -541,11 +541,18 @@ function isInFormerYear(date) {
   return date.getFullYear() < currentYear;
 }
 
+function isYesterdayOrOlder(date) {
+  const currentDate = new Date();
+  const yesterday = new Date(currentDate.getTime() - 86400000);
+  return date.getTime() < yesterday.getTime();
+}
+
 async function sendScheduledEmails() {
   const today = new Date();
   const customers = await Customer.find({});
-  customers.forEach((customer) => {
-    customer.emails.forEach(async (email) => {
+  customers.forEach(async (customer) => {
+    for (let i = 0; i < customer.emails.length; i++) {
+      const email = customer.emails[i];
       if (email.interval != "Once" && email.isActive) {
         const agent = await User.findById(customer.handler);
         if (!email.lastSent) {
@@ -559,24 +566,52 @@ async function sendScheduledEmails() {
                   email.description
                 );
                 email.lastSent = today;
-              } else {
-                if (today.getMonth() == email.intervalDate.getMonth()) {
-                  await sendMail(
-                    agent.name,
-                    customer.email,
-                    email.title,
-                    email.description
-                  );
-                  email.lastSent = today;
-                }
               }
+            } else if (email.interval == "Annually") {
+              if (
+                today.getMonth() == email.intervalDate.getMonth() &&
+                today.getDay() == email.intervalDate.getDay()
+              ) {
+                await sendMail(
+                  agent.name,
+                  customer.email,
+                  email.title,
+                  email.description
+                );
+                email.lastSent = today;
+              }
+            } else if (email.interval == "Annivesary") {
+              if (
+                today.getMonth() == customer.dateAdded.getMonth() &&
+                today.getDay() == customer.dateAdded.getDay()
+              ) {
+                email.lastSent = today;
+                await sendMail(
+                  agent.name,
+                  customer.email,
+                  email.title,
+                  email.description
+                );
+              }
+            } else if (email.interval == "Daily") {
+              email.lastSent = today;
+              await sendMail(
+                agent.name,
+                customer.email,
+                email.title,
+                email.description
+              );
             }
           } catch (err) {
             console.log(err);
           }
         } else {
+          //has sent them before
           if (email.interval == "Monthly") {
-            if (isInPriorMonth(email.lastSent) && today.getDay()==email.intervalDate.getDay()) {
+            if (
+              isInPriorMonth(email.lastSent) &&
+              today.getDay() == email.intervalDate.getDay()
+            ) {
               await sendMail(
                 agent.name,
                 customer.email,
@@ -585,8 +620,36 @@ async function sendScheduledEmails() {
               );
               email.lastSent = today;
             }
-          }else{
-            if(isInFormerYear(email.lastSent) && today.getMonth()==email.intervalDate.getMonth()){
+          } else if (email.interval == "Annually") {
+            if (
+              isInFormerYear(email.lastSent) &&
+              today.getMonth() == email.intervalDate.getMonth() &&
+              today.getDay() == email.intervalDate.getDay()
+            ) {
+              await sendMail(
+                agent.name,
+                customer.email,
+                email.title,
+                email.description
+              );
+              email.lastSent = today;
+            }
+          } else if (email.interval == "Annivesary") {
+            if (
+              isInFormerYear(email.lastSent) &&
+              today.getMonth() == customer.dateAdded.getMonth() &&
+              today.getDay() == customer.dateAdded.getDay()
+            ) {
+              await sendMail(
+                agent.name,
+                customer.email,
+                email.title,
+                email.description
+              );
+              email.lastSent = today;
+            }
+          } else if (email.interval == "Daily") {
+            if (isYesterdayOrOlder(email.lastSent)) {
               await sendMail(
                 agent.name,
                 customer.email,
@@ -598,7 +661,7 @@ async function sendScheduledEmails() {
           }
         }
       }
-    });
+    }
     customer.save();
   });
 }

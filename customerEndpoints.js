@@ -161,6 +161,10 @@ module.exports = (app) => {
           } catch (err) {
             res.send({ err: "Unable To Send Mail Try again later" });
           }
+        }else{
+          customer.emails.push(data)
+          customer.save();
+          res.json(customer.emails[customer.emails.length - 1]);
         }
       } else {
         throw { message: "UnAuthenticated Requests" };
