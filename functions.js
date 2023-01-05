@@ -1,7 +1,7 @@
 //adding libraries and modules
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
-const sharp = require("sharp")
+const sharp = require("sharp");
 
 async function hashPassword(password) {
   return new Promise((resolve) => {
@@ -20,27 +20,31 @@ async function verifyPassword(password, hash) {
 }
 
 async function encode64(data) {
-  try{
-    const buffer  = Buffer.from(data);
-    const output = await sharp(buffer).resize({width:80,fit:"contain"}).webp({quality:90}).toBuffer()
+  try {
+    const buffer = Buffer.from(data);
+    const output = await sharp(buffer)
+      .resize({ width: 80, fit: "contain" })
+      .webp({ quality: 90 })
+      .toBuffer();
     return output.toString("base64");
-  }catch(err){
-    console.log(err)
+  } catch (err) {
+    console.log(err);
     return "";
   }
 }
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'ajedamilola2005@gmail.com',
-    pass: 'utrsgwdslzwxdlnz'
-  }
-});
-var inlineBase64 = require('nodemailer-plugin-inline-base64');
-transporter.use('compile', inlineBase64({cidPrefix: 'somePrefix_'}));
+var inlineBase64 = require("nodemailer-plugin-inline-base64");
 async function sendMail(sender, recipient, title, message, account) {
   try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "ajedamilola2005@gmail.com",
+        pass: "utrsgwdslzwxdlnz",
+      },
+    });
+    
+    transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
     const customFooter = "";
     const info = await transporter.sendMail({
       from: sender,
@@ -48,11 +52,11 @@ async function sendMail(sender, recipient, title, message, account) {
       subject: title,
       html: message + customFooter,
     });
-    console.log(nodemailer.getTestMessageUrl(info))
-    return {err:false}
+    console.log(nodemailer.getTestMessageUrl(info));
+    return { err: false };
   } catch (err) {
-    console.log("An Error Occured Here ",err);
-    return {err}
+    console.log("An Error Occured Here ", err);
+    return { err };
   }
 }
 
@@ -60,5 +64,5 @@ module.exports = {
   hashPassword,
   verifyPassword,
   encode64,
-  sendMail
+  sendMail,
 };

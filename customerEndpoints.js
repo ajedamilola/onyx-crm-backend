@@ -139,26 +139,28 @@ module.exports = (app) => {
         };
         //actually send an email later with the "email" param
         let testAccount = await nodemailer.createTestAccount();
-        try {
-          console.log(testAccount);
-          const { err } = await sendMail(
-            `"${user.name}" <${user.email}>`,
-            `<${customer.email}>`,
-            subject,
-            message,
-            testAccount
-          );
-          if (!err) {
-            customer.emails.push(data);
-            customer.save();
-            res.json(customer.emails[customer.emails.length - 1]);
-          } else {
-            res.json({
-              err: "Unable To Send Emails At the moment. try again later",
-            });
+        if (!interval) {
+          try {
+            console.log(testAccount);
+            const { err } = await sendMail(
+              `"${user.name}" <${user.email}>`,
+              `<${customer.email}>`,
+              subject,
+              message,
+              testAccount
+            );
+            if (!err) {
+              customer.emails.push(data);
+              customer.save();
+              res.json(customer.emails[customer.emails.length - 1]);
+            } else {
+              res.json({
+                err: "Unable To Send Emails At the moment. try again later",
+              });
+            }
+          } catch (err) {
+            res.send({ err: "Unable To Send Mail Try again later" });
           }
-        } catch (err) {
-          res.send({ err: "Unable To Send Mail Try again later" });
         }
       } else {
         throw { message: "UnAuthenticated Requests" };
@@ -210,7 +212,7 @@ module.exports = (app) => {
           if (purchase._id == purchaseId) {
             purchase.pending = pending;
             purchase.confirmed = successful;
-            customer.save()
+            customer.save();
             return res.json({ purchase });
           }
         });

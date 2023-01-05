@@ -1,6 +1,6 @@
 //import libraries
 const { User, Customer, Category, Product, Chat } = require("./database");
-const { encode64 } = require("./functions");
+const { encode64, sendMail } = require("./functions");
 module.exports = (app) => {
   const d_productImage =
     "data:image/jpeg;base64,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";
@@ -137,7 +137,9 @@ module.exports = (app) => {
           secure: true,
         });
 
-        const agents = (await User.find({})).map(u=>user.privilage < 2 ? ({_id:u.id,image:u.image,name:u.name}) : u);
+        const agents = (await User.find({})).map((u) =>
+          user.privilage < 2 ? { _id: u.id, image: u.image, name: u.name } : u
+        );
         res.send({
           user: { ...user.toObject(), plans },
           customers,
@@ -169,7 +171,9 @@ module.exports = (app) => {
           maxAge: 24 * 60 * 60 * 1000,
           secure: true,
         });
-        const agents = (await User.find({})).map(u=>user.privilage < 2 ? ({_id:u.id,image:u.image,name:u.name}) : u);
+        const agents = (await User.find({})).map((u) =>
+          user.privilage < 2 ? { _id: u.id, image: u.image, name: u.name } : u
+        );
 
         res.send({
           user: { ...user.toObject(), plans },
@@ -459,8 +463,10 @@ module.exports = (app) => {
     try {
       const { limit } = req.headers;
       const allChats = (await Chat.find()).reverse();
-      const chats = allChats.map((chat) => (allChats.indexOf(chat) <= (limit || allChats.length)) && chat);
-      res.json({ chats:chats.reverse() });
+      const chats = allChats.map(
+        (chat) => allChats.indexOf(chat) <= (limit || allChats.length) && chat
+      );
+      res.json({ chats: chats.reverse() });
     } catch (err) {
       console.log(err);
       res.json({ err: "Database Error Try again later" });
@@ -514,3 +520,90 @@ module.exports = (app) => {
     }
   });
 };
+
+function isInPriorMonth(date) {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+  const inputMonth = date.getMonth();
+  const inputYear = date.getFullYear();
+  if (inputYear < currentYear) {
+    return true;
+  } else if (inputYear == currentYear && inputMonth < currentMonth) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function isInFormerYear(date) {
+  const currentYear = new Date().getFullYear();
+  return date.getFullYear() < currentYear;
+}
+
+async function sendScheduledEmails() {
+  const today = new Date();
+  const customers = await Customer.find({});
+  customers.forEach((customer) => {
+    customer.emails.forEach(async (email) => {
+      if (email.interval != "Once" && email.isActive) {
+        const agent = await User.findById(customer.handler);
+        if (!email.lastSent) {
+          try {
+            if (email.interval == "Monthly") {
+              if (today.getDay() == email.intervalDate.getDay()) {
+                await sendMail(
+                  agent.name,
+                  customer.email,
+                  email.title,
+                  email.description
+                );
+                email.lastSent = today;
+              } else {
+                if (today.getMonth() == email.intervalDate.getMonth()) {
+                  await sendMail(
+                    agent.name,
+                    customer.email,
+                    email.title,
+                    email.description
+                  );
+                  email.lastSent = today;
+                }
+              }
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        } else {
+          if (email.interval == "Monthly") {
+            if (isInPriorMonth(email.lastSent) && today.getDay()==email.intervalDate.getDay()) {
+              await sendMail(
+                agent.name,
+                customer.email,
+                email.title,
+                email.description
+              );
+              email.lastSent = today;
+            }
+          }else{
+            if(isInFormerYear(email.lastSent) && today.getMonth()==email.intervalDate.getMonth()){
+              await sendMail(
+                agent.name,
+                customer.email,
+                email.title,
+                email.description
+              );
+              email.lastSent = today;
+            }
+          }
+        }
+      }
+    });
+    customer.save();
+  });
+}
+sendScheduledEmails();
+setInterval(() => {
+  //check for emails every 12 hours
+  sendScheduledEmails();
+}, 43200000);

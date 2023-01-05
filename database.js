@@ -15,7 +15,8 @@ const ContactInstance = {
   },
   interval:String,
   intervalDate:Date,
-  isActive:Boolean
+  isActive:Boolean,
+  lastSent:Date,
 };
 
 const Purchase = {
