@@ -90,12 +90,13 @@ module.exports = (app) => {
 
   app.patch("/agent", async (req, res) => {
     try {
-      const { id, email, name, canAddProducts, privilage } = req.body;
+      const { id, email, name, canAddProducts, privilage, canAddCustomers } = req.body;
       const user = await User.findById(id);
       user.email = email;
       user.name = name;
       user.canAddProducts = canAddProducts;
       user.privilage = privilage;
+      user.canAddCustomers = canAddCustomers;
       if (req.files && req.files.image) {
         user.image =
           "data:image/webp;base64," + (await encode64(req.files.image.data));
@@ -663,6 +664,7 @@ async function sendScheduledEmails() {
         }
       }
     }
+
     customer.save();
   });
 }

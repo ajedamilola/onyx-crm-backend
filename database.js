@@ -13,10 +13,10 @@ const ContactInstance = {
     type: Boolean,
     default: false,
   },
-  interval:String,
-  intervalDate:Date,
-  isActive:Boolean,
-  lastSent:Date,
+  interval: String,
+  intervalDate: Date,
+  isActive: Boolean,
+  lastSent: Date,
 };
 
 const Purchase = {
@@ -26,7 +26,7 @@ const Purchase = {
   confirmed: Boolean,
   pending: Boolean,
   qty: Number,
-  pendingDelete:{type:Boolean,default:false}
+  pendingDelete: { type: Boolean, default: false },
 };
 
 const userStructure = new mongoose.Schema({
@@ -37,11 +37,13 @@ const userStructure = new mongoose.Schema({
   tasks: [{ ...ContactInstance, bySuper: false }],
   privilage: Number,
   canAddProducts: Boolean,
-  dateAdded:{
-    type:Date,
-    default:()=>new Date()
+  dateAdded: {
+    type: Date,
+    default: () => new Date(),
   },
-  image:String
+  image: String,
+  checkIns: [Date],
+  canAddCustomers: Boolean,
 });
 
 const customerStructure = new mongoose.Schema({
@@ -61,6 +63,16 @@ const customerStructure = new mongoose.Schema({
   mainProduct: mongoose.SchemaTypes.ObjectId,
   company: String,
   active: Boolean,
+  tasks: [
+    {
+      title: String,
+      description: String,
+      compulsory: Boolean,
+      completed: Boolean,
+      agent: String,
+      requestComplete: Boolean,
+    },
+  ],
 });
 
 const productsStructure = mongoose.Schema({
@@ -79,18 +91,26 @@ const category = mongoose.Schema({
 });
 
 const chat = mongoose.Schema({
-  content:String,
-  files:[String],
-  sender:String
-})
+  content: String,
+  files: [String],
+  sender: String,
+});
+
+const requests = mongoose.Schema({
+  message: String,
+  sender: mongoose.SchemaTypes.ObjectId,
+  recipient: mongoose.SchemaTypes.ObjectId,
+  done: Boolean,
+  pendingDone: Boolean,
+});
 
 const User = mongoose.model("user", userStructure);
 const Customer = mongoose.model("customer", customerStructure);
 const Product = mongoose.model("product", productsStructure);
 const Category = mongoose.model("category", category);
 const Chat = mongoose.model("chat", chat);
-const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
-// const connString = "mongodb://localhost:27017/telserve-crm";
+// const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
+const connString = "mongodb://localhost:27017/telserve-crm";
 
 mongoose.connect(connString, (err) => {
   console.log(err ? "Connection Failed" : "Connection Successful");
@@ -101,5 +121,5 @@ module.exports = {
   Customer,
   Product,
   Category,
-  Chat
+  Chat,
 };

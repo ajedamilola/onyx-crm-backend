@@ -19,25 +19,35 @@ module.exports = (app) => {
   ];
 
   app.post("/newCustomer", async (req, res) => {
+    const { uid } = req.cookies;
+    const {
+      email,
+      phone,
+      name,
+      purchaseAmount,
+      company,
+      payment,
+      product,
+      date,
+    } = req.body;
     try {
-      const { uid } = req.cookies;
-      const { email, phone, name, purchaseAmount, company, payment, product } =
-        req.body;
-
       const newCustomer = new Customer({
         name,
         email,
         phone,
         handler: uid,
-        purchases: [
-          {
-            amount: purchaseAmount,
-            product,
-            pending: payment != "done",
-            confirmed: payment == "done",
-            date: new Date(),
-          },
-        ],
+        purchases:
+          payment == "done"
+            ? [
+                {
+                  amount: purchaseAmount,
+                  product,
+                  pending: payment != "done",
+                  confirmed: payment == "done",
+                  date,
+                },
+              ]
+            : [],
         company,
       });
 
@@ -161,8 +171,8 @@ module.exports = (app) => {
           } catch (err) {
             res.send({ err: "Unable To Send Mail Try again later" });
           }
-        }else{
-          customer.emails.push(data)
+        } else {
+          customer.emails.push(data);
           customer.save();
           res.json(customer.emails[customer.emails.length - 1]);
         }
@@ -202,6 +212,26 @@ module.exports = (app) => {
     } catch (e) {
       res.json({ err: e.message, msg: "An Error Occured" });
       console.log(e);
+    }
+  });
+
+  app.post("/customer/task", async (req, res) => {
+    const { title, description, compulsory, customerId, agent } = req.body;
+    try {
+      const customer = await Customer.findById(customerId);
+      customer.tasks.push({
+        title,
+        description,
+        compulsory,
+        completed: false,
+        agent,
+        requestComplete:false
+      });
+      customer.save();
+      res.json({ task: customer.tasks[customer.tasks.length - 1], err: false });
+    } catch (err) {
+      res.json({ err: "Database Error try again later" });
+      console.log(err);
     }
   });
   //#endregion
@@ -431,12 +461,13 @@ module.exports = (app) => {
 
   app.patch("/customer", async (req, res) => {
     try {
-      const { name, email, company, phone, id } = req.body;
+      const { name, email, company, phone, id, active } = req.body;
       const customer = await Customer.findById(id);
       customer.name = name;
       customer.email = email;
       customer.company = company;
       customer.phone = phone;
+      customer.active = active;
       if (req.files && req.files.image) {
         customer.image =
           "data:image/webp;base64," + (await encode64(req.files.image.data));
@@ -499,6 +530,57 @@ module.exports = (app) => {
       }
     } catch (err) {
       res.json({ err: "An Error Occured Try again later" });
+    }
+  });
+
+  app.patch("/customer/task/complete", async (req, res) => {
+    const { customerid, taskid } = req.body;
+    try {
+      const customer = await Customer.findById(customerid);
+      var t = {};
+      customer.tasks.forEach((task) => {
+        if (task._id == taskid) {
+          task.completed = true;
+          t = task;
+        }
+      });
+      customer.save();
+      res.json({ task: t });
+    } catch (error) {
+      console.log(error);
+      res.json({ err: "Database Error Try again later" });
+    }
+  });
+
+  app.delete("/customer/task", async (req, res) => {
+    const { task, customerid } = req.headers;
+    try {
+      const customer = await Customer.findById(customerid);
+      customer.tasks = customer.tasks.filter((t) => {
+        return t._id != task;
+      });
+      customer.save();
+      res.json({ err: false });
+    } catch (error) {
+      console.log(error);
+      res.json({ err: "Database Error, Try again later" });
+    }
+  });
+
+  app.patch("/customer/tasks/requestComplete", async (req, res) => {
+    const { taskid, customerid } = req.body;
+    try {
+      const customer = await Customer.findById(customerid);
+      customer.tasks.forEach((task) => {
+        if (task._id == taskid) {
+          task.requestComplete = true;
+        }
+      });
+      customer.save();
+      res.json({ err: false });
+    } catch (error) {
+      console.log(error);
+      res.json({ err: "Databse Error, Try again later" });
     }
   });
 
