@@ -459,6 +459,19 @@ module.exports = (app) => {
     }
   });
 
+  app.post("/check-in", async (req,res)=>{
+    const {uid} = req.cookies;
+    try {
+      const user = await User.findById(uid);
+      user.checkIns.push(new Date());
+      user.save();
+      res.json({err:false})
+    } catch (error) {
+      console.log(error);
+      res.json({err:"Database Error, Try again later"})
+    }
+  })
+
   //============= Chat Section
   app.get("/chats", async (req, res) => {
     try {

@@ -219,16 +219,31 @@ module.exports = (app) => {
     const { title, description, compulsory, customerId, agent } = req.body;
     try {
       const customer = await Customer.findById(customerId);
+      const Agent = await User.findById(agent);
+      const Admin = await User.findById(req.cookies.uid);
       customer.tasks.push({
         title,
         description,
         compulsory,
         completed: false,
         agent,
-        requestComplete:false
+        requestComplete: false,
+        admin: req.cookies.uid,
       });
       customer.save();
       res.json({ task: customer.tasks[customer.tasks.length - 1], err: false });
+      await sendMail(
+        Admin.email,
+        Agent.email,
+        `New Task For Customer ${customer.name}`,
+        `<h3>Title</h3><p>${title}</p><h3>Details: </h3><p>${description}</p>${
+          compulsory && "<p style='color:red'>This Task Has Been Flagged Compulsory</p>"
+        }
+        <br /><br /><br />
+        <hr />
+        &copy; ${new Date().getFullYear()} Telserve CRPMS By Aje Damilola
+        `
+      );
     } catch (err) {
       res.json({ err: "Database Error try again later" });
       console.log(err);
@@ -571,9 +586,23 @@ module.exports = (app) => {
     const { taskid, customerid } = req.body;
     try {
       const customer = await Customer.findById(customerid);
-      customer.tasks.forEach((task) => {
+      customer.tasks.forEach(async (task) => {
         if (task._id == taskid) {
           task.requestComplete = true;
+          const agent = await User.findById(task.agent);
+          const admin = await User.findById(task.admin);
+          sendMail(
+            agent.email,
+            admin.email,
+            `Completion Of A Task By ${agent.name}`,
+            `
+            ${agent.name} Just Notified that <b>${task.title}</b> For Customer <b>${customer.name}</b> Has been completed,
+            click the below button to check it out <br /><br />
+            <a href='https://telserve-crm.vercel.app/#/customers/${customer.id}'>
+            <button style='border:2px solid #00ff00;background-color:#00ff00;border-radius:10px;padding:13px'>Check</button>
+            </a>
+            `
+          );
         }
       });
       customer.save();

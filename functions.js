@@ -44,7 +44,7 @@ const transporter = nodemailer.createTransport({
 
 transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
 
-async function sendMail(sender, recipient, title, message, account) {
+async function sendMail(sender, recipient, title, message) {
   try {
     const customFooter = "";
     const info = await transporter.sendMail({
