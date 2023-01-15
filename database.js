@@ -97,7 +97,7 @@ const chat = mongoose.Schema({
   sender: String,
 });
 
-const requests = mongoose.Schema({
+const request = mongoose.Schema({
   message: String,
   sender: mongoose.SchemaTypes.ObjectId,
   recipient: mongoose.SchemaTypes.ObjectId,
@@ -105,11 +105,19 @@ const requests = mongoose.Schema({
   pendingDone: Boolean,
 });
 
+const announcement = mongoose.Schema({
+  title:String,
+  description:String,
+  sender:String,
+})
+
 const User = mongoose.model("user", userStructure);
 const Customer = mongoose.model("customer", customerStructure);
 const Product = mongoose.model("product", productsStructure);
 const Category = mongoose.model("category", category);
 const Chat = mongoose.model("chat", chat);
+const Annoucement = mongoose.model("announcement", announcement);
+const Request = mongoose.model("request",request);
 const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
 // const connString = "mongodb://localhost:27017/telserve-crm";
 
@@ -123,4 +131,6 @@ module.exports = {
   Product,
   Category,
   Chat,
+  Annoucement,
+  Request
 };

@@ -1,5 +1,12 @@
 //import libraries
-const { User, Customer, Category, Product, Chat } = require("./database");
+const {
+  User,
+  Customer,
+  Category,
+  Product,
+  Chat,
+  Annoucement,
+} = require("./database");
 const { encode64, sendMail } = require("./functions");
 module.exports = (app) => {
   const d_productImage =
@@ -39,7 +46,7 @@ module.exports = (app) => {
         res.json({ msg: "ok" });
       } catch (error) {
         res.json({ err: "Database Error Try again later" });
-        console.log(new Date().toLocaleString(),"===>  ", error);
+        console.log(new Date().toLocaleString(), "===>  ", error);
       }
     } else {
       res.json({ err: "Unauthenticated Request Logout and try again later" });
@@ -90,7 +97,8 @@ module.exports = (app) => {
 
   app.patch("/agent", async (req, res) => {
     try {
-      const { id, email, name, canAddProducts, privilage, canAddCustomers } = req.body;
+      const { id, email, name, canAddProducts, privilage, canAddCustomers } =
+        req.body;
       const user = await User.findById(id);
       user.email = email;
       user.name = name;
@@ -104,7 +112,7 @@ module.exports = (app) => {
       user.save();
       res.json({ user });
     } catch (err) {
-      console.log(new Date().toLocaleString(),"===>  ", err);
+      console.log(new Date().toLocaleString(), "===>  ", err);
       res.json({ err: "Databse Error Try again later" });
     }
   });
@@ -113,7 +121,7 @@ module.exports = (app) => {
     if (req.cookies.uid) {
       try {
         await User.findByIdAndDelete(req.headers.id);
-        console.log(new Date().toLocaleString(),"===>  ", req.headers.id);
+        console.log(new Date().toLocaleString(), "===>  ", req.headers.id);
         res.json({ msg: "Ok" });
       } catch (err) {
         res.json({ err: "Database Error Try Again later" });
@@ -131,6 +139,7 @@ module.exports = (app) => {
         const customers = await Customer.find({});
         const categories = await Category.find({});
         const products = await Product.find({});
+        const annoucements = await Annoucement.find({});
         res.cookie("uid", user.id, {
           httpOnly: false,
           sameSite: "none",
@@ -148,6 +157,7 @@ module.exports = (app) => {
           categories,
           products,
           agents,
+          annoucements,
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });
@@ -166,6 +176,7 @@ module.exports = (app) => {
       if (user) {
         const customers = await Customer.find({});
         const categories = await Category.find({});
+        const annoucements = await Annoucement.find({});
         res.cookie("uid", user.id, {
           httpOnly: false,
           sameSite: "none",
@@ -182,6 +193,7 @@ module.exports = (app) => {
           categories,
           products,
           agents,
+          annoucements,
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });
@@ -234,7 +246,7 @@ module.exports = (app) => {
         }
       }
     } catch (e) {
-      console.log(new Date().toLocaleString(),"===>  ", e.message);
+      console.log(new Date().toLocaleString(), "===>  ", e.message);
       res.json({ err: "A Server Error Ocurred" });
     }
   });
@@ -252,7 +264,7 @@ module.exports = (app) => {
         }
       }
     } catch (error) {
-      console.log(new Date().toLocaleString(),"===>  ", error);
+      console.log(new Date().toLocaleString(), "===>  ", error);
       res.json({ err: "Databse Error Try Again Later" });
     }
   });
@@ -281,7 +293,7 @@ module.exports = (app) => {
       }
     } catch (err) {
       res.json({ err: "Database Error Try again later" });
-      console.log(new Date().toLocaleString(),"===>  ", err);
+      console.log(new Date().toLocaleString(), "===>  ", err);
     }
   });
 
@@ -298,7 +310,7 @@ module.exports = (app) => {
       }
     } catch (err) {
       res.json({ err: "Database Error Try Again later" });
-      console.log(new Date().toLocaleString(),"===>  ", err);
+      console.log(new Date().toLocaleString(), "===>  ", err);
     }
   });
 
@@ -313,7 +325,7 @@ module.exports = (app) => {
       category.save();
       res.json({ msg: "Ok", category });
     } catch (err) {
-      console.log(new Date().toLocaleString(),"===>  ", err);
+      console.log(new Date().toLocaleString(), "===>  ", err);
       res.json({
         err: err.message,
         msg: "A Error Occured, Unable to add Category Try again later",
@@ -331,12 +343,12 @@ module.exports = (app) => {
         err: error.message,
         msg: "Unable To Delete category try again later",
       });
-      console.log(new Date().toLocaleString(),"===>  ", error);
+      console.log(new Date().toLocaleString(), "===>  ", error);
     }
   });
 
   app.post("/product", async (req, res) => {
-    console.log(new Date().toLocaleString(),"===>  ", req.body);
+    console.log(new Date().toLocaleString(), "===>  ", req.body);
     try {
       const { name, price, category } = req.body;
       const { uid } = req.cookies;
@@ -356,7 +368,7 @@ module.exports = (app) => {
       product.save();
       res.json({ msg: "Ok", product });
     } catch (err) {
-      console.log(new Date().toLocaleString(),"===>  ", err);
+      console.log(new Date().toLocaleString(), "===>  ", err);
       res.json({
         err: err.message,
         msg: "Unable to create Product At this time try again later",
@@ -373,7 +385,7 @@ module.exports = (app) => {
       res.json({ msg: "Ok" });
     } catch (err) {
       res.json({ err: "Unable to add category try again later" });
-      console.log(new Date().toLocaleString(),"===>  ", err);
+      console.log(new Date().toLocaleString(), "===>  ", err);
     }
   });
 
@@ -387,7 +399,7 @@ module.exports = (app) => {
         err: error.message,
         msg: "Unable To Delete Product try again later",
       });
-      console.log(new Date().toLocaleString(),"===>  ", error);
+      console.log(new Date().toLocaleString(), "===>  ", error);
     }
   });
 
@@ -405,7 +417,7 @@ module.exports = (app) => {
       product.save();
       res.json({ msg: "Ok", product });
     } catch (error) {
-      console.log(new Date().toLocaleString(),"===>  ", error);
+      console.log(new Date().toLocaleString(), "===>  ", error);
       res.json({ err: "Unable To Edit Product at this time try again later" });
     }
   });
@@ -435,7 +447,7 @@ module.exports = (app) => {
         res.json({ err: "Unauthenticated Request" });
       }
     } catch (err) {
-      console.log(new Date().toLocaleString(),"===>  ", err);
+      console.log(new Date().toLocaleString(), "===>  ", err);
       res.json({ err: "Database Error Try again later" });
     }
   });
@@ -454,24 +466,56 @@ module.exports = (app) => {
       Agent.save();
       res.json({ newTask: Agent.tasks[Agent.tasks.length - 1] });
     } catch (err) {
-      console.log(new Date().toLocaleString(),"===>  ", err);
+      console.log(new Date().toLocaleString(), "===>  ", err);
       res.json({ err: "Database Error Try Again Later" });
     }
   });
 
-  app.post("/check-in", async (req,res)=>{
-    const {uid} = req.cookies;
+  app.post("/check-in", async (req, res) => {
+    const { uid } = req.cookies;
     try {
       const user = await User.findById(uid);
-      user.checkIns.push(new Date());
+      const today = new Date();
+      if (
+        user.checkIns.find((d) => d.toDateString() == today.toDateString()) ==
+        null
+      ) {
+        user.checkIns.push(today);
+      }
       user.save();
-      res.json({err:false})
+      res.json({ err: false });
     } catch (error) {
       console.log(error);
-      res.json({err:"Database Error, Try again later"})
+      res.json({ err: "Database Error, Try again later" });
     }
-  })
+  });
 
+  app.post("/annoucement", async (req, res) => {
+    const { title, description } = req.body;
+    const { uid } = req.cookies;
+    try {
+      const annoucement = new Annoucement({
+        title,
+        description,
+        sender: uid,
+      });
+      annoucement.save();
+      res.json({ annoucement });
+    } catch (error) {
+      console.log(error);
+      res.json({ err: "database Error try again later" });
+    }
+  });
+
+  app.delete("/annoucement", async (req, res) => {
+    try {
+      await Annoucement.findByIdAndDelete(req.headers.id);
+      res.json({ err: false });
+    } catch (error) {
+      console.log(error);
+      res.json({ err: "Database Error try again later" });
+    }
+  });
   //============= Chat Section
   app.get("/chats", async (req, res) => {
     try {
@@ -482,7 +526,7 @@ module.exports = (app) => {
       );
       res.json({ chats: chats.reverse() });
     } catch (err) {
-      console.log(new Date().toLocaleString(),"===>  ", err);
+      console.log(new Date().toLocaleString(), "===>  ", err);
       res.json({ err: "Database Error Try again later" });
     }
   });
@@ -519,7 +563,7 @@ module.exports = (app) => {
         res.json({ err: "Unauthenticated Request" });
       }
     } catch (error) {
-      console.log(new Date().toLocaleString(),"===>  ", error);
+      console.log(new Date().toLocaleString(), "===>  ", error);
       res.json({ err: "Database Error Try again later" });
     }
   });
@@ -529,7 +573,7 @@ module.exports = (app) => {
       await Chat.findByIdAndDelete(req.headers.chatid);
       res.json({ msg: "Ok" });
     } catch (error) {
-      console.log(new Date().toLocaleString(),"===>  ", error);
+      console.log(new Date().toLocaleString(), "===>  ", error);
       res.json({ err: "Databse Error Try Again later" });
     }
   });
@@ -562,7 +606,10 @@ function isYesterdayOrOlder(date) {
 }
 
 async function sendScheduledEmails() {
-  console.log(new Date().toLocaleString(),"==> Running Scheduled Emails Check....");
+  console.log(
+    new Date().toLocaleString(),
+    "==> Running Scheduled Emails Check...."
+  );
   const today = new Date();
   const customers = await Customer.find({});
   customers.forEach(async (customer) => {
@@ -618,7 +665,7 @@ async function sendScheduledEmails() {
               );
             }
           } catch (err) {
-            console.log(new Date().toLocaleString(),"===>  ", err);
+            console.log(new Date().toLocaleString(), "===>  ", err);
           }
         } else {
           //has sent them before
