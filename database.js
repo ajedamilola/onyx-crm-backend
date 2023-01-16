@@ -35,15 +35,17 @@ const userStructure = new mongoose.Schema({
   password: String,
   customers: [mongoose.SchemaTypes.ObjectId],
   tasks: [{ ...ContactInstance, bySuper: false }],
+  //privilages
   privilage: Number,
   canAddProducts: Boolean,
+  account:Boolean,
   dateAdded: {
-    type: Date,
     default: () => new Date(),
+    type: Date,
+    canAddCustomers: Boolean,
   },
   image: String,
   checkIns: [Date],
-  canAddCustomers: Boolean,
 });
 
 const customerStructure = new mongoose.Schema({

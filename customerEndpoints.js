@@ -240,8 +240,7 @@ module.exports = (app) => {
           compulsory && "<p style='color:red'>This Task Has Been Flagged Compulsory</p>"
         }
         <br /><br /><br />
-        <hr />
-        &copy; ${new Date().getFullYear()} Telserve CRPMS By Aje Damilola
+       
         `
       );
     } catch (err) {

@@ -46,7 +46,8 @@ transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
 
 async function sendMail(sender, recipient, title, message) {
   try {
-    const customFooter = "";
+    const customFooter = `<hr />
+    &copy; ${new Date().getFullYear()} Telserve CRPMS By Aje Damilola`;
     const info = await transporter.sendMail({
       from: sender,
       to: recipient,
