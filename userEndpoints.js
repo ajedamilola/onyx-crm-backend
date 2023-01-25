@@ -6,6 +6,7 @@ const {
   Product,
   Chat,
   Annoucement,
+  Request,
 } = require("./database");
 const { encode64, sendMail } = require("./functions");
 module.exports = (app) => {
@@ -97,9 +98,16 @@ module.exports = (app) => {
 
   app.patch("/agent", async (req, res) => {
     try {
-      const { id, email, name, canAddProducts, privilage, canAddCustomers, account } =
-        req.body;
-        const user = await User.findById(id);
+      const {
+        id,
+        email,
+        name,
+        canAddProducts,
+        privilage,
+        canAddCustomers,
+        account,
+      } = req.body;
+      const user = await User.findById(id);
       user.email = email;
       user.name = name;
       user.canAddProducts = canAddProducts;
@@ -477,11 +485,13 @@ module.exports = (app) => {
     try {
       const user = await User.findById(uid);
       const today = new Date();
-      if (
-        user.checkIns.find((d) => d.toDateString() == today.toDateString()) ==
-        null
-      ) {
+      if (user.checkIns.length < 1) {
         user.checkIns.push(today);
+      }else{
+        const latest = user.checkIns[user.checkIns.length - 1];
+        if(latest.toDateString()!=today.toDateString()){
+          user.checkIns.push(today);
+        }
       }
       user.save();
       res.json({ err: false });
@@ -576,6 +586,66 @@ module.exports = (app) => {
     } catch (error) {
       console.log(new Date().toLocaleString(), "===>  ", error);
       res.json({ err: "Databse Error Try Again later" });
+    }
+  });
+
+  app.post("/request", async (req, res) => {
+    const { title, description, recipient } = req.body;
+    if (req.cookies.uid) {
+      try {
+        const request = new Request({
+          description,
+          sender: req.cookies.uid,
+          recipient,
+          done:false,
+          pendingDone:false
+        });
+        request.save()
+        res.json({ request });
+      } catch (err) {
+        console.log(err);
+        res.json({ err: "" });
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" });
+    }
+  });
+
+  app.get("/requests", async (req, res) => {
+    if (req.cookies.uid) {
+      const { uid } = req.cookies;
+      try {
+        const requests = await Request.find({
+          $or: [{ sender: uid }, { recipient: uid }],
+        });
+        res.json({ requests });
+      } catch (error) {
+        console.log(error);
+        res.json({ err: "Unknown Error try again later" });
+      }
+    } else {
+      res.json({ err: "unauthenticated Request" });
+    }
+  });
+
+  app.delete("/request", async (req, res) => {
+    try {
+      await Request.findByIdAndDelete(req.headers.id);
+      res.json({});
+    } catch (error) {
+      res.json({ err: "Unkown Error try again later" });
+    }
+  });
+
+  app.patch("/request", async (req, res) => {
+    try {
+      const request = await Request.findByIdAndUpdate(req.body.id, {
+        done: true,
+      });
+      res.json({ });
+    } catch (error) {
+      console.log(error)
+      res.json({err:"unknown Error try again later"})
     }
   });
 };

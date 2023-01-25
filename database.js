@@ -100,7 +100,7 @@ const chat = mongoose.Schema({
 });
 
 const request = mongoose.Schema({
-  message: String,
+  description: String,
   sender: mongoose.SchemaTypes.ObjectId,
   recipient: mongoose.SchemaTypes.ObjectId,
   done: Boolean,
@@ -111,6 +111,7 @@ const announcement = mongoose.Schema({
   title:String,
   description:String,
   sender:String,
+  done:Boolean
 })
 
 const User = mongoose.model("user", userStructure);
