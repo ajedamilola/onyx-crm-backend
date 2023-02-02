@@ -46,6 +46,7 @@ const userStructure = new mongoose.Schema({
   },
   image: String,
   checkIns: [Date],
+  signature:"",
 });
 
 const customerStructure = new mongoose.Schema({
@@ -121,8 +122,8 @@ const Category = mongoose.model("category", category);
 const Chat = mongoose.model("chat", chat);
 const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request",request);
-const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
-// const connString = "mongodb://localhost:27017/telserve-crm";
+// const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
+const connString = "mongodb://localhost:27017/telserve-crm";
 
 mongoose.connect(connString, (err) => {
   console.log(err ? "Connection Failed" : "Connection Successful");

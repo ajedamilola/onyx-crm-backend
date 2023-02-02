@@ -487,9 +487,9 @@ module.exports = (app) => {
       const today = new Date();
       if (user.checkIns.length < 1) {
         user.checkIns.push(today);
-      }else{
+      } else {
         const latest = user.checkIns[user.checkIns.length - 1];
-        if(latest.toDateString()!=today.toDateString()){
+        if (latest.toDateString() != today.toDateString()) {
           user.checkIns.push(today);
         }
       }
@@ -558,7 +558,7 @@ module.exports = (app) => {
           keyArray.forEach(async (fileKey) => {
             const file = req.files[fileKey];
             const data =
-              "data:image/webp;base64," + (await encode64(file.data));
+              "data:image/webp;base64," + (await encode64(file.data,true));
             chat.files.push(data);
             if (keyArray.indexOf(fileKey) == keyArray.length - 1) {
               //save and return to client if this was the file
@@ -597,10 +597,10 @@ module.exports = (app) => {
           description,
           sender: req.cookies.uid,
           recipient,
-          done:false,
-          pendingDone:false
+          done: false,
+          pendingDone: false,
         });
-        request.save()
+        request.save();
         res.json({ request });
       } catch (err) {
         console.log(err);
@@ -642,10 +642,28 @@ module.exports = (app) => {
       const request = await Request.findByIdAndUpdate(req.body.id, {
         done: true,
       });
-      res.json({ });
+      res.json({});
     } catch (error) {
-      console.log(error)
-      res.json({err:"unknown Error try again later"})
+      console.log(error);
+      res.json({ err: "unknown Error try again later" });
+    }
+  });
+
+  app.post("/signature", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      if (req.files && req.files.image) {
+        const agent = await User.findById(uid);
+        agent.signature =
+          "data:image/webp;base64," +
+          (await encode64(req.files.image.data, true));
+        agent.save();
+        res.json({ image: agent.signature });
+      } else {
+        res.json({ err: "Signature must be an image" });
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" });
     }
   });
 };

@@ -19,11 +19,11 @@ async function verifyPassword(password, hash) {
   });
 }
 
-async function encode64(data) {
+async function encode64(data, large = false) {
   try {
     const buffer = Buffer.from(data);
     const output = await sharp(buffer)
-      .resize({ width: 80, fit: "contain" })
+      .resize({ width: large ? 1000 : 80, fit: "inside",withoutEnlargement:true })
       .webp({ quality: 90 })
       .toBuffer();
     return output.toString("base64");
@@ -44,15 +44,15 @@ const transporter = nodemailer.createTransport({
 
 transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
 
-async function sendMail(sender, recipient, title, message) {
+async function sendMail(sender, recipient, title, message, signature=false) {
   try {
     const customFooter = `<hr />
     &copy; ${new Date().getFullYear()} Telserve CRPMS By Aje Damilola`;
-    const info = await transporter.sendMail({
+    await transporter.sendMail({
       from: sender,
       to: recipient,
       subject: title,
-      html: message + customFooter,
+      html: `${message} ${signature &&  `<img src='${signature}' style='width:100%'/>`} ${customFooter}`,
     });
     return { err: false };
   } catch (err) {

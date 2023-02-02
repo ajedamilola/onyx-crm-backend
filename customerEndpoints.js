@@ -157,7 +157,7 @@ module.exports = (app) => {
               `<${customer.email}>`,
               subject,
               message,
-              testAccount
+              user.signature!="" && user.signature
             );
             if (!err) {
               customer.emails.push(data);
@@ -460,7 +460,7 @@ module.exports = (app) => {
             const successful = status == "successful";
             email.pending = false;
             email.successful = successful;
-            return res.json(email);
+            res.json(email);
           }
         });
         customer.save();
@@ -521,6 +521,7 @@ module.exports = (app) => {
           return res.json({ email: mail });
         }
       });
+      customer.save();
     } catch (error) {
       console.log(error);
       res.json({ err: "Database Error Try again later" });
