@@ -46,7 +46,7 @@ const userStructure = new mongoose.Schema({
   },
   image: String,
   checkIns: [Date],
-  signature:"",
+  signature:String,
 });
 
 const customerStructure = new mongoose.Schema({

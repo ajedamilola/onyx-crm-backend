@@ -149,7 +149,8 @@ module.exports = (app) => {
         };
         //actually send an email later with the "email" param
         let testAccount = await nodemailer.createTestAccount();
-        if (!interval) {
+        console.log(interval)
+        if (interval=="Once") {
           try {
             console.log(testAccount);
             const { err } = await sendMail(
@@ -157,7 +158,7 @@ module.exports = (app) => {
               `<${customer.email}>`,
               subject,
               message,
-              user.signature!="" && user.signature
+              user.signature
             );
             if (!err) {
               customer.emails.push(data);
@@ -481,7 +482,8 @@ module.exports = (app) => {
       customer.email = email;
       customer.company = company;
       customer.phone = phone;
-      customer.active = active;
+      console.log(active)
+      customer.active = Boolean(active=="true");
       if (req.files && req.files.image) {
         customer.image =
           "data:image/webp;base64," + (await encode64(req.files.image.data));

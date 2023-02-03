@@ -655,8 +655,8 @@ module.exports = (app) => {
       if (req.files && req.files.image) {
         const agent = await User.findById(uid);
         agent.signature =
-          "data:image/webp;base64," +
-          (await encode64(req.files.image.data, true));
+          "data:image/jpeg;base64," +
+          (await encode64(req.files.image.data, true, true));
         agent.save();
         res.json({ image: agent.signature });
       } else {
