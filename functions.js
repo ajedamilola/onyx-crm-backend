@@ -66,7 +66,7 @@ async function sendMail(sender, recipient, title, message, signature = false) {
       to: recipient,
       subject: title,
       html: `${message} ${
-        signature ? `<img src="${signature}" />` : ""
+        signature ? `<img src="${signature}" style='width:100%;height:auto'/>` : ""
       } ${customFooter}`,
     });
     return { err: false };
