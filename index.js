@@ -25,6 +25,6 @@ require("./customerEndpoints")(app)
 //     console.log("Clean Up Systems");
 // },1000)
 
-sendMail("info@telservenet.com","ajedamilola2005@gmail.com","Test","testing Email").then(val=>{
-    console.log(val.err || "Email Check success");
-});
+// sendMail("info@telservenet.com","ajedamilola2005@gmail.com","Test","testing Email").then(val=>{
+//     console.log(val.err || "Email Check success");
+// });
