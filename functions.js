@@ -2,6 +2,7 @@
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const sharp = require("sharp");
+require("dotenv").config();
 
 async function hashPassword(password) {
   return new Promise((resolve) => {
@@ -48,10 +49,12 @@ async function encode64(data, large = false, jpeg = false) {
 
 var inlineBase64 = require("nodemailer-plugin-inline-base64");
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "mail.telservenet.com",
+  port: 465,
+  secure: true, // true for 465, false for other ports
   auth: {
-    user: "ajedamilola2005@gmail.com",
-    pass: "utrsgwdslzwxdlnz",
+    user: "info@telservenet.com", // generated ethereal user
+    pass: process.env.SMTPPASSWORD, // generated ethereal password
   },
 });
 
@@ -66,7 +69,9 @@ async function sendMail(sender, recipient, title, message, signature = false) {
       to: recipient,
       subject: title,
       html: `${message} ${
-        signature ? `<img src="${signature}" style='width:100%;height:auto'/>` : ""
+        signature
+          ? `<img src="${signature}" style='width:100%;height:auto'/>`
+          : ""
       } ${customFooter}`,
     });
     return { err: false };

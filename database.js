@@ -125,7 +125,7 @@ const Request = mongoose.model("request",request);
 const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
 // const connString = "mongodb://localhost:27017/telserve-crm";
 
-mongoose.connect(connString, (err) => {
+mongoose.connect(connString, {dbName:"main"},(err) => {
   console.log(err ? "Connection Failed" : "Connection Successful");
 });
 

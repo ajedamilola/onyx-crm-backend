@@ -1,4 +1,5 @@
 const express = require("express");
+const { sendMail } = require("./functions");
 const app = express();
 app.listen(process.env.PORT || 3000,(err)=>{
     if(!err){
@@ -23,3 +24,7 @@ require("./customerEndpoints")(app)
 // setInterval(async ()=>{
 //     console.log("Clean Up Systems");
 // },1000)
+
+sendMail("info@telservenet.com","ajedamilola2005@gmail.com","Test","testing Email").then(val=>{
+    console.log(val.err || "Email Check success");
+});
