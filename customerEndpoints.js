@@ -28,13 +28,16 @@ module.exports = (app) => {
       payment,
       product,
       date,
-      setUpCost
+      setUpCost,
+      amount,
+      address
     } = req.body;
     try {
       const newCustomer = new Customer({
         name,
         email,
         phone,
+        address,
         handler: uid,
         setUpCost,
         purchases:
@@ -45,6 +48,7 @@ module.exports = (app) => {
                   pending: payment != "done",
                   confirmed: payment == "done",
                   date,
+                  amount
                 },
               ]
             : [],
@@ -476,13 +480,13 @@ module.exports = (app) => {
 
   app.patch("/customer", async (req, res) => {
     try {
-      const { name, email, company, phone, id, active } = req.body;
+      const { name, email, company, phone, id, active, address } = req.body;
       const customer = await Customer.findById(id);
       customer.name = name;
       customer.email = email;
       customer.company = company;
       customer.phone = phone;
-      console.log(active)
+      customer.address = address;
       customer.active = Boolean(active=="true");
       if (req.files && req.files.image) {
         customer.image =

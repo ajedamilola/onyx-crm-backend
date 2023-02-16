@@ -359,7 +359,7 @@ module.exports = (app) => {
   app.post("/product", async (req, res) => {
     console.log(new Date().toLocaleString(), "===>  ", req.body);
     try {
-      const { name, price, category } = req.body;
+      const { name, price, category, variablePrice } = req.body;
       const { uid } = req.cookies;
       const product = new Product({
         name,
@@ -368,6 +368,7 @@ module.exports = (app) => {
         owner: uid,
         image: d_productImage,
         featured: false,
+        variablePrice,
       });
 
       if (req.files && req.files.image) {
@@ -413,12 +414,13 @@ module.exports = (app) => {
   });
 
   app.patch("/product", async (req, res) => {
-    const { name, id, category, price } = req.body;
+    const { name, id, category, price, variablePrice } = req.body;
     try {
       const product = await Product.findById(id);
       (product.name = name),
         (product.category = category),
         (product.price = price);
+        product.variablePrice = variablePrice;
       if (req.files && req.files.image) {
         product.image =
           "data:image/webp;base64," + (await encode64(req.files.image.data));
@@ -558,7 +560,7 @@ module.exports = (app) => {
           keyArray.forEach(async (fileKey) => {
             const file = req.files[fileKey];
             const data =
-              "data:image/webp;base64," + (await encode64(file.data,true));
+              "data:image/webp;base64," + (await encode64(file.data, true));
             chat.files.push(data);
             if (keyArray.indexOf(fileKey) == keyArray.length - 1) {
               //save and return to client if this was the file

@@ -78,7 +78,8 @@ const customerStructure = new mongoose.Schema({
       admin:String
     },
   ],
-  setUpCost:Number
+  setUpCost:Number,
+  address:String
 });
 
 const productsStructure = mongoose.Schema({
@@ -88,6 +89,7 @@ const productsStructure = mongoose.Schema({
   category: String,
   image: String,
   featured: Boolean,
+  variablePrice:Boolean
 });
 
 const category = mongoose.Schema({
@@ -129,7 +131,7 @@ const dbName  = "main";
 // const connString = "mongodb://localhost:27017/telserve-crm";
 // const dbName  = "telserve-crm";
 mongoose.connect(connString, {dbName},(err) => {
-  console.log("Database ",err ? "Connection Failed" : "Connection Successful");
+  console.log("Database",err ? "Connection Failed" : "Connection Successful");
 });
 
 module.exports = {
