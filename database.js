@@ -27,6 +27,7 @@ const Purchase = {
   pending: Boolean,
   qty: Number,
   pendingDelete: { type: Boolean, default: false },
+  discount:Number
 };
 
 const userStructure = new mongoose.Schema({
@@ -42,8 +43,8 @@ const userStructure = new mongoose.Schema({
   dateAdded: {
     default: () => new Date(),
     type: Date,
-    canAddCustomers: Boolean,
   },
+  canAddCustomers: Boolean,
   image: String,
   checkIns: [Date],
   signature:String,
@@ -77,6 +78,7 @@ const customerStructure = new mongoose.Schema({
       admin:String
     },
   ],
+  setUpCost:Number
 });
 
 const productsStructure = mongoose.Schema({
@@ -123,10 +125,11 @@ const Chat = mongoose.model("chat", chat);
 const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request",request);
 const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
+const dbName  = "main";
 // const connString = "mongodb://localhost:27017/telserve-crm";
-
-mongoose.connect(connString, {dbName:"main"},(err) => {
-  console.log(err ? "Connection Failed" : "Connection Successful");
+// const dbName  = "telserve-crm";
+mongoose.connect(connString, {dbName},(err) => {
+  console.log("Database ",err ? "Connection Failed" : "Connection Successful");
 });
 
 module.exports = {

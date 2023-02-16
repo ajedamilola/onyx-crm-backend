@@ -24,11 +24,11 @@ module.exports = (app) => {
       email,
       phone,
       name,
-      purchaseAmount,
       company,
       payment,
       product,
       date,
+      setUpCost
     } = req.body;
     try {
       const newCustomer = new Customer({
@@ -36,11 +36,11 @@ module.exports = (app) => {
         email,
         phone,
         handler: uid,
+        setUpCost,
         purchases:
           payment == "done"
             ? [
                 {
-                  amount: purchaseAmount,
                   product,
                   pending: payment != "done",
                   confirmed: payment == "done",
