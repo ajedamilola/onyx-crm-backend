@@ -151,7 +151,6 @@ module.exports = (app) => {
           intervalDate: intervalDate,
           isActive: true,
         };
-        //actually send an email later with the "email" param
         let testAccount = await nodemailer.createTestAccount();
         console.log(interval)
         if (interval=="Once") {
@@ -162,7 +161,8 @@ module.exports = (app) => {
               `<${customer.email}>`,
               subject,
               message,
-              user.signature
+              user.signature,
+              customer.name
             );
             if (!err) {
               customer.emails.push(data);
@@ -246,7 +246,8 @@ module.exports = (app) => {
         }
         <br /><br /><br />
        
-        `
+        `,
+        Admin.signature
       );
     } catch (err) {
       res.json({ err: "Database Error try again later" });
@@ -607,7 +608,8 @@ module.exports = (app) => {
             <a href='https://telserve-crm.vercel.app/#/customers/${customer.id}'>
             <button style='border:2px solid #00ff00;background-color:#00ff00;border-radius:10px;padding:13px'>Check</button>
             </a>
-            `
+            `,
+            agent.signature
           );
         }
       });

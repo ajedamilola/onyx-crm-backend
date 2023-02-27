@@ -420,7 +420,7 @@ module.exports = (app) => {
       (product.name = name),
         (product.category = category),
         (product.price = price);
-        product.variablePrice = variablePrice;
+      product.variablePrice = variablePrice;
       if (req.files && req.files.image) {
         product.image =
           "data:image/webp;base64," + (await encode64(req.files.image.data));
@@ -722,7 +722,9 @@ async function sendScheduledEmails() {
                   agent.name,
                   customer.email,
                   email.title,
-                  email.description
+                  email.description,
+                  agent.signature,
+                  customer.name
                 );
                 email.lastSent = today;
               }
@@ -735,7 +737,9 @@ async function sendScheduledEmails() {
                   agent.name,
                   customer.email,
                   email.title,
-                  email.description
+                  email.description,
+                  agent.signature,
+                  customer.name
                 );
                 email.lastSent = today;
               }
@@ -749,7 +753,9 @@ async function sendScheduledEmails() {
                   agent.name,
                   customer.email,
                   email.title,
-                  email.description
+                  email.description,
+                  agent.signature,
+                  customer.name
                 );
               }
             } else if (email.interval == "Daily") {
@@ -758,7 +764,9 @@ async function sendScheduledEmails() {
                 agent.name,
                 customer.email,
                 email.title,
-                email.description
+                email.description,
+                agent.signature,
+                customer.name
               );
             }
           } catch (err) {
@@ -775,7 +783,9 @@ async function sendScheduledEmails() {
                 agent.name,
                 customer.email,
                 email.title,
-                email.description
+                email.description,
+                agent.signature,
+                customer.name
               );
               email.lastSent = today;
             }
@@ -789,7 +799,9 @@ async function sendScheduledEmails() {
                 agent.name,
                 customer.email,
                 email.title,
-                email.description
+                email.description,
+                agent.signature,
+                customer.name
               );
               email.lastSent = today;
             }
@@ -803,7 +815,9 @@ async function sendScheduledEmails() {
                 agent.name,
                 customer.email,
                 email.title,
-                email.description
+                email.description,
+                agent.signature,
+                customer.name
               );
               email.lastSent = today;
             }
@@ -813,7 +827,9 @@ async function sendScheduledEmails() {
                 agent.name,
                 customer.email,
                 email.title,
-                email.description
+                email.description,
+                agent.signature,
+                customer.name
               );
               email.lastSent = today;
             }
@@ -843,7 +859,9 @@ async function sendSubscriptionEmails() {
           agent.email,
           customer.email,
           "Subscription Renewal Reminder",
-          `You Last Subscription For ${product?.name} Will expire in ${dateDiff} days please renew`
+          `You Last Subscription For ${product?.name} Will expire in ${dateDiff} days please renew`,
+          agent.signature,
+          customer.name
         );
         if (dateDiff < 3) {
           //FIXME: Use Official Email Here Instead
@@ -853,7 +871,9 @@ async function sendSubscriptionEmails() {
             `Subscription Renewal Reminder For Customer ${customer.name}`,
             `You Last Subscription For ${product?.name} Will expire in ${dateDiff} days Mail has already been sent to customer. 
             But follow up is reccomended
-            `
+            `,
+            agent.signature,
+            customer.name
           );
         }
       } else if (dateDiff < 0) {
@@ -863,7 +883,9 @@ async function sendSubscriptionEmails() {
           agent.email,
           customer.email,
           "Subscription Renewal Reminder",
-          `You Last Subscription For ${product?.name} Has Expired`
+          `You Last Subscription For ${product?.name} Has Expired`,
+          agent.signature,
+          customer.name
         );
       }
     }

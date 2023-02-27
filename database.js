@@ -79,7 +79,11 @@ const customerStructure = new mongoose.Schema({
     },
   ],
   setUpCost:Number,
-  address:String
+  address:String,
+  code: {
+    type: String,
+    default: ()=>Math.floor(Math.random() * 100000 ) + 100000
+  }
 });
 
 const productsStructure = mongoose.Schema({
@@ -126,12 +130,12 @@ const Category = mongoose.model("category", category);
 const Chat = mongoose.model("chat", chat);
 const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request",request);
-const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
-const dbName  = "main";
-// const connString = "mongodb://localhost:27017/telserve-crm";
+// const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
+// const dbName  = "main";
+// const connString = "mongodb://127.0.0.1:27017";
 // const dbName  = "telserve-crm";
 mongoose.connect(connString, {dbName},(err) => {
-  console.log("Database",err ? "Connection Failed" : "Connection Successful");
+  console.log("Database",err ? "Connection Failed with "+err : "Connection Successful");
 });
 
 module.exports = {
