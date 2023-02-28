@@ -134,6 +134,7 @@ const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.
 const dbName  = "main";
 // const connString = "mongodb://127.0.0.1:27017";
 // const dbName  = "telserve-crm";
+mongoose.set('strictQuery', false)
 mongoose.connect(connString, {dbName},(err) => {
   console.log("Database",err ? "Connection Failed with "+err : "Connection Successful");
 });
