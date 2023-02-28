@@ -130,8 +130,8 @@ const Category = mongoose.model("category", category);
 const Chat = mongoose.model("chat", chat);
 const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request",request);
-// const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
-// const dbName  = "main";
+const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
+const dbName  = "main";
 // const connString = "mongodb://127.0.0.1:27017";
 // const dbName  = "telserve-crm";
 mongoose.connect(connString, {dbName},(err) => {
