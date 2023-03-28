@@ -39,6 +39,7 @@ module.exports = (app) => {
         phone,
         address,
         handler: uid,
+        invitor: uid,
         setUpCost,
         purchases:
           payment == "done"
@@ -481,13 +482,14 @@ module.exports = (app) => {
 
   app.patch("/customer", async (req, res) => {
     try {
-      const { name, email, company, phone, id, active, address } = req.body;
+      const { name, email, company, phone, id, active, address, setUpCost } = req.body;
       const customer = await Customer.findById(id);
       customer.name = name;
       customer.email = email;
       customer.company = company;
       customer.phone = phone;
       customer.address = address;
+      customer.setUpCost = setUpCost;
       customer.active = Boolean(active=="true");
       if (req.files && req.files.image) {
         customer.image =

@@ -64,6 +64,7 @@ const customerStructure = new mongoose.Schema({
   emails: [ContactInstance],
   purchases: [Purchase],
   handler: mongoose.SchemaTypes.ObjectId,
+  invitor: mongoose.SchemaTypes.ObjectId,
   mainProduct: mongoose.SchemaTypes.ObjectId,
   company: String,
   active: Boolean,
@@ -86,7 +87,7 @@ const customerStructure = new mongoose.Schema({
   }
 });
 
-const productsStructure = mongoose.Schema({
+const productsStructure = new mongoose.Schema({
   name: String,
   price: Number,
   owner: mongoose.SchemaTypes.ObjectId,
@@ -96,19 +97,20 @@ const productsStructure = mongoose.Schema({
   variablePrice:Boolean
 });
 
-const category = mongoose.Schema({
+const category = new mongoose.Schema({
   name: String,
   description: String,
   owner: String,
 });
 
-const chat = mongoose.Schema({
+const chat = new mongoose.Schema({
   content: String,
-  files: [String],
   sender: String,
+  recipient:String, 
+  files:[String]
 });
 
-const request = mongoose.Schema({
+const request = new mongoose.Schema({
   description: String,
   sender: mongoose.SchemaTypes.ObjectId,
   recipient: mongoose.SchemaTypes.ObjectId,
@@ -116,7 +118,7 @@ const request = mongoose.Schema({
   pendingDone: Boolean,
 });
 
-const announcement = mongoose.Schema({
+const announcement = new mongoose.Schema({
   title:String,
   description:String,
   sender:String,
@@ -130,10 +132,10 @@ const Category = mongoose.model("category", category);
 const Chat = mongoose.model("chat", chat);
 const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request",request);
-const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
-const dbName  = "main";
-// const connString = "mongodb://127.0.0.1:27017";
-// const dbName  = "telserve-crm";
+// const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
+// const dbName  = "main";
+const connString = "mongodb://127.0.0.1:27017";
+const dbName  = "telserve-crm";
 mongoose.set('strictQuery', false)
 mongoose.connect(connString, {dbName},(err) => {
   console.log("Database",err ? "Connection Failed with "+err : "Connection Successful");

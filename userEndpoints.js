@@ -149,6 +149,10 @@ module.exports = (app) => {
         const categories = await Category.find({});
         const products = await Product.find({});
         const annoucements = await Annoucement.find({});
+        const chats = await Chat.find().or([
+          { "recipient": user.id },
+          { "sender": user.id }
+        ])
         res.cookie("uid", user.id, {
           httpOnly: false,
           sameSite: "none",
@@ -167,6 +171,7 @@ module.exports = (app) => {
           products,
           agents,
           annoucements,
+          chats
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });
@@ -530,65 +535,23 @@ module.exports = (app) => {
     }
   });
   //============= Chat Section
-  app.get("/chats", async (req, res) => {
-    try {
-      const { limit } = req.headers;
-      const allChats = (await Chat.find()).reverse();
-      const chats = allChats.map(
-        (chat) => allChats.indexOf(chat) <= (limit || allChats.length) && chat
-      );
-      res.json({ chats: chats.reverse() });
-    } catch (err) {
-      console.log(new Date().toLocaleString(), "===>  ", err);
-      res.json({ err: "Database Error Try again later" });
-    }
-  });
 
   app.post("/chat", async (req, res) => {
-    try {
-      const { uid } = req.cookies;
-      if (uid) {
-        const { message } = req.body;
-        const chat = new Chat({
-          content: message,
-          sender: uid,
-          files: [],
-        });
-
-        if (req.files) {
-          const keyArray = Object.keys(req.files);
-          keyArray.forEach(async (fileKey) => {
-            const file = req.files[fileKey];
-            const data =
-              "data:image/webp;base64," + (await encode64(file.data, true));
-            chat.files.push(data);
-            if (keyArray.indexOf(fileKey) == keyArray.length - 1) {
-              //save and return to client if this was the file
-              chat.save();
-              return res.json({ chat });
-            }
-          });
-        } else {
-          chat.save();
-          return res.json({ chat });
-        }
-      } else {
-        res.json({ err: "Unauthenticated Request" });
-      }
-    } catch (error) {
-      console.log(new Date().toLocaleString(), "===>  ", error);
-      res.json({ err: "Database Error Try again later" });
+    //TODO: Add support for files attachment
+    if (req.cookies.uid) {
+      const { content, recipient } = req.body;
+      const chat = new Chat({
+        content, sender: req.cookies.uid, recipient, files:[]
+      })
+      chat.save()
+      res.json({chat})
+    } else {
+      res.json({ err: "Unauthorized Request" })
     }
   });
 
   app.delete("/chat", async (req, res) => {
-    try {
-      await Chat.findByIdAndDelete(req.headers.chatid);
-      res.json({ msg: "Ok" });
-    } catch (error) {
-      console.log(new Date().toLocaleString(), "===>  ", error);
-      res.json({ err: "Databse Error Try Again later" });
-    }
+
   });
 
   app.post("/request", async (req, res) => {
