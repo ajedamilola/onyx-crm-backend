@@ -85,7 +85,7 @@ module.exports = (app) => {
           }
         } else {
           res.json({
-            err: "Aparently You Have Been Deleted. Logout and try again. if this does not work contect your super admin",
+            err: "Aparently You Have Been Deleted. Logout and try again. if this does not work contect your super user",
           });
         }
       } else {
@@ -452,12 +452,12 @@ module.exports = (app) => {
             res.json({ agents });
           } else {
             res.json({
-              err: "Apparently You do not have the proper privilage for this information. Contact A Super Admin",
+              err: "Apparently You do not have the proper privilage for this information. Contact A Super User",
             });
           }
         } else {
           res.json({
-            err: "Apparently You Have Been Deleted from the system. Contact A Super Admin",
+            err: "Apparently You Have Been Deleted from the system. Contact A Super User",
           });
         }
       } else {
