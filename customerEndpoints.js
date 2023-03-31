@@ -44,14 +44,14 @@ module.exports = (app) => {
         purchases:
           payment == "done"
             ? [
-                {
-                  product,
-                  pending: payment != "done",
-                  confirmed: payment == "done",
-                  date,
-                  amount
-                },
-              ]
+              {
+                product,
+                pending: payment != "done",
+                confirmed: payment == "done",
+                date,
+                amount
+              },
+            ]
             : [],
         company,
       });
@@ -154,7 +154,7 @@ module.exports = (app) => {
         };
         let testAccount = await nodemailer.createTestAccount();
         console.log(interval)
-        if (interval=="Once") {
+        if (interval == "Once") {
           try {
             console.log(testAccount);
             const { err } = await sendMail(
@@ -242,8 +242,7 @@ module.exports = (app) => {
         Admin.email,
         Agent.email,
         `New Task For Customer ${customer.name}`,
-        `<h3>Title</h3><p>${title}</p><h3>Details: </h3><p>${description}</p>${
-          compulsory && "<p style='color:red'>This Task Has Been Flagged Compulsory</p>"
+        `<h3>Title</h3><p>${title}</p><h3>Details: </h3><p>${description}</p>${compulsory && "<p style='color:red'>This Task Has Been Flagged Compulsory</p>"
         }
         <br /><br /><br />
        
@@ -490,7 +489,7 @@ module.exports = (app) => {
       customer.phone = phone;
       customer.address = address;
       customer.setUpCost = setUpCost;
-      customer.active = Boolean(active=="true");
+      customer.active = Boolean(active == "true");
       if (req.files && req.files.image) {
         customer.image =
           "data:image/webp;base64," + (await encode64(req.files.image.data));
@@ -622,6 +621,28 @@ module.exports = (app) => {
       res.json({ err: "Databse Error, Try again later" });
     }
   });
+
+  app.patch("/onboarders", async (req, res) => {
+    if (req.cookies.uid) {
+      try {
+        const { data } = req.body;
+        data.forEach(async person => {
+          const customer = await Customer.findById(person.id)
+          customer.invitor = person.invitor;
+          customer.save()
+          if (data.indexOf(person) == data.length - 1) {
+            res.json({ err: false })
+          }
+        })
+      } catch (error) {
+        console.log(error)
+        res.json({ err: "Unknown error, try again later" })
+      }
+
+    } else {
+      res.json({ err: "Unauthenticated Request, Login and try again" })
+    }
+  })
 
   //#endregion
 };
