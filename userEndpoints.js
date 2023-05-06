@@ -167,7 +167,7 @@ module.exports = (app) => {
         const agents = (await User.find({})).map((u) =>
           user.privilage < 2 ? { _id: u.id, image: u.image, name: u.name } : u
         );
-        const emails = await getInbox(user.email,user.mailPassword)
+        const emails = user.mailPassword ? await getInbox(user.email,user.mailPassword) : []
         // console.log(emails)
         res.send({
           user: { ...user.toObject(), plans },

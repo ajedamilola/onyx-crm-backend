@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+require("dotenv").config()
 
 //structures
 
@@ -134,10 +135,10 @@ const Category = mongoose.model("category", category);
 const Chat = mongoose.model("chat", chat);
 const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request",request);
-// const connString = "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority";
 // const dbName  = "main";
-const connString = "mongodb://127.0.0.1:27017";
-const dbName  = "telserve-crm";
+const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority"
+const dbName  = process.env.NODE_ENV == "development" ? "telserve-crm" : "main";
+console.log(connString)
 mongoose.set('strictQuery', false)
 mongoose.connect(connString, {dbName},(err) => {
   console.log("Database",err ? "Connection Failed with "+err : "Connection Successful");
