@@ -39,13 +39,13 @@ const userStructure = new mongoose.Schema({
   tasks: [{ ...ContactInstance, bySuper: false }],
   //privilages
   privilage: Number,
-  canAddProducts: Boolean,
-  account:Boolean,
+  canAddProducts: {type:Boolean,default:false},
+  account:{type:Boolean,default:false},
   dateAdded: {
     default: () => new Date(),
     type: Date,
   },
-  canAddCustomers: Boolean,
+  canAddCustomers: {type:Boolean,default:false},
   image: String,
   checkIns: [Date],
   signature:String,

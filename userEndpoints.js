@@ -115,7 +115,6 @@ module.exports = (app) => {
       user.canAddProducts = canAddProducts;
       user.privilage = privilage;
       user.canAddCustomers = canAddCustomers;
-      user.canViewPayment = 
       user.account = account;
       // user.account = account;
       if (req.files && req.files.image) {
