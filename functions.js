@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const sharp = require("sharp");
 require("dotenv").config();
+var Imap = require('imap')
+var { simpleParser } = require("mailparser")
 
 async function hashPassword(password) {
   return new Promise((resolve) => {
@@ -48,17 +50,8 @@ async function encode64(data, large = false, jpeg = false) {
 }
 
 var inlineBase64 = require("nodemailer-plugin-inline-base64");
-const transporter = nodemailer.createTransport({
-  host: "mail.telservenet.com",
-  port: 465,
-  secure: true, // true for 465, false for other ports
-  auth: {
-    user: "info@telservenet.com", // generated ethereal user
-    pass: process.env.SMTPPASSWORD, // generated ethereal password
-  },
-});
+const { User } = require("./database");
 
-transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
 
 function getDay(index) {
   switch (index) {
@@ -81,6 +74,18 @@ function getDay(index) {
 
 async function sendMail(sender, recipient, title, message, signature = false, recipientName) {
   try {
+    const agent = await User.findOne({ email: sender });
+    const transporter = nodemailer.createTransport({
+      host: process.env.MAILSERVER,
+      port: 465,
+      secure: true, // true for 465, false for other ports
+      auth: {
+        user: sender, // generated ethereal user
+        pass: agent.mailPassword, // generated ethereal password
+      },
+    });
+
+    transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
     const customFooter = `<hr />
     &copy; ${new Date().getFullYear()} Telserve CRPMS By Aje Damilola`;
     const today = new Date();
@@ -95,8 +100,8 @@ async function sendMail(sender, recipient, title, message, signature = false, re
       to: recipient,
       subject: title,
       html: `${output} ${signature
-          ? `<img src="${signature}" style='width:100%;height:auto'/>`
-          : ""
+        ? `<img src="${signature}" style='width:100%;height:auto'/>`
+        : ""
         } ${customFooter}`,
     });
     return { err: false };
@@ -105,11 +110,62 @@ async function sendMail(sender, recipient, title, message, signature = false, re
     return { err };
   }
 }
+const getInbox = (email, password, start = 0, end = 20) => new Promise((resolve, reject) => {
+  const imap = new Imap({
+    password,
+    user: email,
+    host: process.env.MAILSERVER,
+    port: 993,
+    tls: true,
+    tlsOptions: {
+      rejectUnauthorized: false
+    }
+  })
+
+  imap.once("ready", () => {
+    imap.openBox("INBOX", (err, box) => {
+      if (!err) {
+        const messages = [];
+        imap.seq.search(["ALL"], (err, results) => {
+          const limit = results.slice(start, end)
+          const fetched = imap.fetch(limit, { bodies: '' })
+          fetched.on("message", (msg, index) => {
+            msg.on("body", (stream, info) => {
+              simpleParser(stream, async (err, parsed) => {
+                const from = parsed?.from?.text;
+                const subject = parsed.subject;
+                const content = parsed.textAsHtml;
+                const date = parsed.date;
+                messages.push({ from, date, subject, content })
+              });
+            })
+          })
+
+          fetched.once("end", () => {
+            imap.end();
+            resolve(messages)
+          })
+        });
+      } else {
+        resolve([])
+      }
+    })
+  })
+
+  imap.once("error",(err)=>{
+    resolve([])
+  })
+
+  imap.connect();
+})
+
+
 
 module.exports = {
   hashPassword,
   verifyPassword,
   encode64,
   sendMail,
-  getDay
+  getDay,
+  getInbox
 };

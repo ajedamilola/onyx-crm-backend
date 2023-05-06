@@ -222,7 +222,7 @@ module.exports = (app) => {
   });
 
   app.post("/customer/task", async (req, res) => {
-    const { title, description, compulsory, customerId, agent } = req.body;
+    const { title, description, compulsory, customerId, agent, needPayment } = req.body;
     try {
       const customer = await Customer.findById(customerId);
       const Agent = await User.findById(agent);
@@ -234,8 +234,11 @@ module.exports = (app) => {
         completed: false,
         agent,
         requestComplete: false,
+        needPayment,
         admin: req.cookies.uid,
+        handler:agent
       });
+      
       customer.save();
       res.json({ task: customer.tasks[customer.tasks.length - 1], err: false });
       await sendMail(
