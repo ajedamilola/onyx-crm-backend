@@ -236,9 +236,9 @@ module.exports = (app) => {
         requestComplete: false,
         needPayment,
         admin: req.cookies.uid,
-        handler:agent
+        handler: agent
       });
-      
+
       customer.save();
       res.json({ task: customer.tasks[customer.tasks.length - 1], err: false });
       await sendMail(
@@ -578,6 +578,45 @@ module.exports = (app) => {
       res.json({ err: "Database Error Try again later" });
     }
   });
+
+
+  app.patch("/customer/task/fail", async (req, res) => {
+    const { customerid, taskid } = req.body;
+    try {
+      const customer = await Customer.findById(customerid);
+      var t = {};
+      customer.tasks.forEach((task) => {
+        if (task._id == taskid) {
+          task.completed = false;
+          t = task;
+        }
+      });
+      customer.save();
+      res.json({ task: t });
+    } catch (error) {
+      console.log(error);
+      res.json({ err: "Database Error Try again later" });
+    }
+  });
+
+  app.post("/customer/task/comment", async (req, res) => {
+    const { customerid, taskid, admin, content, sender } = req.body;
+    try {
+      const customer = await Customer.findById(customerid);
+      var t = {};
+      customer.tasks.forEach((task) => {
+        if (task._id == taskid) {
+          task.comments.push({ content, sender })
+          t = task;
+        }
+      });
+      customer.save();
+      res.json({ task: t });
+    } catch (error) {
+      console.log(error);
+      res.json({ err: "Database Error Try again later" });
+    }
+  })
 
   app.delete("/customer/task", async (req, res) => {
     const { task, customerid } = req.headers;

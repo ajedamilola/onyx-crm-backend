@@ -28,7 +28,7 @@ const Purchase = {
   pending: Boolean,
   qty: Number,
   pendingDelete: { type: Boolean, default: false },
-  discount:Number
+  discount: Number
 };
 
 const userStructure = new mongoose.Schema({
@@ -39,17 +39,17 @@ const userStructure = new mongoose.Schema({
   tasks: [{ ...ContactInstance, bySuper: false }],
   //privilages
   privilage: Number,
-  canAddProducts: {type:Boolean,default:false},
-  account:{type:Boolean,default:false},
+  canAddProducts: { type: Boolean, default: false },
+  account: { type: Boolean, default: false },
   dateAdded: {
     default: () => new Date(),
     type: Date,
   },
-  canAddCustomers: {type:Boolean,default:false},
+  canAddCustomers: { type: Boolean, default: false },
   image: String,
   checkIns: [Date],
-  signature:String,
-  mailPassword:String,
+  signature: String,
+  mailPassword: String,
 });
 
 const customerStructure = new mongoose.Schema({
@@ -78,19 +78,22 @@ const customerStructure = new mongoose.Schema({
       completed: Boolean,
       agent: String,
       requestComplete: Boolean,
-      admin:String,
-      needPayment:Boolean
+      admin: String,
+      needPayment: Boolean,
+      comments: [
+        { content: String, sender: String }
+      ]
     },
   ],
-  setUpCost:Number,
-  address:String,
-  area:{
-    type:"String",
-    default:"NONE"
+  setUpCost: Number,
+  address: String,
+  area: {
+    type: "String",
+    default: "NONE"
   },
   code: {
     type: String,
-    default: ()=>Math.floor(Math.random() * 100000 ) + 100000
+    default: () => Math.floor(Math.random() * 100000) + 100000
   }
 });
 
@@ -101,7 +104,7 @@ const productsStructure = new mongoose.Schema({
   category: String,
   image: String,
   featured: Boolean,
-  variablePrice:Boolean
+  variablePrice: Boolean
 });
 
 const category = new mongoose.Schema({
@@ -113,8 +116,8 @@ const category = new mongoose.Schema({
 const chat = new mongoose.Schema({
   content: String,
   sender: String,
-  recipient:String, 
-  files:[String]
+  recipient: String,
+  files: [String]
 });
 
 const request = new mongoose.Schema({
@@ -126,10 +129,10 @@ const request = new mongoose.Schema({
 });
 
 const announcement = new mongoose.Schema({
-  title:String,
-  description:String,
-  sender:String,
-  done:Boolean
+  title: String,
+  description: String,
+  sender: String,
+  done: Boolean
 })
 
 const User = mongoose.model("user", userStructure);
@@ -138,14 +141,14 @@ const Product = mongoose.model("product", productsStructure);
 const Category = mongoose.model("category", category);
 const Chat = mongoose.model("chat", chat);
 const Annoucement = mongoose.model("announcement", announcement);
-const Request = mongoose.model("request",request);
+const Request = mongoose.model("request", request);
 // const dbName  = "main";
 const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority"
-const dbName  = process.env.NODE_ENV == "development" ? "telserve-crm" : "main";
+const dbName = process.env.NODE_ENV == "development" ? "telserve-crm" : "main";
 console.log(connString)
 mongoose.set('strictQuery', false)
-mongoose.connect(connString, {dbName},(err) => {
-  console.log("Database",err ? "Connection Failed with "+err : "Connection Successful");
+mongoose.connect(connString, { dbName }, (err) => {
+  console.log("Database", err ? "Connection Failed with " + err : "Connection Successful");
 });
 
 module.exports = {
