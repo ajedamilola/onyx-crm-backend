@@ -84,6 +84,10 @@ const customerStructure = new mongoose.Schema({
   ],
   setUpCost:Number,
   address:String,
+  area:{
+    type:"String",
+    default:"NONE"
+  },
   code: {
     type: String,
     default: ()=>Math.floor(Math.random() * 100000 ) + 100000

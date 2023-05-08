@@ -484,7 +484,7 @@ module.exports = (app) => {
 
   app.patch("/customer", async (req, res) => {
     try {
-      const { name, email, company, phone, id, active, address, setUpCost } = req.body;
+      const { name, email, company, phone, id, active, address, setUpCost, area } = req.body;
       const customer = await Customer.findById(id);
       customer.name = name;
       customer.email = email;
@@ -492,6 +492,7 @@ module.exports = (app) => {
       customer.phone = phone;
       customer.address = address;
       customer.setUpCost = setUpCost;
+      customer.area = area.toUpperCase() || customer.area
       customer.active = Boolean(active == "true");
       if (req.files && req.files.image) {
         customer.image =

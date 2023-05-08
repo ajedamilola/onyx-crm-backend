@@ -666,12 +666,6 @@ function isYesterdayOrOlder(date) {
   return date.getTime() < yesterday.getTime();
 }
 
-function addMonths(date, months) {
-  date.setMonth(date.getMonth() + months);
-
-  return date;
-}
-
 async function sendScheduledEmails() {
   console.log(
     new Date().toLocaleString(),
@@ -811,59 +805,6 @@ async function sendScheduledEmails() {
     customer.save();
   });
 }
-
-async function sendSubscriptionEmails() {
-  const customers = await Customer.find({});
-  const today = new Date();
-
-  customers.forEach(async (customer) => {
-    if (customer.purchases.length > 0) {
-      const lastDeal = customer.purchases[customer.purchases.length - 1];
-      const nextMonth = addMonths(lastDeal.date, 1);
-
-      const dateDiff = Math.ceil((nextMonth - today) / (1000 * 60 * 60 * 24));
-      if (dateDiff <= 5 && dateDiff >= 0) {
-        const agent = await User.findById(customer.handler);
-        const product = await Product.findById(lastDeal.product);
-        sendMail(
-          agent.email,
-          customer.email,
-          "Subscription Renewal Reminder",
-          `You Last Subscription For ${product?.name} Will expire in ${dateDiff} days please renew`,
-          agent.signature,
-          customer.name
-        );
-        if (dateDiff < 3) {
-          //FIXME: Use Official Email Here Instead
-          sendMail(
-            "account@telservenet.com.ng",
-            agent.email,
-            `Subscription Renewal Reminder For Customer ${customer.name}`,
-            `You Last Subscription For ${product?.name} Will expire in ${dateDiff} days Mail has already been sent to customer. 
-            But follow up is reccomended
-            `,
-            agent.signature,
-            customer.name
-          );
-        }
-      } else if (dateDiff < 0) {
-        const agent = await User.findById(customer.handler);
-        const product = await Product.findById(lastDeal.product);
-        sendMail(
-          agent.email,
-          customer.email,
-          "Subscription Renewal Reminder",
-          `You Last Subscription For ${product?.name} Has Expired`,
-          agent.signature,
-          customer.name
-        );
-      }
-    }
-  });
-}
-// sendScheduledEmails();
-
-// sendSubscriptionEmails();
 setInterval(() => {
   //check for emails every 12 hours
   sendScheduledEmails();
