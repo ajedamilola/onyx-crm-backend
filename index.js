@@ -1,7 +1,7 @@
 const express = require("express");
 const { sendMail } = require("./functions");
 const app = express();
-app.listen(process.env.PORT || 3000,(err)=>{
+app.listen(3000,(err)=>{
     if(!err){
         console.log("Server Running Successfully")
     }else{

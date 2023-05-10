@@ -144,7 +144,7 @@ const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request", request);
 // const dbName  = "main";
 const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority"
-const dbName = process.env.NODE_ENV == "development" ? "telserve-crm" : "main";
+const dbName = process.env.NODE_ENV == "development" ? "circuit-crm" : "curcuit-city";
 console.log(connString)
 mongoose.set('strictQuery', false)
 mongoose.connect(connString, { dbName }, (err) => {
