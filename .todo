@@ -1,0 +1,10 @@
+Vouchers:
+    Create The DB Structure
+    Create The CRUD
+Heirachy:
+    Create The CRUD
+Data:
+    Sending Of Notifications:
+        Add the data types
+        do the crud for important requests
+    Keep track of emails sent and stuff like that
