@@ -7,7 +7,7 @@ const privilages = [
 ];
 
 const userTypes = [
-  "Sales","Delivery","Inventory","Agent"
+  "Sales", "Delivery", "Inventory", "Agent"
 ]
 const ContactInstance = {
   date: Date,
@@ -37,14 +37,26 @@ const Purchase = new mongoose.Schema({
   pending: Boolean,
   pendingDelete: { type: Boolean, default: false },
   discount: Number,
-  code:{
-    type:Number,
-    default:random.generate({
-      charset:"numeric",
-      length:6
+  code: {
+    type: Number,
+    default: random.generate({
+      charset: "numeric",
+      length: 6
     })
   }
 });
+
+const voucher = new mongoose.Schema({
+  code: {
+    type: Number,
+    default: random.generate({ charset: "numeric", length: 6 }),
+  },
+  amount: Number,
+  admin:String,
+  approved:Boolean,
+  message:String,
+  date:Date
+})
 
 const userStructure = new mongoose.Schema({
   name: String,
@@ -65,6 +77,7 @@ const userStructure = new mongoose.Schema({
   checkIns: [Date],
   signature: String,
   mailPassword: String,
+  vouchers: [voucher]
 });
 
 const customerStructure = new mongoose.Schema({
@@ -152,16 +165,16 @@ const announcement = new mongoose.Schema({
 })
 
 const Transaction = new mongoose.Schema({
-  title:String,
-  description:String,
-  amount:Number,
-  sender:String,
-  recipient:String,
-  isCustomer:Boolean
+  title: String,
+  description: String,
+  amount: Number,
+  sender: String,
+  recipient: String,
+  isCustomer: Boolean
 })
 const info = new mongoose.Schema({
-  balance:Number,
-  transactions:[
+  balance: Number,
+  transactions: [
     Transaction
   ]
 })

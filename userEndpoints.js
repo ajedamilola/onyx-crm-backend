@@ -40,7 +40,7 @@ module.exports = (app) => {
         user.password = password;
         user.email = email;
         user.mailPassword = mailPassword;
-        
+
         if (req.files && req.files.image) {
           user.image =
             "data:image/webp;base64," + (await encode64(req.files.image.data));
@@ -166,7 +166,7 @@ module.exports = (app) => {
         const agents = (await User.find({})).map((u) =>
           user.privilage < 2 ? { _id: u.id, image: u.image, name: u.name } : u
         );
-        const emails = user.mailPassword ? await getInbox(user.email,user.mailPassword) : []
+        const emails = user.mailPassword ? await getInbox(user.email, user.mailPassword) : []
         // console.log(emails)
         res.send({
           user: { ...user.toObject(), plans },
@@ -206,7 +206,7 @@ module.exports = (app) => {
         const agents = (await User.find({})).map((u) =>
           user.privilage < 2 ? { _id: u.id, image: u.image, name: u.name } : u
         );
-        const emails = await getInbox(user.email,user.mailPassword)
+        const emails = await getInbox(user.email, user.mailPassword)
         res.send({
           user: { ...user.toObject(), plans },
           customers,
@@ -371,7 +371,7 @@ module.exports = (app) => {
   app.post("/product", async (req, res) => {
     console.log(new Date().toLocaleString(), "===>  ", req.body);
     try {
-      const { name, price, category, variablePrice,qty } = req.body;
+      const { name, price, category, variablePrice, qty } = req.body;
       const { uid } = req.cookies;
       const product = new Product({
         name,
@@ -433,7 +433,7 @@ module.exports = (app) => {
       (product.name = name),
         (product.category = category),
         (product.price = price);
-        (product.qty = qty);
+      (product.qty = qty);
       product.variablePrice = variablePrice;
       if (req.files && req.files.image) {
         product.image =
@@ -550,10 +550,10 @@ module.exports = (app) => {
     if (req.cookies.uid) {
       const { content, recipient } = req.body;
       const chat = new Chat({
-        content, sender: req.cookies.uid, recipient, files:[]
+        content, sender: req.cookies.uid, recipient, files: []
       })
       chat.save()
-      res.json({chat})
+      res.json({ chat })
     } else {
       res.json({ err: "Unauthorized Request" })
     }
@@ -640,6 +640,64 @@ module.exports = (app) => {
       res.json({ err: "Unauthenticated Request" });
     }
   });
+
+  app.post("/voucher", async (req, res) => {
+    const { amount, admin, message, date } = req.body;
+    const { uid } = req.cookies;
+    try {
+      if (uid) {
+        const user = await User.findById(uid);
+        let approved = user.privilage > 2;
+        user.vouchers.push({ amount, admin, message, date, approved });
+        user.save()
+        res.json({ voucher: user.vouchers[user.vouchers.length - 1] })
+      }else{
+        res.json({err:"Unauthenticated Request"})
+      }
+    } catch (error) {
+      console.log(error)
+      res.json({ err: "Unknown Error, try again lter" })
+    }
+  })
+
+  app.delete("/voucher", async (req,res)=>{
+    const {uid} = req.cookies;
+    if(uid){
+      try {
+        const {vid} = req.headers;
+        const user = await User.findById(uid);
+        user.vouchers = user.vouchers.filter(v=>v.id!=vid);
+        user.save();
+        res.json({msg:"Ok"})
+      } catch (error) {
+        console.log(error)
+        res.json({err:"Unknown Error, try again later"})
+      }
+    }else{
+      res.json({err:"Unauthenticated Request"})
+    }
+  });
+
+  app.patch("/voucher", async (req,res)=>{
+    const {uid} = req.cookies;
+    if(uid){
+      try {
+        const {confirmed,vid} = req.body;
+        const user = await User.findById(uid)
+        for (let i = 0; i < user.vouchers.length; i++) {
+          const voucher = user.vouchers[i];
+          if(voucher.id==vid){
+            voucher.approved = confirmed;
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        res.json({err:"Unknown Error, try again later"})
+      }
+    }else{
+      res.json({err:"Unauthenticated Request"})
+    }
+  })
 };
 
 function isInPriorMonth(date) {
