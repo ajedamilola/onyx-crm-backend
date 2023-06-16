@@ -371,7 +371,7 @@ module.exports = (app) => {
   app.post("/product", async (req, res) => {
     console.log(new Date().toLocaleString(), "===>  ", req.body);
     try {
-      const { name, price, category, variablePrice } = req.body;
+      const { name, price, category, variablePrice,qty } = req.body;
       const { uid } = req.cookies;
       const product = new Product({
         name,
@@ -381,6 +381,7 @@ module.exports = (app) => {
         image: d_productImage,
         featured: false,
         variablePrice,
+        qty
       });
 
       if (req.files && req.files.image) {
@@ -426,12 +427,13 @@ module.exports = (app) => {
   });
 
   app.patch("/product", async (req, res) => {
-    const { name, id, category, price, variablePrice } = req.body;
+    const { name, id, category, price, variablePrice, qty } = req.body;
     try {
       const product = await Product.findById(id);
       (product.name = name),
         (product.category = category),
         (product.price = price);
+        (product.qty = qty);
       product.variablePrice = variablePrice;
       if (req.files && req.files.image) {
         product.image =

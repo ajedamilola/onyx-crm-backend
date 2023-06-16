@@ -1,8 +1,14 @@
 const mongoose = require("mongoose");
 require("dotenv").config()
-
+const random = require("randomstring")
 //structures
+const privilages = [
+  "staff", "Head Of Unit", "Head Of Department", "Human Resources", "Management Team"
+];
 
+const userTypes = [
+  "Sales","Delivery","Inventory","Agent"
+]
 const ContactInstance = {
   date: Date,
   successful: Boolean,
@@ -20,16 +26,25 @@ const ContactInstance = {
   lastSent: Date,
 };
 
-const Purchase = {
+const Purchase = new mongoose.Schema({
   amount: Number,
-  product: String,
+  items: [{
+    product: String,
+    qty: Number,
+  }],
   date: Date,
   confirmed: Boolean,
   pending: Boolean,
-  qty: Number,
   pendingDelete: { type: Boolean, default: false },
-  discount: Number
-};
+  discount: Number,
+  code:{
+    type:Number,
+    default:random.generate({
+      charset:"numeric",
+      length:6
+    })
+  }
+});
 
 const userStructure = new mongoose.Schema({
   name: String,
@@ -104,7 +119,8 @@ const productsStructure = new mongoose.Schema({
   category: String,
   image: String,
   featured: Boolean,
-  variablePrice: Boolean
+  variablePrice: Boolean,
+  qty: Number
 });
 
 const category = new mongoose.Schema({
@@ -135,6 +151,21 @@ const announcement = new mongoose.Schema({
   done: Boolean
 })
 
+const Transaction = new mongoose.Schema({
+  title:String,
+  description:String,
+  amount:Number,
+  sender:String,
+  recipient:String,
+  isCustomer:Boolean
+})
+const info = new mongoose.Schema({
+  balance:Number,
+  transactions:[
+    Transaction
+  ]
+})
+
 const User = mongoose.model("user", userStructure);
 const Customer = mongoose.model("customer", customerStructure);
 const Product = mongoose.model("product", productsStructure);
@@ -142,6 +173,7 @@ const Category = mongoose.model("category", category);
 const Chat = mongoose.model("chat", chat);
 const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request", request);
+const Info = mongoose.model("information", info);
 // const dbName  = "main";
 const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority"
 const dbName = process.env.NODE_ENV == "development" ? "circuit-crm" : "curcuit-city";
@@ -158,5 +190,7 @@ module.exports = {
   Category,
   Chat,
   Annoucement,
-  Request
+  Request,
+  privilages,
+  userTypes
 };

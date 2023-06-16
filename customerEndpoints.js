@@ -25,11 +25,7 @@ module.exports = (app) => {
       phone,
       name,
       company,
-      payment,
-      product,
       date,
-      setUpCost,
-      amount,
       address
     } = req.body;
     try {
@@ -40,19 +36,6 @@ module.exports = (app) => {
         address,
         handler: uid,
         invitor: uid,
-        setUpCost,
-        purchases:
-          payment == "done"
-            ? [
-              {
-                product,
-                pending: payment != "done",
-                confirmed: payment == "done",
-                date,
-                amount
-              },
-            ]
-            : [],
         company,
       });
 
@@ -197,17 +180,17 @@ module.exports = (app) => {
   app.post("/purchase", async (req, res) => {
     try {
       const { uid } = req.cookies;
-      const { product, customerId, amount, confirmed, date, qty } = req.body;
+      const { cart, customerId, amount, } = req.body;
       const user = await User.findById(uid);
       if (user) {
         const customer = await Customer.findById(customerId);
         const purchase = {
           amount: Number(amount),
-          pending: !confirmed,
-          confirmed: confirmed,
+          pending: true,
+          confirmed: false,
           date,
-          product,
-          qty,
+          items:cart,
+          date:new Date()
         };
         customer.purchases.push(purchase);
         customer.save();
