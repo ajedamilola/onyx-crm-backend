@@ -46,16 +46,21 @@ const Purchase = new mongoose.Schema({
   }
 });
 
+
 const voucher = new mongoose.Schema({
   code: {
     type: Number,
     default: random.generate({ charset: "numeric", length: 6 }),
   },
   amount: Number,
-  admin:String,
-  approved:Boolean,
-  message:String,
-  date:Date
+  admin: String,
+  pending: { type: Boolean, default: true },
+  approved: Boolean,
+  message: String,
+  date: Date,
+  approveDate:String,
+ 
+  confirmed:Boolean
 })
 
 const userStructure = new mongoose.Schema({

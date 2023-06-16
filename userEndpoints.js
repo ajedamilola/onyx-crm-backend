@@ -648,7 +648,8 @@ module.exports = (app) => {
       if (uid) {
         const user = await User.findById(uid);
         let approved = user.privilage > 2;
-        user.vouchers.push({ amount, admin, message, date, approved });
+        let pending = user.privilage <= 2;
+        user.vouchers.push({ amount, admin, message, date, approved, pending });
         user.save()
         res.json({ voucher: user.vouchers[user.vouchers.length - 1] })
       }else{
