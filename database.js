@@ -58,11 +58,16 @@ const voucher = new mongoose.Schema({
   approved: Boolean,
   message: String,
   date: Date,
-  approveDate:String,
- 
-  confirmed:Boolean
+  approveDate: String,
+
+  confirmed: Boolean
 })
 
+const report = new mongoose.Schema({
+  content: String,
+  date: { type: Date, default: () => new Date() },
+  seen: { type: Boolean, default: false }
+})
 const userStructure = new mongoose.Schema({
   name: String,
   email: String,
@@ -82,7 +87,8 @@ const userStructure = new mongoose.Schema({
   checkIns: [Date],
   signature: String,
   mailPassword: String,
-  vouchers: [voucher]
+  vouchers: [voucher],
+  reports: [report]
 });
 
 const customerStructure = new mongoose.Schema({

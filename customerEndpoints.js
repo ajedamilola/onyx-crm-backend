@@ -92,6 +92,8 @@ module.exports = (app) => {
       const user = await User.findById(uid);
       if (user) {
         const customer = await Customer.findById(customerId);
+        user.reports.push({content:`Sent SMS with title:<b>${title}</b> to customer named <b>${customer.name}</b> with id <b>${customer.code}</b>`})
+        user.save()
         const data = {
           date: new Date(),
           successful: false,
@@ -135,11 +137,8 @@ module.exports = (app) => {
           intervalDate: intervalDate,
           isActive: true,
         };
-        let testAccount = await nodemailer.createTestAccount();
-        console.log(interval)
         if (interval == "Once") {
           try {
-            console.log(testAccount);
             const { err } = await sendMail(
               `"${user.name}" <${user.email}>`,
               `<${customer.email}>`,
@@ -149,8 +148,10 @@ module.exports = (app) => {
               customer.name
             );
             if (!err) {
+              user.reports.push({content:`Sent Email with subject:<b>${subject}</b> to customer named <b>${customer.name}</b> with id <b>${customer.code}</b>`})
               customer.emails.push(data);
               customer.save();
+              user.save();
               res.json(customer.emails[customer.emails.length - 1]);
             } else {
               res.json({
@@ -162,6 +163,8 @@ module.exports = (app) => {
           }
         } else {
           customer.emails.push(data);
+          user.reports.push({content:`Scheduled Email ${interval} with subject:<b>${subject}</b> to customer named <b>${customer.name}</b> with id <b>${customer.code}</b>`})
+          user.save();
           customer.save();
           res.json(customer.emails[customer.emails.length - 1]);
         }
@@ -495,6 +498,9 @@ module.exports = (app) => {
         const { customerId, agent } = req.body;
         const customer = await Customer.findById(customerId);
         customer.handler = agent;
+        const user = await User.findById(agent)
+        user.reports.push({content:`Customer ${customer.name} with Id <b class='copy'>${customer.code}</b> Was Assigned To Agent`})
+        user.save()
         customer.save();
         return res.json({ msg: "Ok" });
       } else {
@@ -543,6 +549,7 @@ module.exports = (app) => {
     }
   });
 
+  //TODO: Add Reports to these
   app.patch("/customer/task/complete", async (req, res) => {
     const { customerid, taskid } = req.body;
     try {

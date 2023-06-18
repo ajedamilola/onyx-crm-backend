@@ -8,6 +8,7 @@ const {
   Annoucement,
   Request,
 } = require("./database");
+const formatter = new Intl.NumberFormat("en-US");
 const { encode64, sendMail, getInbox } = require("./functions");
 module.exports = (app) => {
   const d_productImage =
@@ -162,9 +163,8 @@ module.exports = (app) => {
           maxAge: 24 * 60 * 60 * 1000,
           secure: true,
         });
-
         const agents = (await User.find({})).map((u) =>
-          user.privilage < 2 ? { _id: u.id, image: u.image, name: u.name } : u
+          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage } : u
         );
         const emails = user.mailPassword ? await getInbox(user.email, user.mailPassword) : []
         // console.log(emails)
@@ -204,9 +204,12 @@ module.exports = (app) => {
           secure: true,
         });
         const agents = (await User.find({})).map((u) =>
-          user.privilage < 2 ? { _id: u.id, image: u.image, name: u.name } : u
+          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage } : u
         );
         const emails = await getInbox(user.email, user.mailPassword)
+        user.reports.push({ content: `Logged In` })
+        user.save()
+
         res.send({
           user: { ...user.toObject(), plans },
           customers,
@@ -239,6 +242,7 @@ module.exports = (app) => {
         pending: true,
         successful: false,
       });
+      user.reports.push({content:`Created a tesk titled: <b>${title}</b>`})
       user.save();
       res.json(user.tasks[user.tasks.length - 1]);
     } catch (err) {
@@ -280,6 +284,7 @@ module.exports = (app) => {
         const t = user.tasks[i];
         if (t.id == task) {
           user.tasks[i].successful = !t.successful;
+          user.reports.push({ content: `Marked Task <b>${t.title}</b> as completed` })
           user.save();
           return res.json({ msg: "Ok" });
         }
@@ -296,6 +301,7 @@ module.exports = (app) => {
       if (uid) {
         const user = await User.findById(uid);
         if (user.privilage > 1) {
+          user.reports.push({ content: `Deleted Task <b>${user.tasks.find((t) => t.id == req.headers.id).title}</b>` })
           user.tasks = user.tasks.filter((t) => t.id != req.headers.id);
         } else {
           user.tasks.forEach((task) => {
@@ -488,7 +494,10 @@ module.exports = (app) => {
         bySuper: true,
         pending: true,
       });
+      const admin = await User.findById(req.cookies.uid);
+      Agent.reports.push({content:`Task <b>${title}</b> Was assigned By ${admin.name}`})
       Agent.save();
+
       res.json({ newTask: Agent.tasks[Agent.tasks.length - 1] });
     } catch (err) {
       console.log(new Date().toLocaleString(), "===>  ", err);
@@ -507,6 +516,7 @@ module.exports = (app) => {
         const latest = user.checkIns[user.checkIns.length - 1];
         if (latest.toDateString() != today.toDateString()) {
           user.checkIns.push(today);
+          user.reports.push({ content: "Just Checked In For the First Time" });
         }
       }
       user.save();
@@ -527,6 +537,9 @@ module.exports = (app) => {
         sender: uid,
       });
       annoucement.save();
+      const user = await User.findById(uid);
+      user.reports.push({ content: `Sent An Announcemet titled: ${title}` });
+      user.save()
       res.json({ annoucement });
     } catch (error) {
       console.log(error);
@@ -649,11 +662,12 @@ module.exports = (app) => {
         const user = await User.findById(uid);
         let approved = user.privilage > 2;
         let pending = user.privilage <= 2;
-        user.vouchers.push({ amount, admin, message, date, approved, pending });
+        user.vouchers.push({ amount, admin, message, date, approved, pending, approveDate: new Date() });
+        user.reports.push({ content: `Requested A Voucher Worth <b>₦${formatter.format(amount)}</b>` })
         user.save()
         res.json({ voucher: user.vouchers[user.vouchers.length - 1] })
-      }else{
-        res.json({err:"Unauthenticated Request"})
+      } else {
+        res.json({ err: "Unauthenticated Request" })
       }
     } catch (error) {
       console.log(error)
@@ -661,42 +675,70 @@ module.exports = (app) => {
     }
   })
 
-  app.delete("/voucher", async (req,res)=>{
-    const {uid} = req.cookies;
-    if(uid){
+  app.delete("/voucher", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
       try {
-        const {vid} = req.headers;
-        const user = await User.findById(uid);
-        user.vouchers = user.vouchers.filter(v=>v.id!=vid);
+        const { vid, aid } = req.headers;
+        const user = await User.findById(aid);
+        const admin = await User.findById(uid);
+        user.vouchers = user.vouchers.filter(v => v.id != vid);
+        user.reports.push({ content: `Voucher With Ref <b class='copy'>${voucher.code}</b> Was <b class='text-danger'>Deleted</b> By ${admin.name}` })
         user.save();
-        res.json({msg:"Ok"})
+        res.json({ voucher: vid })
       } catch (error) {
         console.log(error)
-        res.json({err:"Unknown Error, try again later"})
+        res.json({ err: "Unknown Error, try again later" })
       }
-    }else{
-      res.json({err:"Unauthenticated Request"})
+    } else {
+      res.json({ err: "Unauthenticated Request" })
     }
   });
 
-  app.patch("/voucher", async (req,res)=>{
-    const {uid} = req.cookies;
-    if(uid){
+  app.patch("/voucher", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
       try {
-        const {confirmed,vid} = req.body;
-        const user = await User.findById(uid)
+        const admin = await User.findById(uid);
+
+        const { confirmed, vid } = req.body;
+        const user = await User.findById(req.body.aid)
         for (let i = 0; i < user.vouchers.length; i++) {
+          let msg = "Voucher Sent Successfully"
           const voucher = user.vouchers[i];
-          if(voucher.id==vid){
-            voucher.approved = confirmed;
+          if (voucher.id == vid) {
+            if (admin.privilage >= 3) {
+              voucher.pending = false;
+              voucher.approved = confirmed;
+              voucher.approveDate = new Date();
+              msg = confirmed ? "Voucher Has Been Confirmed Successfully" : "Voucher Has Been Declined Successfully";
+              user.reports.push({ content: `Voucher With Ref <b class='copy'>${voucher.code}</b> Was ${confirmed ? "<b class='text-success'>Confirmed</b>" : "<b class='text-danger'>Declined</b>"}` })
+            } else {
+              if (confirmed) {
+                voucher.pending = true;
+                msg = "Voucher Has Been Sent To HR Successfully"
+                voucher.admin = (await User.findOne({ privilage: 3 })).id
+                user.reports.push({ content: `Voucher With Ref <b class='copy'>${voucher.code}</b> Was <span class='text-success'>Sent To HR For Approval</span>` })
+
+              } else {
+                voucher.approved = false;
+                voucher.pending = false;
+                msg = "Voucher Has Been Declined Successfully"
+                user.reports.push({ content: `Voucher With Ref <b class='copy'>${voucher.code}</b> Was <b class='text-danger'>Declined</b>` })
+
+              }
+            }
+            user.save()
+            return res.json({ voucher, msg })
           }
         }
+        res.json({ err: "Invalid Request. Resync/Refresh Page and try again" });
       } catch (error) {
         console.log(error)
-        res.json({err:"Unknown Error, try again later"})
+        res.json({ err: "Unknown Error, try again later" })
       }
-    }else{
-      res.json({err:"Unauthenticated Request"})
+    } else {
+      res.json({ err: "Unauthenticated Request" })
     }
   })
 };
