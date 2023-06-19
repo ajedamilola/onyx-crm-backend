@@ -493,6 +493,7 @@ module.exports = (app) => {
         date: new Date(date),
         bySuper: true,
         pending: true,
+        admin:req.cookies.uid
       });
       const admin = await User.findById(req.cookies.uid);
       Agent.reports.push({content:`Task <b>${title}</b> Was assigned By ${admin.name}`})
@@ -519,7 +520,7 @@ module.exports = (app) => {
           user.reports.push({ content: "Just Checked In For the First Time" });
         }
       }
-      user.save();
+      await user.save();
       res.json({ err: false });
     } catch (error) {
       console.log(error);
