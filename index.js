@@ -1,9 +1,10 @@
 const express = require("express");
 const { sendMail } = require("./functions");
 const app = express();
-app.listen(3000,(err)=>{
+const PORT = 3006
+app.listen(PORT,(err)=>{
     if(!err){
-        console.log("Server Running Successfully")
+        console.log("Server Running Successfully On Port",PORT)
     }else{
         console.log("An Error Occured ",err)
     }
