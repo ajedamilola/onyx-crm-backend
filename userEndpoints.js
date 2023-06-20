@@ -375,7 +375,6 @@ module.exports = (app) => {
   });
 
   app.post("/product", async (req, res) => {
-    console.log(new Date().toLocaleString(), "===>  ", req.body);
     try {
       const { name, price, category, variablePrice, qty } = req.body;
       const { uid } = req.cookies;
@@ -397,7 +396,7 @@ module.exports = (app) => {
       product.save();
       res.json({ msg: "Ok", product });
     } catch (err) {
-      console.log(new Date().toLocaleString(), "===>  ", err);
+      console.log("An Error Occuered Here ===>  ", err);
       res.json({
         err: err.message,
         msg: "Unable to create Product At this time try again later",
