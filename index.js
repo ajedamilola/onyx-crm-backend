@@ -13,6 +13,7 @@ corsOptions = {
     origin: true, //included origin as true
     credentials: true, //included credentials as true
 };
+process.title = "CircuitCity";
 
 app.use(require("body-parser")({extended:false,limit:'7mb'}))
 app.use(require("cookie-parser")("secret"))
