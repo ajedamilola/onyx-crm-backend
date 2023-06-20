@@ -1,1 +1,1 @@
-node index.js &
+exec -a CircuitCity command node index.js &
