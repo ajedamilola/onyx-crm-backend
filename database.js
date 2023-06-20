@@ -199,8 +199,8 @@ const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request", request);
 const Info = mongoose.model("information", info);
 // const dbName  = "main";
-const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb+srv://damilola:dEqhLFLqge5XDkrh@maincluster.ym0ggdr.mongodb.net/?retryWrites=true&w=majority"
-const dbName = process.env.NODE_ENV == "development" ? "circuit-crm" : "curcuit-city";
+const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb://crud:dbnetrix%23%40@127.0.0.1:27017/?authMechanism=DEFAULT"
+const dbName = process.env.NODE_ENV == "development" ? "circuit-crm" : "circuitcity";
 console.log(connString)
 mongoose.set('strictQuery', false)
 mongoose.connect(connString, { dbName }, (err) => {
