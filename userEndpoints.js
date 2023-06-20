@@ -158,10 +158,9 @@ module.exports = (app) => {
           { "sender": user.id }
         ])
         res.cookie("uid", user.id, {
-          httpOnly: false,
-          sameSite: "none",
+          httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
-          secure: true,
+          // secure: true,
         });
         const agents = (await User.find({})).map((u) =>
           user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage } : u
@@ -198,10 +197,9 @@ module.exports = (app) => {
         const categories = await Category.find({});
         const annoucements = await Annoucement.find({});
         res.cookie("uid", user.id, {
-          httpOnly: false,
-          sameSite: "none",
+          httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
-          secure: true,
+          // secure: true,
         });
         const agents = (await User.find({})).map((u) =>
           user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage } : u
