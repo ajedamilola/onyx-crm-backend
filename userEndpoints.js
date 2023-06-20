@@ -160,7 +160,8 @@ module.exports = (app) => {
         res.cookie("uid", user.id, {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
-          // secure: true,
+          secure: true,
+          sameSite:"none"
         });
         const agents = (await User.find({})).map((u) =>
           user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage } : u
@@ -199,7 +200,8 @@ module.exports = (app) => {
         res.cookie("uid", user.id, {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
-          // secure: true,
+          secure: true,
+          sameSite:"none"
         });
         const agents = (await User.find({})).map((u) =>
           user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage } : u
