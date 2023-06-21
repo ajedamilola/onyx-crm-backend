@@ -536,14 +536,17 @@ module.exports = (app) => {
   });
 
   app.post("/annoucement", async (req, res) => {
-    const { title, description } = req.body;
+    const { title, description, beyond, departments } = req.body;
     const { uid } = req.cookies;
     try {
       const annoucement = new Annoucement({
         title,
         description,
         sender: uid,
+        departments,
+        beyond
       });
+      console.log(departments)
       annoucement.save();
       const user = await User.findById(uid);
       user.reports.push({ content: `Sent An Announcemet titled: ${title}` });

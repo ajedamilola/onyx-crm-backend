@@ -201,7 +201,10 @@ const announcement = new mongoose.Schema({
   title: String,
   description: String,
   sender: String,
-  done: Boolean
+  done: Boolean,
+  departments:[Number],
+  verified:String,
+  beyond:Boolean
 })
 
 const Transaction = new mongoose.Schema({
