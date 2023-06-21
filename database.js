@@ -117,7 +117,7 @@ const userStructure = new mongoose.Schema({
   vouchers: [voucher],
   reports: [report],
   department:Number,
-  unit:Number
+  units:[Number]
 });
 
 const customerStructure = new mongoose.Schema({

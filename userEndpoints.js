@@ -69,7 +69,7 @@ module.exports = (app) => {
             });
           } else {
             //good to go
-            const { name, email, privilage, password, sid, department, unit } = req.body;
+            const { name, email, privilage, password, sid, department, units } = req.body;
             const agent = new User({
               name,
               email,
@@ -78,9 +78,8 @@ module.exports = (app) => {
               image: d_productImage,
               sid,
               canAddProducts: false,
-              department:Number(department || 0), unit:Number(unit || 0)
+              department:Number(department || 0), units:JSON.parse(units)
             });
-            console.log(Number(department || 0), Number(unit || 0))
             if (req.files && req.files.image) {
               agent.image =
                 "data:image/webp;base64," +
@@ -114,7 +113,7 @@ module.exports = (app) => {
         account,
         sid,
         department,
-        unit
+        units
       } = req.body;
       const user = await User.findById(id);
       user.email = email;
@@ -125,7 +124,7 @@ module.exports = (app) => {
       user.account = account;
       user.sid = sid;
       user.department = Number(department);
-      user.unit = Number(unit);
+      user.units = JSON.parse(units)
       // user.account = account;
       if (req.files && req.files.image) {
         user.image =
