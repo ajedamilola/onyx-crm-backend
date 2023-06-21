@@ -1,22 +1,37 @@
 const express = require("express");
 const { sendMail } = require("./functions");
+const fs = require("fs")
+const https = require("https")
+const http = require("http")
 const app = express();
 const PORT = 3007
-app.listen(PORT,(err)=>{
-    if(!err){
-        console.log("Server Running Successfully On Port",PORT)
-    }else{
-        console.log("An Error Occured ",err)
-    }
-})
 
+if (fs.existsSync("/~/certificates/key.pem")) {
+    https
+        .createServer(
+            // Provide the private and public key to the server by reading each
+            // file's content with the readFileSync() method.
+            {
+                key: fs.readFileSync("/~/certificates/key.pem"),
+                cert: fs.readFileSync("/~/certificates/key.pem"),
+            },
+            app
+        )
+        .listen(PORT, () => {
+            console.log("serever is runing at port With HTTPS ", PORT);
+        });
+}else{
+    http.createServer(app).listen(PORT, ()=>{
+        console.log("Server Running On Port ", PORT)
+    })
+}
 corsOptions = {
     origin: true, //included origin as true
     credentials: true, //included credentials as true
 };
 process.title = "CircuitCity";
 
-app.use(require("body-parser")({extended:false,limit:'7mb'}))
+app.use(require("body-parser")({ extended: false, limit: '7mb' }))
 app.use(require("cookie-parser")("secret"))
 app.use(require("cors")(corsOptions));
 app.use(require("express-fileupload")())
