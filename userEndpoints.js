@@ -69,13 +69,14 @@ module.exports = (app) => {
             });
           } else {
             //good to go
-            const { name, email, privilage, password } = req.body;
+            const { name, email, privilage, password, sid } = req.body;
             const agent = new User({
               name,
               email,
               password,
               privilage,
               image: d_productImage,
+              sid,
               canAddProducts: false,
             });
             if (req.files && req.files.image) {
@@ -109,6 +110,7 @@ module.exports = (app) => {
         privilage,
         canAddCustomers,
         account,
+        sid,
       } = req.body;
       const user = await User.findById(id);
       user.email = email;
@@ -117,6 +119,7 @@ module.exports = (app) => {
       user.privilage = privilage;
       user.canAddCustomers = canAddCustomers;
       user.account = account;
+      user.sid = sid;
       // user.account = account;
       if (req.files && req.files.image) {
         user.image =

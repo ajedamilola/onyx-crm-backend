@@ -87,6 +87,7 @@ const userStructure = new mongoose.Schema({
   checkIns: [Date],
   signature: String,
   mailPassword: String,
+  sid:String,
   vouchers: [voucher],
   reports: [report]
 });
