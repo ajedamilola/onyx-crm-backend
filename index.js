@@ -13,7 +13,7 @@ if (fs.existsSync("/root/certificates")) {
             // file's content with the readFileSync() method.
             {
                 key: fs.readFileSync("/root/certificates/key.pem"),
-                cert: fs.readFileSync("/root/certificates/csr.pem"),
+                cert: fs.readFileSync("/root/certificates/cert.pem"),
             },
             app
         )
