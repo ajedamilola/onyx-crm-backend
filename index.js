@@ -6,14 +6,14 @@ const http = require("http")
 const app = express();
 const PORT = 3007
 
-if (fs.existsSync("/~/certificates/key.pem")) {
+if (fs.existsSync("/root/certificates")) {
     https
         .createServer(
             // Provide the private and public key to the server by reading each
             // file's content with the readFileSync() method.
             {
-                key: fs.readFileSync("/~/certificates/key.pem"),
-                cert: fs.readFileSync("/~/certificates/key.pem"),
+                key: fs.readFileSync("/root/certificates/key.pem"),
+                cert: fs.readFileSync("/root/certificates/key.pem"),
             },
             app
         )
