@@ -69,7 +69,7 @@ module.exports = (app) => {
             });
           } else {
             //good to go
-            const { name, email, privilage, password, sid } = req.body;
+            const { name, email, privilage, password, sid, department, unit } = req.body;
             const agent = new User({
               name,
               email,
@@ -78,7 +78,9 @@ module.exports = (app) => {
               image: d_productImage,
               sid,
               canAddProducts: false,
+              department:Number(department || 0), unit:Number(unit || 0)
             });
+            console.log(Number(department || 0), Number(unit || 0))
             if (req.files && req.files.image) {
               agent.image =
                 "data:image/webp;base64," +
@@ -111,6 +113,8 @@ module.exports = (app) => {
         canAddCustomers,
         account,
         sid,
+        department,
+        unit
       } = req.body;
       const user = await User.findById(id);
       user.email = email;
@@ -120,6 +124,8 @@ module.exports = (app) => {
       user.canAddCustomers = canAddCustomers;
       user.account = account;
       user.sid = sid;
+      user.department = Number(department);
+      user.unit = Number(unit);
       // user.account = account;
       if (req.files && req.files.image) {
         user.image =
@@ -164,7 +170,7 @@ module.exports = (app) => {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
           secure: true,
-          sameSite:"none"
+          sameSite: "none"
         });
         const agents = (await User.find({})).map((u) =>
           user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage } : u
@@ -204,7 +210,7 @@ module.exports = (app) => {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
           secure: true,
-          sameSite:"none"
+          sameSite: "none"
         });
         const agents = (await User.find({})).map((u) =>
           user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage } : u
@@ -245,7 +251,7 @@ module.exports = (app) => {
         pending: true,
         successful: false,
       });
-      user.reports.push({content:`Created a tesk titled: <b>${title}</b>`})
+      user.reports.push({ content: `Created a tesk titled: <b>${title}</b>` })
       user.save();
       res.json(user.tasks[user.tasks.length - 1]);
     } catch (err) {
@@ -495,10 +501,10 @@ module.exports = (app) => {
         date: new Date(date),
         bySuper: true,
         pending: true,
-        admin:req.cookies.uid
+        admin: req.cookies.uid
       });
       const admin = await User.findById(req.cookies.uid);
-      Agent.reports.push({content:`Task <b>${title}</b> Was assigned By ${admin.name}`})
+      Agent.reports.push({ content: `Task <b>${title}</b> Was assigned By ${admin.name}` })
       Agent.save();
 
       res.json({ newTask: Agent.tasks[Agent.tasks.length - 1] });

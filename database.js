@@ -9,6 +9,32 @@ const privilages = [
 const userTypes = [
   "Sales", "Delivery", "Inventory", "Agent"
 ]
+
+const departments = [
+  {
+    name: "Technical", units: [
+      "Software Unit and Hardware Unit", "Network Unit",
+      "Power unit", "Engineering Assistant and Automations Unit",
+      "Project Assistant", "E-marketing"
+    ]
+  },
+  {
+    name: "Marketing", units: [
+      "Retail Unit",
+      "Marketing Unit",
+      "E-marketing Unit",
+    ]
+  },
+  { name: "Logistics", units: ["Logistics support unit"] },
+  {
+    name: "Admin", units: [
+      "HR",
+      "Junior Staffs",
+      "IT staffs and Interim staffs"
+    ]
+  },
+]
+
 const ContactInstance = {
   date: Date,
   successful: Boolean,
@@ -73,7 +99,7 @@ const userStructure = new mongoose.Schema({
   email: String,
   password: String,
   customers: [mongoose.SchemaTypes.ObjectId],
-  tasks: [{ ...ContactInstance, bySuper: false, admin:String }],
+  tasks: [{ ...ContactInstance, bySuper: false, admin: String }],
   //privilages
   privilage: Number,
   canAddProducts: { type: Boolean, default: false },
@@ -87,9 +113,11 @@ const userStructure = new mongoose.Schema({
   checkIns: [Date],
   signature: String,
   mailPassword: String,
-  sid:String,
+  sid: String,
   vouchers: [voucher],
-  reports: [report]
+  reports: [report],
+  department:Number,
+  unit:Number
 });
 
 const customerStructure = new mongoose.Schema({
