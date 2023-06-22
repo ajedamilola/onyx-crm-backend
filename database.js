@@ -203,7 +203,7 @@ const announcement = new mongoose.Schema({
   sender: String,
   done: Boolean,
   departments:[Number],
-  verified:String,
+  verified:Boolean,
   beyond:Boolean
 })
 

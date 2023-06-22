@@ -78,7 +78,7 @@ module.exports = (app) => {
               image: d_productImage,
               sid,
               canAddProducts: false,
-              department:Number(department || 0), units:JSON.parse(units)
+              department: Number(department || 0), units: JSON.parse(units)
             });
             if (req.files && req.files.image) {
               agent.image =
@@ -172,7 +172,7 @@ module.exports = (app) => {
           sameSite: "none"
         });
         const agents = (await User.find({})).map((u) =>
-          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage } : u
+          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department:u.department } : u
         );
         const emails = user.mailPassword ? await getInbox(user.email, user.mailPassword) : []
         // console.log(emails)
@@ -212,7 +212,7 @@ module.exports = (app) => {
           sameSite: "none"
         });
         const agents = (await User.find({})).map((u) =>
-          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage } : u
+          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department:u.department } : u
         );
         const emails = await getInbox(user.email, user.mailPassword)
         user.reports.push({ content: `Logged In` })
@@ -538,17 +538,19 @@ module.exports = (app) => {
   app.post("/annoucement", async (req, res) => {
     const { title, description, beyond, departments } = req.body;
     const { uid } = req.cookies;
+    const user = await User.findById(uid);
     try {
       const annoucement = new Annoucement({
         title,
         description,
         sender: uid,
         departments,
-        beyond
+        beyond,
+        verified: user.privilage >= 2
       });
       console.log(departments)
       annoucement.save();
-      const user = await User.findById(uid);
+    
       user.reports.push({ content: `Sent An Announcemet titled: ${title}` });
       user.save()
       res.json({ annoucement });
@@ -560,13 +562,35 @@ module.exports = (app) => {
 
   app.delete("/annoucement", async (req, res) => {
     try {
-      await Annoucement.findByIdAndDelete(req.headers.id);
+      const announcement = await Annoucement.findById(req.headers.id)
+      await announcement.delete()
+      if (req.headers.byadmin) {
+        const user = await User.findById(announcement.sender);
+        user.reports.push({ content: `Announcement <b>${announcement.title}</b> was Deleted By An Admin or HOD` })
+        user.save()
+      }
       res.json({ err: false });
     } catch (error) {
       console.log(error);
       res.json({ err: "Database Error try again later" });
     }
   });
+
+  app.patch("/announcement/accept", async (req, res) => {
+    try {
+      const { id } = req.body;
+      const annoucement = await Annoucement.findById(id)
+      annoucement.verified = true;
+      annoucement.save()
+      const user = await User.findById(annoucement.sender);
+      user.reports.push({ content: `Announcement <b>${annoucement.title}</b> Has Been verified for viewing by an Admin or HOD` })
+      user.save()
+      res.json({ annoucement });
+    } catch (error) {
+      console.log(error);
+      res.json({ err: "Database Error try again later" });
+    }
+  })
   //============= Chat Section
 
   app.post("/chat", async (req, res) => {
