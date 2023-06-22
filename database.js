@@ -92,7 +92,8 @@ const voucher = new mongoose.Schema({
 const report = new mongoose.Schema({
   content: String,
   date: { type: Date, default: () => new Date() },
-  seen: { type: Boolean, default: false }
+  seen: { type: Boolean, default: false },
+  manual: Boolean
 })
 const userStructure = new mongoose.Schema({
   name: String,
@@ -116,8 +117,9 @@ const userStructure = new mongoose.Schema({
   sid: String,
   vouchers: [voucher],
   reports: [report],
-  department:Number,
-  units:[Number]
+  department: Number,
+  units: [Number],
+  sentReports: [{ date: Date, type:String, title:String }]
 });
 
 const customerStructure = new mongoose.Schema({
@@ -202,9 +204,9 @@ const announcement = new mongoose.Schema({
   description: String,
   sender: String,
   done: Boolean,
-  departments:[Number],
-  verified:Boolean,
-  beyond:Boolean
+  departments: [Number],
+  verified: Boolean,
+  beyond: Boolean
 })
 
 const Transaction = new mongoose.Schema({

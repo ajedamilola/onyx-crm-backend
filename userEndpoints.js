@@ -172,7 +172,7 @@ module.exports = (app) => {
           sameSite: "none"
         });
         const agents = (await User.find({})).map((u) =>
-          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department:u.department } : u
+          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department } : u
         );
         const emails = user.mailPassword ? await getInbox(user.email, user.mailPassword) : []
         // console.log(emails)
@@ -212,7 +212,7 @@ module.exports = (app) => {
           sameSite: "none"
         });
         const agents = (await User.find({})).map((u) =>
-          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department:u.department } : u
+          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department } : u
         );
         const emails = await getInbox(user.email, user.mailPassword)
         user.reports.push({ content: `Logged In` })
@@ -550,7 +550,7 @@ module.exports = (app) => {
       });
       console.log(departments)
       annoucement.save();
-    
+
       user.reports.push({ content: `Sent An Announcemet titled: ${title}` });
       user.save()
       res.json({ annoucement });
@@ -768,6 +768,24 @@ module.exports = (app) => {
           }
         }
         res.json({ err: "Invalid Request. Resync/Refresh Page and try again" });
+      } catch (error) {
+        console.log(error)
+        res.json({ err: "Unknown Error, try again later" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+  })
+
+  app.post("/event", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const { content } = req.body;
+        const user = await User.findById(uid)
+        user.reports.push({ content, manual: true })
+        user.save();
+        res.json({ user })
       } catch (error) {
         console.log(error)
         res.json({ err: "Unknown Error, try again later" })
