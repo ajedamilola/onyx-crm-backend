@@ -119,7 +119,7 @@ const userStructure = new mongoose.Schema({
   reports: [report],
   department: Number,
   units: [Number],
-  sentReports: [{ date: Date, type:String, title:String }]
+  sentReports: [{ date: Date, type: String, title: String }]
 });
 
 const customerStructure = new mongoose.Schema({
@@ -217,11 +217,26 @@ const Transaction = new mongoose.Schema({
   recipient: String,
   isCustomer: Boolean
 })
+
 const info = new mongoose.Schema({
   balance: Number,
   transactions: [
     Transaction
   ]
+})
+
+const ticket = new mongoose.Schema({
+  contents: [{ title: String, content: String, responder: String }],
+  open: {
+    type: Boolean,
+    default: true
+  },
+  resolved: Boolean,
+  raiser: String,
+  ref: {
+    type: Number,
+    default: ()=>random.generate({ charset: "numeric", length: 7 })
+  }
 })
 
 const User = mongoose.model("user", userStructure);
@@ -232,6 +247,7 @@ const Chat = mongoose.model("chat", chat);
 const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request", request);
 const Info = mongoose.model("information", info);
+const Ticket = mongoose.model("ticket", ticket)
 // const dbName  = "main";
 const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb://crud:dbnetrix%23%40@127.0.0.1:27017/?authMechanism=DEFAULT"
 const dbName = process.env.NODE_ENV == "development" ? "circuit-crm" : "circuitcity";
@@ -249,6 +265,7 @@ module.exports = {
   Chat,
   Annoucement,
   Request,
+  Ticket,
   privilages,
   userTypes
 };

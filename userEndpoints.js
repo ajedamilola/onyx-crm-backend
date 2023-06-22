@@ -7,6 +7,7 @@ const {
   Chat,
   Annoucement,
   Request,
+  Ticket,
 } = require("./database");
 const formatter = new Intl.NumberFormat("en-US");
 const { encode64, sendMail, getInbox } = require("./functions");
@@ -175,6 +176,8 @@ module.exports = (app) => {
           user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department } : u
         );
         const emails = user.mailPassword ? await getInbox(user.email, user.mailPassword) : []
+        const tickets = user.privilage < 1 ? await Ticket.find({ raiser: user._id }) : await Ticket.find({});
+
         // console.log(emails)
         res.send({
           user: { ...user.toObject(), plans },
@@ -185,7 +188,8 @@ module.exports = (app) => {
           agents,
           annoucements,
           chats,
-          emails
+          emails,
+          tickets
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });
@@ -214,6 +218,7 @@ module.exports = (app) => {
         const agents = (await User.find({})).map((u) =>
           user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department } : u
         );
+        const tickets = user.privilage < 1 ? await Ticket.find({ raiser: user._id }) : await Ticket.find({});
         const emails = await getInbox(user.email, user.mailPassword)
         user.reports.push({ content: `Logged In` })
         user.save()
@@ -225,7 +230,8 @@ module.exports = (app) => {
           products,
           agents,
           annoucements,
-          emails
+          emails,
+          tickets
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });
@@ -786,6 +792,69 @@ module.exports = (app) => {
         user.reports.push({ content, manual: true })
         user.save();
         res.json({ user })
+      } catch (error) {
+        console.log(error)
+        res.json({ err: "Unknown Error, try again later" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+  })
+
+  app.post("/ticket", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const { title, content } = req.body;
+        const ticket = new Ticket({
+          contents: [{ title, content, responder:uid }],
+          raiser: uid,
+          resolved: false
+        })
+        user.reports.push({ content: `${user.name} Raised A ticket with ref <b class='copy'>${ticket.ref}</b>` })
+        user.save()
+        ticket.save()
+        res.json({ ticket })
+      } catch (error) {
+        console.log(error)
+        res.json({ err: "Unknown Error, try again later" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+  });
+
+  app.delete("/ticket", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const { id } = req.body
+        const ticket = await Ticket.findById(id);
+        ticket.delete()
+        const user = await User.findById(ticket.raiser)
+        user.reports.push({ content: `Ticket with ref <b>${ticket.ref}</b> Was Deleted` });
+        user.save()
+        res.json({ msg: "ok" })
+      } catch (error) {
+        console.log(error)
+        res.json({ err: "Unknown Error, try again later" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+  })
+
+  app.patch("/ticket", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const ticket = await Ticket.findById(req.body.id);
+        ticket.open = req.body.open;
+        ticket.resolved = req.body.resolved;
+        ticket.save()
+        res.json({ ticket })
       } catch (error) {
         console.log(error)
         res.json({ err: "Unknown Error, try again later" })
