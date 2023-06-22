@@ -808,7 +808,7 @@ module.exports = (app) => {
         const user = await User.findById(uid)
         const { title, content } = req.body;
         const ticket = new Ticket({
-          contents: [{ title, content, responder:uid }],
+          contents: [{ title, content, responder: uid }],
           raiser: uid,
           resolved: false
         })
@@ -861,6 +861,48 @@ module.exports = (app) => {
       }
     } else {
       res.json({ err: "Unauthenticated Request" })
+    }
+  })
+
+  app.post("/ticket/response", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const { id, content, title } = req.body;
+        const ticket = await Ticket.findById(id);
+        ticket.contents.push({ content, title, responder: uid });
+        user.reports.push({content:`${user.name} Gave a response to a ticket with ref <b>#${ticket.ref}</b>`})
+        user.save()
+        ticket.save()
+        res.json({ticket})
+      } catch (error) {
+        console.log(error)
+        res.json({ err: "Unknown Error, try again later" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+  })
+
+  app.patch("/ticket/close", async (req,res)=>{
+    const {uid} = req.cookies;
+    if(uid){
+      try {
+        const user = await User.findById(uid)
+        const {id,resolved} = req.body;
+        const ticket  = await Ticket.findById(id)
+        ticket.resolved = resolved;
+        ticket.open = false;
+        ticket.save();
+        user.reports.push({content:`${user.name} Closed A ticket with ref #${ticket.ref}`})
+        res.json({ticket})
+      } catch (error) {
+        console.log(error)
+        res.json({err:"Unknown Error, try again later"})
+      }
+    }else{
+      res.json({err:"Unauthenticated Request"})
     }
   })
 };

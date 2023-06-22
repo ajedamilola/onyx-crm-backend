@@ -5,6 +5,7 @@ const sharp = require("sharp");
 require("dotenv").config();
 var Imap = require('imap')
 var { simpleParser } = require("mailparser")
+const ejs = require("ejs")
 
 async function hashPassword(password) {
   return new Promise((resolve) => {
@@ -72,11 +73,13 @@ function getDay(index) {
   }
 }
 
-async function sendMail(sender, recipient, title, message, signature = false, recipientName) {
+async function sendMail(sender, recipient, title, message, signature = false, recipientName, template = "base") {
   try {
+    console.log(process.env.MAILSERVER)
     const agent = await User.findOne({ email: sender });
     const transporter = nodemailer.createTransport({
       host: process.env.MAILSERVER,
+      // name:"",
       port: 465,
       secure: true, // true for 465, false for other ports
       auth: {
@@ -85,7 +88,7 @@ async function sendMail(sender, recipient, title, message, signature = false, re
       },
     });
 
-    transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
+    // transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
     const customFooter = `<hr />
     &copy; ${new Date().getFullYear()} Telserve CRPMS By Aje Damilola`;
     const today = new Date();
@@ -93,18 +96,23 @@ async function sendMail(sender, recipient, title, message, signature = false, re
     let day = getDay(today.getDay())
 
     //My Template Feature
-    const output = message.replace(/\[name\]/g, recipientName || "").replace(/\[day\]/g, day).replace(/\[date\]/g, date);
-    console.log(output)
-    await transporter.sendMail({
-      from: sender,
-      to: recipient,
-      subject: title,
-      html: `${output} ${signature
-        ? `<img src="${signature}" style='width:100%;height:auto'/>`
-        : ""
-        } ${customFooter}`,
-    });
-    return { err: false };
+    const content = message.replace(/\[name\]/g, recipientName || "").replace(/\[day\]/g, day).replace(/\[date\]/g, date);
+    ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content }, async (err, output) => {
+      if (!err) {
+        const info = await transporter.sendMail({
+          from: sender,
+          to: recipient,
+          subject: title,
+          html: output,
+        });
+        console.log(info)
+        // return { err: false };
+      } else {
+        console.log(err)
+        // return { err: true }
+      }
+    })
+
   } catch (err) {
     console.log("An Error Occured Here ", err);
     return { err };
@@ -152,7 +160,7 @@ const getInbox = (email, password, start = 0, end = 20) => new Promise((resolve,
     })
   })
 
-  imap.once("error",(err)=>{
+  imap.once("error", (err) => {
     resolve([])
   })
 

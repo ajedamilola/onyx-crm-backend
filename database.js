@@ -226,7 +226,11 @@ const info = new mongoose.Schema({
 })
 
 const ticket = new mongoose.Schema({
-  contents: [{ title: String, content: String, responder: String }],
+  contents: [{
+    title: String, content: String, responder: String, date: {
+      type: Date, default: () => new Date()
+    }
+  }],
   open: {
     type: Boolean,
     default: true
@@ -235,7 +239,7 @@ const ticket = new mongoose.Schema({
   raiser: String,
   ref: {
     type: Number,
-    default: ()=>random.generate({ charset: "numeric", length: 7 })
+    default: () => random.generate({ charset: "numeric", length: 7 })
   }
 })
 
