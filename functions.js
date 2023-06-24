@@ -34,6 +34,11 @@ async function sendMail(sender, recipient, subject, body) {
       user: sender, // generated ethereal user
       pass: "coding2005*@", // generated ethereal password
     },
+    tls:{
+      // servername:process.env.MAILSERVER,
+      rejectUnauthorized: true,
+      minVersion: "TLSv1.2"
+    }
   });
 
   const mailOptions = {
