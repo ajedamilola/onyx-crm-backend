@@ -26,7 +26,7 @@ async function verifyPassword(password, hash) {
 
 async function sendMail(sender, recipient, subject, body, template = "base") {
   const agent = await User.findOne({ email: sender });
-  if (true) {
+  if (agent && agent.mailPassword) {
     const transporter = nodemailer.createTransport({
       host: process.env.MAILSERVER,
       // name:"",
@@ -35,7 +35,7 @@ async function sendMail(sender, recipient, subject, body, template = "base") {
       auth: {
         user: sender, // generated ethereal user
         // pass: agent.mailPassword, // generated ethereal password
-        pass: "workohh2023@", // generated ethereal password
+        pass: agent.mailPassword, // generated ethereal password
       },
       // tls:{
       //   // servername:process.env.MAILSERVER,
