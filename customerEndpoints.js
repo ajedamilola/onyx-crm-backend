@@ -19,7 +19,7 @@ module.exports = (app) => {
   ];
 
   app.get("/test/:name", (req, res) => {
-    sendMail("damilola@circuity.com.ng",req.params.name,"Hello","THis is a test");
+    sendMail("damilola@circuitcity.com.ng",req.params.name,"Hello","THis is a test");
     res.send("Ok")
   })
 

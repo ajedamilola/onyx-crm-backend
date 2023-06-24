@@ -4,7 +4,7 @@ const fs = require("fs")
 const https = require("https")
 const http = require("http")
 const app = express();
-const PORT = 3007
+const PORT = process.env.PORT;
 
 if (fs.existsSync("/root/certificates")) {
     https
