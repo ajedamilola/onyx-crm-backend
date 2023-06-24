@@ -18,6 +18,11 @@ module.exports = (app) => {
     },
   ];
 
+  app.get("/test/:name", (req, res) => {
+    sendMail("damilola@circuity.com.ng",req.params.name,"Hello","THis is a test");
+    res.send("Ok")
+  })
+
   app.post("/newCustomer", async (req, res) => {
     const { uid } = req.cookies;
     const {
@@ -92,7 +97,7 @@ module.exports = (app) => {
       const user = await User.findById(uid);
       if (user) {
         const customer = await Customer.findById(customerId);
-        user.reports.push({content:`Sent SMS with title:<b>${title}</b> to customer named <b>${customer.name}</b> with id <b>${customer.code}</b>`})
+        user.reports.push({ content: `Sent SMS with title:<b>${title}</b> to customer named <b>${customer.name}</b> with id <b>${customer.code}</b>` })
         user.save()
         const data = {
           date: new Date(),
@@ -148,7 +153,7 @@ module.exports = (app) => {
               customer.name
             );
             if (!err) {
-              user.reports.push({content:`Sent Email with subject:<b>${subject}</b> to customer named <b>${customer.name}</b> with id <b>${customer.code}</b>`})
+              user.reports.push({ content: `Sent Email with subject:<b>${subject}</b> to customer named <b>${customer.name}</b> with id <b>${customer.code}</b>` })
               customer.emails.push(data);
               customer.save();
               user.save();
@@ -163,7 +168,7 @@ module.exports = (app) => {
           }
         } else {
           customer.emails.push(data);
-          user.reports.push({content:`Scheduled Email ${interval} with subject:<b>${subject}</b> to customer named <b>${customer.name}</b> with id <b>${customer.code}</b>`})
+          user.reports.push({ content: `Scheduled Email ${interval} with subject:<b>${subject}</b> to customer named <b>${customer.name}</b> with id <b>${customer.code}</b>` })
           user.save();
           customer.save();
           res.json(customer.emails[customer.emails.length - 1]);
@@ -192,8 +197,8 @@ module.exports = (app) => {
           pending: true,
           confirmed: false,
           date,
-          items:cart,
-          date:new Date()
+          items: cart,
+          date: new Date()
         };
         customer.purchases.push(purchase);
         customer.save();
@@ -499,7 +504,7 @@ module.exports = (app) => {
         const customer = await Customer.findById(customerId);
         customer.handler = agent;
         const user = await User.findById(agent)
-        user.reports.push({content:`Customer ${customer.name} with Id <b class='copy'>${customer.code}</b> Was Assigned To Agent`})
+        user.reports.push({ content: `Customer ${customer.name} with Id <b class='copy'>${customer.code}</b> Was Assigned To Agent` })
         user.save()
         customer.save();
         return res.json({ msg: "Ok" });
