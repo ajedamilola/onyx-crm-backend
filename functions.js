@@ -23,6 +23,34 @@ async function verifyPassword(password, hash) {
   });
 }
 
+
+async function sendMail(sender, recipient, subject, body) {
+  const transporter = nodemailer.createTransport({
+    host: process.env.MAILSERVER,
+    // name:"",
+    port: 465,
+    secure: true, // true for 465, false for other ports
+    auth: {
+      user: sender, // generated ethereal user
+      pass: "coding2005*@", // generated ethereal password
+    },
+  });
+
+  const mailOptions = {
+    from: sender,
+    to: recipient,
+    subject,
+    html: body
+  };
+  transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err)
+    }
+    return err == null;
+  })
+}
+
+
 async function encode64(data, large = false, jpeg = false) {
   try {
     const buffer = Buffer.from(data);
@@ -73,51 +101,50 @@ function getDay(index) {
   }
 }
 
-async function sendMail(sender, recipient, title, message, signature = false, recipientName, template = "base") {
-  try {
-    console.log(process.env.MAILSERVER)
-    const agent = await User.findOne({ email: sender });
-    const transporter = nodemailer.createTransport({
-      host: process.env.MAILSERVER,
-      // name:"",
-      port: 465,
-      secure: true, // true for 465, false for other ports
-      auth: {
-        user: sender, // generated ethereal user
-        pass: agent.mailPassword, // generated ethereal password
-      },
-    });
+// async function sendMail(sender, recipient, title, message, signature = false, recipientName, template = "base") {
+//   try {
+//     const agent = await User.findOne({ email: sender });
+//     const transporter = nodemailer.createTransport({
+//       host: process.env.MAILSERVER,
+//       // name:"",
+//       port: 465,
+//       secure: true, // true for 465, false for other ports
+//       auth: {
+//         user: sender, // generated ethereal user
+//         pass: agent.mailPassword, // generated ethereal password
+//       },
+//     });
 
-    // transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
-    const customFooter = `<hr />
-    &copy; ${new Date().getFullYear()} Telserve CRPMS By Aje Damilola`;
-    const today = new Date();
-    const date = today.toDateString();
-    let day = getDay(today.getDay())
+//     // transporter.use("compile", inlineBase64({ cidPrefix: "somePrefix_" }));
+//     const customFooter = `<hr />
+//     &copy; ${new Date().getFullYear()} Telserve CRPMS By Aje Damilola`;
+//     const today = new Date();
+//     const date = today.toDateString();
+//     let day = getDay(today.getDay())
 
-    //My Template Feature
-    const content = message.replace(/\[name\]/g, recipientName || "").replace(/\[day\]/g, day).replace(/\[date\]/g, date);
-    ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content }, async (err, output) => {
-      if (!err) {
-        const info = await transporter.sendMail({
-          from: sender,
-          to: recipient,
-          subject: title,
-          html: output,
-        });
-        console.log(info)
-        // return { err: false };
-      } else {
-        console.log(err)
-        // return { err: true }
-      }
-    })
+//     //My Template Feature
+//     // const content = message.replace(/\[name\]/g, recipientName || "").replace(/\[day\]/g, day).replace(/\[date\]/g, date);
+//     ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content }, async (err, output) => {
+//       if (!err) {
+//        transporter.sendMail({
+//           from: "Aje Damilola <damilola@telservenet.com>",
+//           to: recipient,
+//           subject: title,
+//           html: output,
+//         },(err,info)=>{
+//           return console.log(info)
+//         })
+//       } else {
+//         console.log(err)
+//         return { err: true }
+//       }
+//     })
 
-  } catch (err) {
-    console.log("An Error Occured Here ", err);
-    return { err };
-  }
-}
+//   } catch (err) {
+//     console.log("An Error Occured Here ", err);
+//     return { err };
+//   }
+// }
 const getInbox = (email, password, start = 0, end = 20) => new Promise((resolve, reject) => {
   const imap = new Imap({
     password,

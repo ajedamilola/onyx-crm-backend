@@ -872,10 +872,14 @@ module.exports = (app) => {
         const { id, content, title } = req.body;
         const ticket = await Ticket.findById(id);
         ticket.contents.push({ content, title, responder: uid });
-        user.reports.push({content:`${user.name} Gave a response to a ticket with ref <b>#${ticket.ref}</b>`})
+        user.reports.push({ content: `${user.name} Gave a response to a ticket with ref <b>#${ticket.ref}</b>` })
+        if(uid!=ticket.raiser){
+          const recipient = await User.findById(ticket.raiser);
+          sendMail(user.email,recipient.email,`Ticket Update`,`<h1><b>${ticket.ref}</b></h1><br />This ticket Was reopened by ${user.name}`,false,recipient.name);
+        }
         user.save()
         ticket.save()
-        res.json({ticket})
+        res.json({ ticket })
       } catch (error) {
         console.log(error)
         res.json({ err: "Unknown Error, try again later" })
@@ -885,24 +889,53 @@ module.exports = (app) => {
     }
   })
 
-  app.patch("/ticket/close", async (req,res)=>{
-    const {uid} = req.cookies;
-    if(uid){
+  app.patch("/ticket/close", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
       try {
         const user = await User.findById(uid)
-        const {id,resolved} = req.body;
-        const ticket  = await Ticket.findById(id)
+        const { id, resolved } = req.body;
+        const ticket = await Ticket.findById(id)
         ticket.resolved = resolved;
         ticket.open = false;
         ticket.save();
-        user.reports.push({content:`${user.name} Closed A ticket with ref #${ticket.ref}`})
-        res.json({ticket})
+        user.reports.push({ content: `${user.name} Closed A ticket with ref #${ticket.ref}` })
+        if (uid != ticket.raiser) {
+          const recipient = await User.findById(ticket.raiser);
+          sendMail(user.email, recipient.email, `Ticket Update`, `<h1><b>${ticket.ref}</b></h1><br />There is a new response for your ticket`, false, recipient.name);
+        }
+        res.json({ ticket })
       } catch (error) {
         console.log(error)
-        res.json({err:"Unknown Error, try again later"})
+        res.json({ err: "Unknown Error, try again later" })
       }
-    }else{
-      res.json({err:"Unauthenticated Request"})
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+  })
+
+  app.patch("/ticket/open", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const { id } = req.body;
+        const ticket = await Ticket.findById(id)
+        // ticket.resolved = resolved;
+        ticket.open = true;
+        ticket.save();
+        user.reports.push({ content: `${user.name} Reopened A ticket with ref #${ticket.ref}` })
+        if (uid != ticket.raiser) {
+          const recipient = await User.findById(ticket.raiser);
+          sendMail(user.email, recipient.email, `Ticket Update`, `<h1><b>${ticket.ref}</b></h1><br />This ticket Was reopened by ${user.name}`, false, recipient.name);
+        }
+        res.json({ ticket })
+      } catch (error) {
+        console.log(error)
+        res.json({ err: "Unknown Error, try again later" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
     }
   })
 };
