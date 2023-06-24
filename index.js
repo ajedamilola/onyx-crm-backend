@@ -6,25 +6,28 @@ const http = require("http")
 const app = express();
 const PORT = 3007
 
-if (fs.existsSync("/root/certificates")) {
-    https
-        .createServer(
-            // Provide the private and public key to the server by reading each
-            // file's content with the readFileSync() method.
-            {
-                key: fs.readFileSync("/root/certificates/key.pem"),
-                cert: fs.readFileSync("/root/certificates/cert.pem"),
-            },
-            app
-        )
-        .listen(PORT, () => {
-            console.log("serever is runing at port With HTTPS ", PORT);
-        });
-}else{
-    http.createServer(app).listen(PORT, ()=>{
-        console.log("Server Running On Port ", PORT)
-    })
-}
+// if (fs.existsSync("/root/certificates")) {
+//     https
+//         .createServer(
+//             // Provide the private and public key to the server by reading each
+//             // file's content with the readFileSync() method.
+//             {
+//                 key: fs.readFileSync("/root/certificates/key.pem"),
+//                 cert: fs.readFileSync("/root/certificates/cert.pem"),
+//             },
+//             app
+//         )
+//         .listen(PORT, () => {
+//             console.log("serever is runing at port With HTTPS ", PORT);
+//         });
+// }else{
+//     http.createServer(app).listen(PORT, ()=>{
+//         console.log("Server Running On Port ", PORT)
+//     })
+// }
+http.createServer(app).listen(PORT, ()=>{
+    console.log("Server Running On Port ", PORT)
+})
 corsOptions = {
     origin: true, //included origin as true
     credentials: true, //included credentials as true
