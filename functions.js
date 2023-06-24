@@ -24,35 +24,52 @@ async function verifyPassword(password, hash) {
 }
 
 
-async function sendMail(sender, recipient, subject, body) {
-  const transporter = nodemailer.createTransport({
-    host: process.env.MAILSERVER,
-    // name:"",
-    port: 465,
-    secure: true, // true for 465, false for other ports
-    auth: {
-      user: sender, // generated ethereal user
-      pass: "coding2005*@", // generated ethereal password
-    },
-    tls:{
-      // servername:process.env.MAILSERVER,
-      rejectUnauthorized: true,
-      minVersion: "TLSv1.2"
-    }
-  });
+async function sendMail(sender, recipient, subject, body, template = "base") {
+  const agent = await User.findOne({ email: sender });
+  if (agent.mailPassword) {
+    const transporter = nodemailer.createTransport({
+      host: process.env.MAILSERVER,
+      // name:"",
+      port: 465,
+      secure: true, // true for 465, false for other ports
+      auth: {
+        user: sender, // generated ethereal user
+        pass: agent.mailPassword, // generated ethereal password
+      },
+      // tls:{
+      //   // servername:process.env.MAILSERVER,
+      //   rejectUnauthorized: true,
+      //   minVersion: "TLSv1.2"
+      // }
+    });
 
-  const mailOptions = {
-    from: sender,
-    to: recipient,
-    subject,
-    html: body
-  };
-  transporter.sendMail(mailOptions, (err, info) => {
-    if (err) {
-      console.log(err)
-    }
-    return err == null;
-  })
+    ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content: body }, (err, html) => {
+      if (!err) {
+        const mailOptions = {
+          from: sender,
+          to: recipient,
+          subject,
+          html
+        };
+        require("fs").writeFileSync("test.html",html,{});
+        transporter.sendMail(mailOptions, (err, info) => {
+          if (err) {
+            console.log(err)
+          }else{
+            console.log("Mail Sent SUccessfully")
+          }
+          return err == null;
+        })
+      } else {
+        console.log(err)
+      }
+    })
+  } else {
+    console.log("Mailpassword Not Set")
+    return false
+  }
+
+
 }
 
 

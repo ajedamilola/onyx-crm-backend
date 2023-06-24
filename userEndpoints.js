@@ -873,9 +873,16 @@ module.exports = (app) => {
         const ticket = await Ticket.findById(id);
         ticket.contents.push({ content, title, responder: uid });
         user.reports.push({ content: `${user.name} Gave a response to a ticket with ref <b>#${ticket.ref}</b>` })
-        if(uid!=ticket.raiser){
+        if (uid != ticket.raiser) {
           const recipient = await User.findById(ticket.raiser);
-          sendMail(user.email,recipient.email,`Ticket Update`,`<h1><b>${ticket.ref}</b></h1><br />This ticket Was reopened by ${user.name}`,false,recipient.name);
+          console.log(recipient.email)
+          sendMail(user.email, recipient.email, `Ticket Update`,
+            `<h3>Ticket Update</h3><br />A New Response was sent for ticket with ref: <b>${ticket.ref}</b> by <b>${user.name}</b>
+            <br />
+            <a href='https://circuit-crm.vercel.app/#/tickets/${ticket.ref}'>
+            <button class='btn btn-primary'>Check Here</button> to check ticket
+          </a>`
+          );
         }
         user.save()
         ticket.save()
@@ -902,7 +909,7 @@ module.exports = (app) => {
         user.reports.push({ content: `${user.name} Closed A ticket with ref #${ticket.ref}` })
         if (uid != ticket.raiser) {
           const recipient = await User.findById(ticket.raiser);
-          sendMail(user.email, recipient.email, `Ticket Update`, `<h1><b>${ticket.ref}</b></h1><br />There is a new response for your ticket`, false, recipient.name);
+          sendMail(user.email, recipient.email, `Ticket Update`, `<h3>Ticket Update</h3><br /> Ticket <b>#${ticket.ref}</b> was Closed by: <img src='${user.image}' class='rounded-circle mx-2' style='width:50px' /> <b>${user.name}</b>`);
         }
         res.json({ ticket })
       } catch (error) {
@@ -927,7 +934,7 @@ module.exports = (app) => {
         user.reports.push({ content: `${user.name} Reopened A ticket with ref #${ticket.ref}` })
         if (uid != ticket.raiser) {
           const recipient = await User.findById(ticket.raiser);
-          sendMail(user.email, recipient.email, `Ticket Update`, `<h1><b>${ticket.ref}</b></h1><br />This ticket Was reopened by ${user.name}`, false, recipient.name);
+          sendMail(user.email, recipient.email, `Ticket Update`, `<h1><b>${ticket.ref}</b></h1><br />This ticket Was reopened by ${user.name}`);
         }
         res.json({ ticket })
       } catch (error) {
