@@ -25,9 +25,6 @@ if (fs.existsSync("/root/certificates")) {
         console.log("Server Running On Port ", PORT)
     })
 }
-http.createServer(app).listen(PORT, ()=>{
-    console.log("Server Running On Port ", PORT)
-})
 corsOptions = {
     origin: true, //included origin as true
     credentials: true, //included credentials as true
