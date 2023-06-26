@@ -70,8 +70,10 @@ async function sendMail(sender, recipient, subject, body, template = "base", cus
   //   console.log("Mailpassword Not Set")
   //   return false
   // }
+  console.log("Import1")
   ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content: body, ...customData }, (err, html) => {
     if (!err) {
+      require("fs").writeFileSync("temp.html", html, {});
       const mailOptions = {
         from: sender,
         to: recipient,
@@ -82,7 +84,7 @@ async function sendMail(sender, recipient, subject, body, template = "base", cus
         url: "http://new.circuitcity.com.ng/send-mail.php",
         form: {
           title: subject,
-          content: html,
+          content:html,
           sender,
           recipient
         }
@@ -91,11 +93,9 @@ async function sendMail(sender, recipient, subject, body, template = "base", cus
           console.log(err)
         } else {
           console.log("Mail Sent Successfully")
-          console.log(body)
+          // console.log(body)
         }
       })
-      require("fs").writeFileSync("test.html", html, {});
-      request
     } else {
       console.log(err)
     }

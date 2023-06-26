@@ -1,15 +1,14 @@
 <%- include("./header.ejs") %>
-    <div class="container pb-5 pt-3 fs-4">
-        <img style='width: 50px;height:50px;border-radius: 200px'
-            src="<%- image %>" />
-        <h3 class='fw-bold'>
+    <div style="max-width: 90%; margin: auto;">
+        <img style='width: 50px;height:50px;border-radius: 200px' src="<%- image %>" />
+        <h3 style="font-weight: bold; font-size: 1.2em;">
             <%= name %>'s Report <span class='badge bg-info'>
                     (<%= type %>)
                 </span>
         </h3>
-        <table class="table table-striped table-borderless mt-5">
+        <table style="width: 100%; gap: 0px; text-align: center;background-color: white;margin: auto;border-radius: 20px;">
             <thead>
-                <tr>
+                <tr style="height: 50px;font-weight: bold;">
                     <th>#</th>
                     <th>Event</th>
                     <th>Time</th>
@@ -17,7 +16,7 @@
             </thead>
             <tbody>
                 <% events.forEach((event)=>{ %>
-                    <tr>
+                    <tr style="border-bottom: 1px solid #bbb;height: 50px;">
                         <td style="text-align: center;"><%- events.indexOf(event)+1 %></td>
                         <td style="text-align: center;"><%- event.content %></td>
                         <td style="text-align: center;"><%- event.date %></td>

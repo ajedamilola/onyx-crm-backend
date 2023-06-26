@@ -5,7 +5,7 @@ const https = require("https")
 const http = require("http")
 const app = express();
 require("dotenv").config()
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3007;
 const ejs = require("ejs")
 
 if (fs.existsSync("/root/certificates")) {
@@ -22,8 +22,8 @@ if (fs.existsSync("/root/certificates")) {
         .listen(PORT, () => {
             console.log("serever is runing at port With HTTPS ", PORT);
         });
-}else{
-    http.createServer(app).listen(PORT, ()=>{
+} else {
+    http.createServer(app).listen(PORT, () => {
         console.log("Server Running On Port ", PORT)
     })
 }
@@ -47,11 +47,12 @@ require("./customerEndpoints")(app)
 // sendMail("info@telservenet.com","ajedamilola2005@gmail.com","Test","testing Email").then(val=>{
 //     console.log(val.err || "Email Check success");
 // });
-app.get("/test", (req,res)=>{
-    sendMail("damilola@circuitcity.com.ng","ajedamilola2005@gmail.com","Weekly Report","","report",{
-        name:"Aje",
-    type:"Weekly",
-    image:"",
-    events:[{content:"Demo", date:"12/may/2023",}]})
+app.get("/test", (req, res) => {
+    sendMail("damilola@circuitcity.com.ng", "ajedamilola2005@gmail.com", "Weekly Report", "", "report", {
+        name: "Aje",
+        type: "Weekly",
+        image: "",
+        events: [{ content: "Demo", date: "12/may/2023", }]
+    })
     res.send("Ok")
 })

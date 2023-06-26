@@ -977,8 +977,8 @@ module.exports = (app) => {
         if (hous.length > 0) {
           user.sentReports.push({date:new Date(), rType:req.params.type,title:req.body.title})
           hous.forEach(admin => {
-            sendMail(user.email, admin.email, `${user.name}'s ${type} Report`, "", "report", {
-              events, name: user.name, type: req.params.type
+            sendMail(user.email, admin.email, `${user.name}'s ${req.params.type} Report`, "", "report", {
+              events, name: user.name, type: req.params.type, image:user.image
             })
           });
           user.save()

@@ -95,6 +95,8 @@ const report = new mongoose.Schema({
   seen: { type: Boolean, default: false },
   manual: Boolean
 })
+
+const sentReport = new mongoose.Schema({ date: Date, rType: String, title: String })
 const userStructure = new mongoose.Schema({
   name: String,
   email: String,
@@ -119,9 +121,9 @@ const userStructure = new mongoose.Schema({
   reports: [report],
   department: Number,
   units: [Number],
-  sentReports: [{ date: Date, rType: String, title: String }],
-  scheduledEmails:[
-    {title:String,content:String, interval:String, date:Date}
+  sentReports: [sentReport],
+  scheduledEmails: [
+    { title: String, content: String, interval: String, date: Date }
   ]
 });
 
