@@ -1,3 +1,5 @@
-const { sendMail } = require("./functions");
+// const { sendMail } = require("./functions");
 
-sendMail("damilola@telservenet.com","ajedamilola2005@gmail.com","Hello","This is a test message");
+const { isInCurrentWeek } = require("./functions");
+
+// sendMail("damilola@telservenet.com","ajedamilola2005@gmail.com","Hello","This is a test message");

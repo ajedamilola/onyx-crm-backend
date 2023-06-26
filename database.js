@@ -119,7 +119,10 @@ const userStructure = new mongoose.Schema({
   reports: [report],
   department: Number,
   units: [Number],
-  sentReports: [{ date: Date, type: String, title: String }]
+  sentReports: [{ date: Date, rType: String, title: String }],
+  scheduledEmails:[
+    {title:String,content:String, interval:String, date:Date}
+  ]
 });
 
 const customerStructure = new mongoose.Schema({

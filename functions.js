@@ -6,6 +6,7 @@ require("dotenv").config();
 var Imap = require('imap')
 var { simpleParser } = require("mailparser")
 const ejs = require("ejs")
+const request = require("request")
 
 async function hashPassword(password) {
   return new Promise((resolve) => {
@@ -24,51 +25,81 @@ async function verifyPassword(password, hash) {
 }
 
 
-async function sendMail(sender, recipient, subject, body, template = "base") {
+async function sendMail(sender, recipient, subject, body, template = "base", customData) {
   const agent = await User.findOne({ email: sender });
-  if (agent.mailPassword) {
-    const transporter = nodemailer.createTransport({
-      host: process.env.MAILSERVER,
-      // name:"",
-      port: 465,
-      secure: true, // true for 465, false for other ports
-      auth: {
-        user: sender, // generated ethereal user
-        // pass: agent.mailPassword, // generated ethereal password
-        pass: agent.mailPassword, // generated ethereal password
-      },
-      // tls:{
-      //   // servername:process.env.MAILSERVER,
-      //   rejectUnauthorized: true,
-      //   minVersion: "TLSv1.2"
-      // }
-    });
+  // if (agent.mailPassword) {
+  //   const transporter = nodemailer.createTransport({
+  //     host: process.env.MAILSERVER,
+  //     // name:"",
+  //     port: 465,
+  //     secure: true, // true for 465, false for other ports
+  //     auth: {
+  //       user: sender, // generated ethereal user
+  //       // pass: agent.mailPassword, // generated ethereal password
+  //       pass: agent.mailPassword, // generated ethereal password
+  //     },
+  //     // tls:{
+  //     //   // servername:process.env.MAILSERVER,
+  //     //   rejectUnauthorized: true,
+  //     //   minVersion: "TLSv1.2"
+  //     // }
+  //   });
 
-    ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content: body }, (err, html) => {
-      if (!err) {
-        const mailOptions = {
-          from: sender,
-          to: recipient,
-          subject,
-          html
-        };
-        require("fs").writeFileSync("test.html",html,{});
-        transporter.sendMail(mailOptions, (err, info) => {
-          if (err) {
-            console.log(err)
-          }else{
-            console.log("Mail Sent SUccessfully")
-          }
-          return err == null;
-        })
-      } else {
-        console.log(err)
-      }
-    })
-  } else {
-    console.log("Mailpassword Not Set")
-    return false
-  }
+  //   ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content: body, ...customData }, (err, html) => {
+  //     if (!err) {
+  //       const mailOptions = {
+  //         from: sender,
+  //         to: recipient,
+  //         subject,
+  //         html
+  //       };
+  //       require("fs").writeFileSync("test.html",html,{});
+  //       transporter.sendMail(mailOptions, (err, info) => {
+  //         if (err) {
+  //           console.log(err)
+  //         }else{
+  //           console.log("Mail Sent SUccessfully")
+  //         }
+  //         return err == null;
+  //       })
+  //     } else {
+  //       console.log(err)
+  //     }
+  //   })
+  // } else {
+  //   console.log("Mailpassword Not Set")
+  //   return false
+  // }
+  ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content: body, ...customData }, (err, html) => {
+    if (!err) {
+      const mailOptions = {
+        from: sender,
+        to: recipient,
+        subject,
+        html
+      };
+      request.post({
+        url: "http://new.circuitcity.com.ng/send-mail.php",
+        form: {
+          title: subject,
+          content: html,
+          sender,
+          recipient
+        }
+      }, (err, res, body) => {
+        if (err) {
+          console.log(err)
+        } else {
+          console.log("Mail Sent Successfully")
+          console.log(body)
+        }
+      })
+      require("fs").writeFileSync("test.html", html, {});
+      request
+    } else {
+      console.log(err)
+    }
+  })
 
 
 }
@@ -217,6 +248,21 @@ const getInbox = (email, password, start = 0, end = 20) => new Promise((resolve,
   imap.connect();
 })
 
+function isInCurrentWeek(date) {
+  const today = new Date();
+  const currentWeekStart = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - today.getDay()
+  );
+  const currentWeekEnd = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() + (6 - today.getDay())
+  );
+
+  return date >= currentWeekStart && date <= currentWeekEnd;
+}
 
 
 module.exports = {
@@ -225,5 +271,6 @@ module.exports = {
   encode64,
   sendMail,
   getDay,
-  getInbox
+  getInbox,
+  isInCurrentWeek
 };

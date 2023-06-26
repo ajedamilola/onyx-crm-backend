@@ -25,6 +25,7 @@
     "nodemailer": "^6.9.1",
     "nodemailer-plugin-inline-base64": "^2.1.1",
     "randomstring": "^1.3.0",
+    "request": "^2.88.2",
     "sharp": "^0.31.3",
     "smtp-client": "^0.4.0"
   },

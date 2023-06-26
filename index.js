@@ -4,7 +4,9 @@ const fs = require("fs")
 const https = require("https")
 const http = require("http")
 const app = express();
+require("dotenv").config()
 const PORT = process.env.PORT;
+const ejs = require("ejs")
 
 if (fs.existsSync("/root/certificates")) {
     https
@@ -45,3 +47,11 @@ require("./customerEndpoints")(app)
 // sendMail("info@telservenet.com","ajedamilola2005@gmail.com","Test","testing Email").then(val=>{
 //     console.log(val.err || "Email Check success");
 // });
+app.get("/test", (req,res)=>{
+    sendMail("damilola@circuitcity.com.ng","ajedamilola2005@gmail.com","Weekly Report","","report",{
+        name:"Aje",
+    type:"Weekly",
+    image:"",
+    events:[{content:"Demo", date:"12/may/2023",}]})
+    res.send("Ok")
+})
