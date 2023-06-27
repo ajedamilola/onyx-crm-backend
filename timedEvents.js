@@ -20,28 +20,28 @@ async function checkTasks() {
                     if (!user.taskHistory.some(t => t.taskId === task.id)) {
                         //add it to history if !found
                         user.taskHistory.push({ taskId: task.id, due: dueDate, completed: Boolean(task.successful), admin: task.admin })
+                        if (!Boolean(task.successful)) {
+                            if (today.getMonth() == dueDate.getMonth() && today.getFullYear() == dueDate.getFullYear()) {
 
-                        if (today.getMonth() == dueDate.getMonth() && today.getFullYear() == dueDate.getFullYear()) {
-
-                            monthMisses++;
-                            if (!Boolean(task.successful)) {
+                                monthMisses++;
                                 failed.push({
                                     title: task.title,
                                     date: task.date.toDateString(),
                                     admin: (await User.findById(task.admin)).name
                                 })
-                                consecutiveMisses += 1;
-                                if (consecutiveMisses == 3) {
-                                    console.log("Oya Send Mail")
-                                    user.taskHistory[user.taskHistory.length - 1].reported = true;
-                                    shudSend = true;
-                                }
-                                if (monthMisses == 7) {
-                                    shudSend = true;
-                                }
-                            } else {
-                                maxMisses = Math.max(maxMisses, consecutiveMisses);
+
                             }
+                            consecutiveMisses += 1;
+                            if (consecutiveMisses == 3) {
+                                user.taskHistory[user.taskHistory.length - 1].reported = true;
+                                shudSend = true;
+                            }
+                            if (monthMisses == 7) {
+                                shudSend = true;
+                            }
+                        } else {
+                            maxMisses = Math.max(maxMisses, consecutiveMisses);
+                            consecutiveMisses = 0;
                         }
                     }
                 }
@@ -77,7 +77,7 @@ async function checkTasks() {
 }
 
 checkTasks()
-// setInterval(()=>{
-//     //High Priority Every 30 Minutes
-//     checkTasks()
-// },1000 * 60 * 30)
+setInterval(()=>{
+    //High Priority Every 30 Minutes
+    checkTasks()
+},1000 * 60 * 30)
