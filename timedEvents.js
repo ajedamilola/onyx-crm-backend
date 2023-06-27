@@ -1,6 +1,6 @@
 const { User } = require("./database");
 const { sendMail } = require("./functions");
-
+process.title = "CircuitCity_TimedJobs";
 async function checkTasks() {
     const today = new Date();
     const users = await User.find();
