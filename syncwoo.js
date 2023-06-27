@@ -10,7 +10,7 @@ const api = new WooCommerceRestApi({
 
 
 api.get("products/categories").then(response => {
-  require("fs").writeFileSync("nogit/woo_categories.json", JSON.stringify(response.data))
+  // require("fs").writeFileSync("nogit/woo_categories.json", JSON.stringify(response.data))
   const categories = response.data;
   categories.forEach(async wooCat => {
     const dbCat = await Category.findOne({ wid: wooCat.id })
@@ -25,7 +25,7 @@ api.get("products/categories").then(response => {
   //Products Too
   api.get("products").then(response => {
     const products = response.data;
-    require("fs").writeFileSync("nogit/woo_products.json", JSON.stringify(response.data))
+    // require("fs").writeFileSync("nogit/woo_products.json", JSON.stringify(response.data))
     products.forEach(async wooProduct => {
       const dbProduct = await Product.findOne({ wid: wooProduct.id })
       const { name, price, featured, id } = wooProduct;
