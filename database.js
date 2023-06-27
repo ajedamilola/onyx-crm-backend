@@ -195,6 +195,7 @@ const category = new mongoose.Schema({
   name: String,
   description: String,
   owner: String,
+  wid:String
 });
 
 const chat = new mongoose.Schema({
@@ -271,8 +272,8 @@ const dbName = process.env.NODE_ENV == "development" ? "circuit-crm" : "circuitc
 console.log(connString)
 mongoose.set('strictQuery', false)
 mongoose.connect(connString, { dbName }, (err) => {
-  console.log("Database", err ? "Connection Failed with " + err : "Connection Successful");
-});
+  return console.log("Database", err ? "Connection Failed with " + err : "Connection Successful");
+})
 
 module.exports = {
   User,
