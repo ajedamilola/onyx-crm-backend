@@ -61,7 +61,7 @@ async function checkTasks() {
                     ]
                 })
                 const cc = copies.map(a => a.email).join(",");
-                sendMail(user.email, hr.email, "Task Deadline Grace Missed", "", "failedTask", {
+                sendMail(user.email, hr.email, "Task Deadline Missed", "", "failedTask", {
                     name: user.name,
                     tasks: failed
                 }, cc)
