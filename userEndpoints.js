@@ -787,9 +787,9 @@ module.exports = (app) => {
     const { uid } = req.cookies;
     if (uid) {
       try {
-        const { content } = req.body;
+        const { content, date } = req.body;
         const user = await User.findById(uid)
-        user.reports.push({ content, manual: true })
+        user.reports.push({ content, manual: true, date })
         user.save();
         res.json({ user })
       } catch (error) {
