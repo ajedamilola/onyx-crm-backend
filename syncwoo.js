@@ -50,10 +50,10 @@ api.get("products/categories").then(response => {
         dbProduct.save()
       }
     })
-  
+
+  }).finally(() => {
+    process.exit(0);
   })
-}).finally(()=>{
-  process.exit(0);
 })
 
 
