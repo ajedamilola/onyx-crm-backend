@@ -21,37 +21,42 @@ api.get("products/categories").then(response => {
       category.save()
     }
   });
-})
 
-api.get("products").then(response => {
-  const products = response.data;
-  require("fs").writeFileSync("nogit/woo_products.json", JSON.stringify(response.data))
-  products.forEach(async wooProduct => {
-    const dbProduct = await Product.findOne({ wid: wooProduct.id })
-    const { name, price, featured, id } = wooProduct;
-    if (!dbProduct) {
-      const product = new Product({
-        price,
-        featured,
-        name,
-        image: wooProduct.images[0]?.src,
-        category: wooProduct.categories[0]?.name || "Uncategorized",
-        qty: wooProduct.stock_quantity || 0,
-        wid: id
-      });
-      product.save();
-    } else {
-      dbProduct.price = price;
-      dbProduct.featured = featured;
-      dbProduct.name = name;
-      dbProduct.image = wooProduct.images[0]?.src
-      dbProduct.category = wooProduct.categories[0]?.name || "Uncategorized"
-      dbProduct.qty = wooProduct.stock_quantity || 0
-      dbProduct.save()
-    }
+  //Products Too
+  api.get("products").then(response => {
+    const products = response.data;
+    require("fs").writeFileSync("nogit/woo_products.json", JSON.stringify(response.data))
+    products.forEach(async wooProduct => {
+      const dbProduct = await Product.findOne({ wid: wooProduct.id })
+      const { name, price, featured, id } = wooProduct;
+      if (!dbProduct) {
+        const product = new Product({
+          price,
+          featured,
+          name,
+          image: wooProduct.images[0]?.src,
+          category: wooProduct.categories[0]?.name || "Uncategorized",
+          qty: wooProduct.stock_quantity || 0,
+          wid: id
+        });
+        product.save();
+      } else {
+        dbProduct.price = price;
+        dbProduct.featured = featured;
+        dbProduct.name = name;
+        dbProduct.image = wooProduct.images[0]?.src
+        dbProduct.category = wooProduct.categories[0]?.name || "Uncategorized"
+        dbProduct.qty = wooProduct.stock_quantity || 0
+        dbProduct.save()
+      }
+    })
+  
   })
-
+}).finally(()=>{
+  process.exit(0);
 })
+
+
 
 //TODO: Updaing Of Products To WOO
 //TODO: Fetching And Updating Of Orders
