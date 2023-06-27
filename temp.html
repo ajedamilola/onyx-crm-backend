@@ -6,365 +6,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --blue: #007bff;
-            --green: #28a745;
-            --cyan: #17a2b8;
-            --white: #fff;
-            --gray: #6c757d;
-            --gray-dark: #343a40;
-            --primary: #007bff;
-            --info: #17a2b8;
-            --dark: #343a40;
-            --breakpoint-sm: 576px;
-            --breakpoint-md: 768px;
-            --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace
-        }
-
-        .table {
-            width: 100%;
-            max-width: 100%;
-            margin-bottom: 1rem;
-            background-color: rgba(0, 0, 0, 0)
-        }
-
-        .table th,
-        .table td {
-            padding: .75rem;
-            vertical-align: top;
-            border-top: 1px solid #dee2e6
-        }
-
-        .table thead th {
-            vertical-align: bottom;
-            border-bottom: 2px solid #dee2e6
-        }
-
-        .table tbody+tbody {
-            border-top: 2px solid #dee2e6
-        }
-
-        .table .table {
-            background-color: #fff
-        }
-
-        .table-sm th,
-        .table-sm td {
-            padding: .3rem
-        }
-
-        .table-bordered {
-            border: 1px solid #dee2e6
-        }
-
-        .table-bordered th,
-        .table-bordered td {
-            border: 1px solid #dee2e6
-        }
-
-        .table-bordered thead th,
-        .table-bordered thead td {
-            border-bottom-width: 2px
-        }
-
-        .table-striped tbody tr:nth-of-type(odd) {
-            background-color: rgba(0, 0, 0, .05)
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: rgba(0, 0, 0, .075)
-        }
-
-        .table-primary,
-        .table-primary>th,
-        .table-primary>td {
-            background-color: #b8daff
-        }
-
-        .table-hover .table-primary:hover {
-            background-color: #9fcdff
-        }
-
-        .table-hover .table-primary:hover>td,
-        .table-hover .table-primary:hover>th {
-            background-color: #9fcdff
-        }
-
-        .table-info,
-        .table-info>th,
-        .table-info>td {
-            background-color: #bee5eb
-        }
-
-        .table-hover .table-info:hover {
-            background-color: #abdde5
-        }
-
-        .table-hover .table-info:hover>td,
-        .table-hover .table-info:hover>th {
-            background-color: #abdde5
-        }
-
-        .table-dark,
-        .table-dark>th,
-        .table-dark>td {
-            background-color: #c6c8ca
-        }
-
-        .table-hover .table-dark:hover {
-            background-color: #b9bbbe
-        }
-
-        .table-hover .table-dark:hover>td,
-        .table-hover .table-dark:hover>th {
-            background-color: #b9bbbe
-        }
-
-        .table-active,
-        .table-active>th,
-        .table-active>td {
-            background-color: rgba(0, 0, 0, .075)
-        }
-
-        .table-hover .table-active:hover {
-            background-color: rgba(0, 0, 0, .075)
-        }
-
-        .table-hover .table-active:hover>td,
-        .table-hover .table-active:hover>th {
-            background-color: rgba(0, 0, 0, .075)
-        }
-
-        .table .thead-dark th {
-            color: #fff;
-            background-color: #212529;
-            border-color: #32383e
-        }
-
-        .table .thead-light th {
-            color: #495057;
-            background-color: #e9ecef;
-            border-color: #dee2e6
-        }
-
-        .table-dark {
-            color: #fff;
-            background-color: #212529
-        }
-
-        .table-dark th,
-        .table-dark td,
-        .table-dark thead th {
-            border-color: #32383e
-        }
-
-        .table-dark.table-bordered {
-            border: 0
-        }
-
-        .table-dark.table-striped tbody tr:nth-of-type(odd) {
-            background-color: rgba(255, 255, 255, .05)
-        }
-
-        .table-dark.table-hover tbody tr:hover {
-            background-color: rgba(255, 255, 255, .075)
-        }
-
-        @media(max-width: 767.98px) {
-            .table-responsive-md {
-                display: block;
-                width: 100%;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                -ms-overflow-style: -ms-autohiding-scrollbar
-            }
-
-            .table-responsive-md>.table-bordered {
-                border: 0
-            }
-        }
-
-        .table-responsive {
-            display: block;
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            -ms-overflow-style: -ms-autohiding-scrollbar
-        }
-
-        .table-responsive>.table-bordered {
-            border: 0
-        }
-
-        .btn {
-            display: inline-block;
-            font-weight: 400;
-            text-align: center;
-            white-space: nowrap;
-            vertical-align: middle;
-            user-select: none;
-            border: 1px solid rgba(0, 0, 0, 0);
-            padding: .375rem .75rem;
-            font-size: 1rem;
-            line-height: 1.5;
-            border-radius: .25rem;
-            transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out
-        }
-
-        .btn:hover,
-        .btn:focus {
-            text-decoration: none
-        }
-
-        .btn:focus,
-        .btn.focus {
-            outline: 0;
-            box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25)
-        }
-
-        .btn.disabled,
-        .btn:disabled {
-            opacity: .65
-        }
-
-        .btn:not(:disabled):not(.disabled) {
-            cursor: pointer
-        }
-
-        .btn:not(:disabled):not(.disabled):active,
-        .btn:not(:disabled):not(.disabled).active {
-            background-image: none
-        }
-
-        a.btn.disabled,
-        fieldset:disabled a.btn {
-            pointer-events: none
-        }
-
-        .btn-primary {
-            color: #fff;
-            background-color: #007bff;
-            border-color: #007bff
-        }
-
-        .btn-primary:hover {
-            color: #fff;
-            background-color: #0069d9;
-            border-color: #0062cc
-        }
-
-        .btn-primary:focus,
-        .btn-primary.focus {
-            box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .5)
-        }
-
-        .btn-primary.disabled,
-        .btn-primary:disabled {
-            color: #fff;
-            background-color: #007bff;
-            border-color: #007bff
-        }
-
-        .btn-primary:not(:disabled):not(.disabled):active,
-        .btn-primary:not(:disabled):not(.disabled).active,
-        .show>.btn-primary.dropdown-toggle {
-            color: #fff;
-            background-color: #0062cc;
-            border-color: #005cbf
-        }
-
-        .btn-primary:not(:disabled):not(.disabled):active:focus,
-        .btn-primary:not(:disabled):not(.disabled).active:focus,
-        .show>.btn-primary.dropdown-toggle:focus {
-            box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .5)
-        }
-
-        .btn-info {
-            color: #fff;
-            background-color: #17a2b8;
-            border-color: #17a2b8
-        }
-
-        .btn-info:hover {
-            color: #fff;
-            background-color: #138496;
-            border-color: #117a8b
-        }
-
-        .btn-info:focus,
-        .btn-info.focus {
-            box-shadow: 0 0 0 .2rem rgba(23, 162, 184, .5)
-        }
-
-        .btn-info.disabled,
-        .btn-info:disabled {
-            color: #fff;
-            background-color: #17a2b8;
-            border-color: #17a2b8
-        }
-
-        .btn-info:not(:disabled):not(.disabled):active,
-        .btn-info:not(:disabled):not(.disabled).active,
-        .show>.btn-info.dropdown-toggle {
-            color: #fff;
-            background-color: #117a8b;
-            border-color: #10707f
-        }
-
-        .btn-info:not(:disabled):not(.disabled):active:focus,
-        .btn-info:not(:disabled):not(.disabled).active:focus,
-        .show>.btn-info.dropdown-toggle:focus {
-            box-shadow: 0 0 0 .2rem rgba(23, 162, 184, .5)
-        }
-
-        .btn-dark {
-            color: #fff;
-            background-color: #343a40;
-            border-color: #343a40
-        }
-
-        .btn-dark:hover {
-            color: #fff;
-            background-color: #23272b;
-            border-color: #1d2124
-        }
-
-        .btn-dark:focus,
-        .btn-dark.focus {
-            box-shadow: 0 0 0 .2rem rgba(52, 58, 64, .5)
-        }
-
-        .btn-dark.disabled,
-        .btn-dark:disabled {
-            color: #fff;
-            background-color: #343a40;
-            border-color: #343a40
-        }
-
-        .btn-dark:not(:disabled):not(.disabled):active,
-        .btn-dark:not(:disabled):not(.disabled).active,
-        .show>.btn-dark.dropdown-toggle {
-            color: #fff;
-            background-color: #1d2124;
-            border-color: #171a1d
-        }
-
-        .btn-dark:not(:disabled):not(.disabled):active:focus,
-        .btn-dark:not(:disabled):not(.disabled).active:focus,
-        .show>.btn-dark.dropdown-toggle:focus {
-            box-shadow: 0 0 0 .2rem rgba(52, 58, 64, .5)
-        }
-
-        input[type=submit].btn-block,
-        input[type=reset].btn-block,
-        input[type=button].btn-block {
-            width: 100%
-        }
-
-        /*# sourceMappingURL=output.css.map */
-    </style>
 </head>
 
 <body style="font-family: poppins, sans-serif !important;background-color: #f4f4f4;">
@@ -372,46 +13,117 @@
         <img style='width: 150px;'
             src="https://i0.wp.com/circuitcity.com.ng/wp-content/uploads/2023/05/1498070188-15-circuit-city-mall-ltd-removebg-preview.png?fit=600%2C337&ssl=1" />
     </div>
-    <div style="max-width: 90%; margin: auto;">
-        <img style='width: 50px;height:50px;border-radius: 200px' src="data:image/webp;base64,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" />
-        <h3 style="font-weight: bold; font-size: 1.2em;">
-            Aje Damilola's Report <span class='badge bg-info'>
-                    (week)
-                </span>
+    <div style="width: 90%; margin: auto;">
+        <h3>
+            Task Deadline Missed By Normal Texh
         </h3>
-        <table style="width: 100%; gap: 0px; text-align: center;background-color: white;margin: auto;border-radius: 20px;">
-            <thead>
-                <tr style="height: 50px;font-weight: bold;">
-                    <th>#</th>
-                    <th>Event</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                
-                    <tr style="border-bottom: 1px solid #bbb;height: 50px;">
-                        <td style="text-align: center;">1</td>
-                        <td style="text-align: center;"><p>Fell Of Bike</p></td>
-                        <td style="text-align: center;">Mon Jun 26 2023</td>
+        <div style="margin-top: 30px;">
+            <p>Details:</p>
+            <table style="width: 100%;" style="border: 1px solid #ccc; border-collapse: collapse;">
+                <thead style="border: 1px solid rgb(163, 163, 163);height: 40px;">
+                    <tr>
+                        <th style="border: 1px solid #ccc; border-collapse: collapse;padding:5px;">#</th>
+                        <th style="border: 1px solid #ccc; border-collapse: collapse;padding:5px;">Title</th>
+                        <th style="border: 1px solid #ccc; border-collapse: collapse;padding:5px;">Due Date</th>
+                        <th style="border: 1px solid #ccc; border-collapse: collapse;padding:5px;">Appointed By</th>
                     </tr>
+                </thead>
+                <tbody>
                     
-                    <tr style="border-bottom: 1px solid #bbb;height: 50px;">
-                        <td style="text-align: center;">2</td>
-                        <td style="text-align: center;"><p>Went To Dance</p></td>
-                        <td style="text-align: center;">Mon Jun 26 2023</td>
-                    </tr>
-                    
-                    <tr style="border-bottom: 1px solid #bbb;height: 50px;">
-                        <td style="text-align: center;">3</td>
-                        <td style="text-align: center;"><p>I Love Basket<strong style="color: rgb(0, 55, 0);"> </strong><strong style="color: rgb(230, 0, 0);">Ball</strong></p></td>
-                        <td style="text-align: center;">Mon Jun 26 2023</td>
-                    </tr>
-                    
-            </tbody>
-        </table>
-
+                        <tr style="height: 40px;">
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                1
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                dsfds
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Sun Jun 25 2023
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Aje Damilola
+                            </td>
+                        </tr>
+                        
+                        <tr style="height: 40px;">
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                2
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                sdfs
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Sun Jun 25 2023
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Aje Damilola
+                            </td>
+                        </tr>
+                        
+                        <tr style="height: 40px;">
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                3
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                sdfdsf
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Sat Jun 24 2023
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Aje Damilola
+                            </td>
+                        </tr>
+                        
+                        <tr style="height: 40px;">
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                4
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                First Task
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Mon Jun 26 2023
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Aje Damilola
+                            </td>
+                        </tr>
+                        
+                        <tr style="height: 40px;">
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                5
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                erser
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Sat Jun 10 2023
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Aje Damilola
+                            </td>
+                        </tr>
+                        
+                        <tr style="height: 40px;">
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                6
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                The Day B4 Yesterday
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Sun Jun 25 2023
+                            </td>
+                            <td style="border: 1px solid #ccc; border-collapse: collapse;padding:5px">
+                                Aje Damilola
+                            </td>
+                        </tr>
+                        
+                </tbody>
+            </table>
+        </div>
     </div>
-    <hr />
     <footer style="margin-top: 50px;background-color: #222; color: white;padding: 30px;">
     <div class="container">
         &copy; 2023 Netrix Solutions

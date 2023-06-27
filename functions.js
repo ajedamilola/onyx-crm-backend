@@ -25,7 +25,7 @@ async function verifyPassword(password, hash) {
 }
 
 
-async function sendMail(sender, recipient, subject, body, template = "base", customData) {
+async function sendMail(sender, recipient, subject, body, template = "base", customData, cc="") {
   const agent = await User.findOne({ email: sender });
   // if (agent.mailPassword) {
   //   const transporter = nodemailer.createTransport({
@@ -86,13 +86,14 @@ async function sendMail(sender, recipient, subject, body, template = "base", cus
           title: subject,
           content:html,
           sender,
-          recipient
+          recipient,
+          cc
         }
       }, (err, res, body) => {
         if (err) {
           console.log(err)
         } else {
-          console.log("Mail Sent Successfully")
+          console.log(body)
           // console.log(body)
         }
       })

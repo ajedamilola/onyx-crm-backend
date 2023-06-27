@@ -498,7 +498,7 @@ module.exports = (app) => {
 
   app.post("/agent/task", async (req, res) => {
     try {
-      const { agent, title, description, date } = req.body;
+      const { agent, title, description, date,uid } = req.body;
       const Agent = await User.findById(agent);
       Agent.tasks.push({
         title,

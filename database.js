@@ -124,7 +124,14 @@ const userStructure = new mongoose.Schema({
   sentReports: [sentReport],
   scheduledEmails: [
     { title: String, content: String, interval: String, date: Date }
-  ]
+  ],
+  taskHistory:[{
+    taskId:String,
+    completed:Boolean,
+    due:Date,
+    admin:String,
+    reported:Boolean
+  }]
 });
 
 const customerStructure = new mongoose.Schema({
@@ -180,7 +187,8 @@ const productsStructure = new mongoose.Schema({
   image: String,
   featured: Boolean,
   variablePrice: Boolean,
-  qty: Number
+  qty: Number,
+  wid:String
 });
 
 const category = new mongoose.Schema({
