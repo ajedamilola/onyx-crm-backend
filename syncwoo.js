@@ -23,8 +23,8 @@ api.get("products/categories").then(response => {
   });
 
   //Products Too
-  api.get("products").then(response => {
-    const products = response.data;
+  api.get("products").then(r => {
+    const products = r.data;
     // require("fs").writeFileSync("nogit/woo_products.json", JSON.stringify(response.data))
     products.forEach(async wooProduct => {
       const dbProduct = await Product.findOne({ wid: wooProduct.id })
@@ -52,6 +52,7 @@ api.get("products/categories").then(response => {
     })
 
   }).finally(() => {
+    console.log("Done");
     process.exit(0);
   })
 })
