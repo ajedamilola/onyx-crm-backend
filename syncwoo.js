@@ -1,5 +1,5 @@
 const { Product, Category } = require("./database");
-
+process.title = "CiruitWooSync"
 //============= CONFIG
 const WooCommerceRestApi = require("@woocommerce/woocommerce-rest-api").default;
 
