@@ -125,12 +125,12 @@ const userStructure = new mongoose.Schema({
   scheduledEmails: [
     { title: String, content: String, interval: String, date: Date }
   ],
-  taskHistory:[{
-    taskId:String,
-    completed:Boolean,
-    due:Date,
-    admin:String,
-    reported:Boolean
+  taskHistory: [{
+    taskId: String,
+    completed: Boolean,
+    due: Date,
+    admin: String,
+    reported: Boolean
   }]
 });
 
@@ -188,14 +188,14 @@ const productsStructure = new mongoose.Schema({
   featured: Boolean,
   variablePrice: Boolean,
   qty: Number,
-  wid:String
+  wid: String
 });
 
 const category = new mongoose.Schema({
   name: String,
   description: String,
   owner: String,
-  wid:String
+  wid: String
 });
 
 const chat = new mongoose.Schema({
@@ -257,6 +257,29 @@ const ticket = new mongoose.Schema({
   }
 })
 
+const transfer = new mongoose.Schema({
+  location: String,
+  items: [{ product: String, qty: String }],
+  completed: Boolean
+})
+
+const order = new mongoose.Schema({
+  wid: String,
+  number: String,
+  orderKey: String,
+  version: String,
+  dateCreated: Date,
+  dateModified: Date,
+  total: Number,
+  totalTax: Number,
+  datePaid: Date,
+  payementMethod: String,
+  lineItems: [{ productId: String, quantity: Number, price: Number }],
+  status: String,
+  billing: mongoose.SchemaTypes.Mixed,
+  shipping: mongoose.SchemaTypes.Mixed,
+})
+
 const User = mongoose.model("user", userStructure);
 const Customer = mongoose.model("customer", customerStructure);
 const Product = mongoose.model("product", productsStructure);
@@ -266,6 +289,9 @@ const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request", request);
 const Info = mongoose.model("information", info);
 const Ticket = mongoose.model("ticket", ticket)
+const Transfer = mongoose.model("delivery", transfer);
+const Order = mongoose.model("order", order);
+
 // const dbName  = "main";
 const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb://crud:dbnetrix%23%40@127.0.0.1:27017/?authMechanism=DEFAULT"
 const dbName = process.env.NODE_ENV == "development" ? "circuit-crm" : "circuitcity";
@@ -274,6 +300,14 @@ mongoose.set('strictQuery', false)
 mongoose.connect(connString, { dbName }, (err) => {
   return console.log("Database", err ? "Connection Failed with " + err : "Connection Successful");
 })
+
+const WooCommerceRestApi = require("@woocommerce/woocommerce-rest-api").default;
+
+const api = new WooCommerceRestApi({
+  url: "https://circuitcity.com.ng",
+  consumerKey: process.env.WOO_CONSUMER_KEY,
+  consumerSecret: process.env.WOO_SECRET_KEY,
+});
 
 module.exports = {
   User,
@@ -284,6 +318,9 @@ module.exports = {
   Annoucement,
   Request,
   Ticket,
+  Transfer,
+  Order,
+  api,
   privilages,
   userTypes
 };
