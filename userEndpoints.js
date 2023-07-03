@@ -210,7 +210,11 @@ module.exports = (app) => {
 
     try {
       const products = await Product.find({});
-      const user = await User.findOne({ email, password });
+      const user = await User.findOne({
+        email: {
+          $regex: new RegExp(email, "i")
+        }, password
+      });
       if (user) {
         const customers = await Customer.find({});
         const categories = await Category.find({});
@@ -508,7 +512,7 @@ module.exports = (app) => {
 
   app.post("/agent/task", async (req, res) => {
     try {
-      const { agent, title, description, date,uid } = req.body;
+      const { agent, title, description, date, uid } = req.body;
       const Agent = await User.findById(agent);
       Agent.tasks.push({
         title,
@@ -975,7 +979,7 @@ module.exports = (app) => {
           } else {
             return null
           }
-        }).filter(e=>e)
+        }).filter(e => e)
         const hous = await User.find({
           department: user.department,
           privilage: 1,
@@ -985,10 +989,10 @@ module.exports = (app) => {
         });
         console.log(hous);
         if (hous.length > 0) {
-          user.sentReports.push({date:new Date(), rType:req.params.type,title:req.body.title})
+          user.sentReports.push({ date: new Date(), rType: req.params.type, title: req.body.title })
           hous.forEach(admin => {
             sendMail(user.email, admin.email, `${user.name}'s ${req.params.type} Report`, "", "report", {
-              events, name: user.name, type: req.params.type, image:user.image
+              events, name: user.name, type: req.params.type, image: user.image
             })
           });
           user.save()
