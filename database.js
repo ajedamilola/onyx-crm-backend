@@ -135,6 +135,7 @@ const userStructure = new mongoose.Schema({
 });
 
 const customerStructure = new mongoose.Schema({
+  wid:String,
   name: String,
   email: String,
   phone: String,
@@ -260,7 +261,9 @@ const ticket = new mongoose.Schema({
 const transfer = new mongoose.Schema({
   location: String,
   items: [{ product: String, qty: String }],
-  completed: Boolean
+  completed: Boolean,
+  customer:String,
+  order:String
 })
 
 const order = new mongoose.Schema({
@@ -272,12 +275,14 @@ const order = new mongoose.Schema({
   dateModified: Date,
   total: Number,
   totalTax: Number,
+  customer:String,
   datePaid: Date,
   payementMethod: String,
   lineItems: [{ productId: String, quantity: Number, price: Number }],
   status: String,
   billing: mongoose.SchemaTypes.Mixed,
   shipping: mongoose.SchemaTypes.Mixed,
+  delivery:Boolean
 })
 
 const User = mongoose.model("user", userStructure);

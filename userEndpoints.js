@@ -9,6 +9,7 @@ const {
   Request,
   Ticket,
   Order,
+  Transfer,
 } = require("./database");
 const formatter = new Intl.NumberFormat("en-US");
 const { encode64, sendMail, getInbox, isInCurrentWeek } = require("./functions");
@@ -164,6 +165,7 @@ module.exports = (app) => {
         const products = await Product.find({});
         const annoucements = await Annoucement.find({});
         const orders = await Order.find({});
+        const deliveries = await Transfer.find({})
         const chats = await Chat.find().or([
           { "recipient": user.id },
           { "sender": user.id }
@@ -192,7 +194,8 @@ module.exports = (app) => {
           chats,
           emails,
           tickets,
-          orders
+          orders,
+          deliveries
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });
@@ -213,6 +216,7 @@ module.exports = (app) => {
         const categories = await Category.find({});
         const annoucements = await Annoucement.find({});
         const orders = await Order.find({})
+        const deliveries = await Transfer.find({})
         res.cookie("uid", user.id, {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
@@ -236,7 +240,8 @@ module.exports = (app) => {
           annoucements,
           emails,
           tickets,
-          orders
+          orders,
+          deliveries
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });

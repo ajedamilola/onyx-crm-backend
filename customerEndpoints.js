@@ -1,5 +1,5 @@
 const { text } = require("express");
-const { Customer, User } = require("./database");
+const { Customer, User, Transfer, Order } = require("./database");
 const { encode64, sendMail } = require("./functions");
 const nodemailer = require("nodemailer");
 module.exports = (app) => {
@@ -679,6 +679,32 @@ module.exports = (app) => {
 
     } else {
       res.json({ err: "Unauthenticated Request, Login and try again" })
+    }
+  })
+
+  app.post("/delivery", async (req,res)=>{
+    const {uid} = req.cookies;
+    if(uid){
+      try {
+        const {location,customerWooId,items,wooOrderId }  = req.body;
+        const delivery = new Transfer({
+          customer:customerWooId,
+          items:items.map(i=>({product:i.productId,qty:i.quantity})),
+          completed:false,
+          order:wooOrderId,
+          location
+        })
+        const order = await Order.findOne({wid:wooOrderId});
+        order.delivery  = true;
+        order.save()
+        delivery.save()
+        res.json({delivery, order})
+      } catch (error) {
+        console.log(error)
+        res.json({err:"Server Error, Try again later"})
+      }
+    }else{
+      res.json({err:"Unauthenticated Request"})
     }
   })
 
