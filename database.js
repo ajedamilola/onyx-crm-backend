@@ -135,7 +135,7 @@ const userStructure = new mongoose.Schema({
 });
 
 const customerStructure = new mongoose.Schema({
-  wid:String,
+  wid: String,
   name: String,
   email: String,
   phone: String,
@@ -180,6 +180,14 @@ const customerStructure = new mongoose.Schema({
   }
 });
 
+const productLog = new mongoose.Schema({
+  date: {
+    type: Date,
+    default: () => new Date()
+  },
+  description: String,
+  qty: Number
+})
 const productsStructure = new mongoose.Schema({
   name: String,
   price: Number,
@@ -189,7 +197,11 @@ const productsStructure = new mongoose.Schema({
   featured: Boolean,
   variablePrice: Boolean,
   qty: Number,
-  wid: String
+  wid: String,
+  logs: {
+    type: [productLog],
+    default: []
+  }
 });
 
 const category = new mongoose.Schema({
@@ -262,8 +274,8 @@ const transfer = new mongoose.Schema({
   location: String,
   items: [{ product: String, qty: String }],
   completed: Boolean,
-  customer:String,
-  order:String
+  customer: String,
+  order: String
 })
 
 const order = new mongoose.Schema({
@@ -275,14 +287,14 @@ const order = new mongoose.Schema({
   dateModified: Date,
   total: Number,
   totalTax: Number,
-  customer:String,
+  customer: String,
   datePaid: Date,
   payementMethod: String,
   lineItems: [{ productId: String, quantity: Number, price: Number }],
   status: String,
   billing: mongoose.SchemaTypes.Mixed,
   shipping: mongoose.SchemaTypes.Mixed,
-  delivery:Boolean
+  delivery: Boolean
 })
 
 const User = mongoose.model("user", userStructure);
