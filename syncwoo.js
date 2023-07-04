@@ -33,7 +33,8 @@ async function Sync() {
 
   //=====Products Syncing
   console.log("Syncing Products.....");
-  const products = (await api.get("products")).data
+  console.log("Syncing Page 1...")
+  let products = (await api.get("products",{per_page:100,page:1})).data
   // require("fs").writeFileSync("nogit/woo_products.json", JSON.stringify(response.data))
   await Promise.all(products.map(async wooProduct => {
     const dbProduct = await Product.findOne({ wid: wooProduct.id })
@@ -59,6 +60,36 @@ async function Sync() {
       dbProduct.save()
     }
   }))
+
+  console.log("Syncing Page 2...")
+  products = (await api.get("products",{per_page:100,page:2})).data
+  console.log(products.length)
+  // require("fs").writeFileSync("nogit/woo_products.json", JSON.stringify(response.data))
+  await Promise.all(products.map(async wooProduct => {
+    const dbProduct = await Product.findOne({ wid: wooProduct.id })
+    const { name, price, featured, id } = wooProduct;
+    if (!dbProduct) {
+      const product = new Product({
+        price,
+        featured,
+        name,
+        image: wooProduct.images[0]?.src,
+        category: wooProduct.categories[0]?.name || "Uncategorized",
+        qty: wooProduct.stock_quantity || 0,
+        wid: id
+      });
+      product.save();
+    } else {
+      dbProduct.price = price;
+      dbProduct.featured = featured;
+      dbProduct.name = name;
+      dbProduct.image = wooProduct.images[0]?.src
+      dbProduct.category = wooProduct.categories[0]?.name || "Uncategorized"
+      dbProduct.qty = wooProduct.stock_quantity || 0
+      dbProduct.save()
+    }
+  }))
+
   syncing.products = false
   console.log("Done Syncing Products ✅")
 
