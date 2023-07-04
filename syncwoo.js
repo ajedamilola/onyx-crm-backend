@@ -17,7 +17,7 @@ async function Sync() {
 
   //=====Categories Sync
   console.log("Syncing Cattegories.....");
-  const categories = (await api.get("products/categories")).data
+  const categories = (await api.get("products/categories",{per_page:30})).data
   await Promise.all(categories.map(async wooCat => {
     const dbCat = await Category.findOne({ wid: wooCat.id })
     if (!dbCat) {
