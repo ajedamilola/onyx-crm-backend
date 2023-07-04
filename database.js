@@ -186,7 +186,12 @@ const productLog = new mongoose.Schema({
     default: () => new Date()
   },
   description: String,
-  qty: Number
+  qty: Number,
+  cost:Number,
+  ref:{
+    type:String,
+    default:()=>random.generate({length:4,charset:"numeric"})
+  }
 })
 const productsStructure = new mongoose.Schema({
   name: String,

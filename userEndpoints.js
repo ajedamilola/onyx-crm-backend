@@ -1008,6 +1008,26 @@ module.exports = (app) => {
       res.json({ err: "Unauthenticated Request" })
     }
   })
+
+  app.post("/product-log", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        // const user = await User.findById(uid)
+        const { id, reason, qty, cost, date } = req.body;
+        const product = await Product.findById(id);
+        product.logs.push({ qty, cost, description: reason, date });
+        product.qty += Number(qty);
+        product.save();
+        res.json({ log: product.logs[product.logs.length - 1], id, qty: product.qty })
+      } catch (err) {
+        console.log(err)
+        res.json({ err: "An Error Occured" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+  })
 };
 
 function isInPriorMonth(date) {
@@ -1174,6 +1194,8 @@ async function sendScheduledEmails() {
 
     customer.save();
   });
+
+
 }
 setInterval(() => {
   //check for emails every 12 hours
