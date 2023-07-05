@@ -10,6 +10,7 @@ const {
   Ticket,
   Order,
   Transfer,
+  api,
 } = require("./database");
 const formatter = new Intl.NumberFormat("en-US");
 const { encode64, sendMail, getInbox, isInCurrentWeek } = require("./functions");
@@ -473,6 +474,16 @@ module.exports = (app) => {
         product.image =
           "data:image/webp;base64," + (await encode64(req.files.image.data));
       }
+      const isWoo = Boolean(product.wid)
+      if (isWoo) {
+        try {
+          const d = await api.put(`products/${product.wid}`, { price, featured:product.featured, stock_quantity: Number(qty), manage_stock:true })
+          console.log(d.data)
+        } catch (error) {
+          console.log(error)
+          console.log("Unable to Sync Product with id",product.id,"With Woo")
+        }
+      }
       product.save();
       res.json({ msg: "Ok", product });
     } catch (error) {
@@ -738,6 +749,7 @@ module.exports = (app) => {
         const { vid, aid } = req.headers;
         const user = await User.findById(aid);
         const admin = await User.findById(uid);
+        const voucher = user.vouchers.find(v => v.id == vid)
         user.vouchers = user.vouchers.filter(v => v.id != vid);
         user.reports.push({ content: `Voucher With Ref <b class='copy'>${voucher.code}</b> Was <b class='text-danger'>Deleted</b> By ${admin.name}` })
         user.save();
@@ -1019,6 +1031,14 @@ module.exports = (app) => {
         const product = await Product.findById(id);
         product.logs.push({ qty, cost, description: reason, date });
         product.qty += Number(qty);
+        if(Boolean(product.wid)){
+          try {
+            const p = await api.put(`products/${product.wid}`,{stock_quantity:product.qty,manage_stock:true})
+            console.log(p.data)
+          } catch (error) {
+            console.log("Unable to Sync Product With Id",product.id)
+          }
+        }
         product.save();
         res.json({ log: product.logs[product.logs.length - 1], id, qty: product.qty })
       } catch (err) {

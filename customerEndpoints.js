@@ -1,5 +1,5 @@
 const { text } = require("express");
-const { Customer, User, Transfer, Order } = require("./database");
+const { Customer, User, Transfer, Order, api } = require("./database");
 const { encode64, sendMail } = require("./functions");
 const nodemailer = require("nodemailer");
 module.exports = (app) => {
@@ -485,9 +485,22 @@ module.exports = (app) => {
       customer.setUpCost = setUpCost;
       customer.area = area.toUpperCase() || customer.area
       customer.active = Boolean(active == "true");
+      const isWoo = Boolean(customer.wid);
       if (req.files && req.files.image) {
         customer.image =
-          "data:image/webp;base64," + (await encode64(req.files.image.data));
+        "data:image/webp;base64," + (await encode64(req.files.image.data));
+      }
+      if(isWoo){
+        try {
+          const data = {
+            first_name:name.split(" ")[0],last_name:name.split(" ")[1] || "",email,avatar_url:customer.image,phone
+          }
+          // console.log(`customer/${customer.wid}`)
+          await api.put(`customers/${customer.wid}`,data)
+        } catch (error) {
+          console.log(error)
+          console.log("Unable To Sync Customer with woo")
+        }
       }
       customer.save();
       res.json({ msg: "Ok", customer });

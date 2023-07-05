@@ -10,6 +10,16 @@
         "errFile": "/root/logs/circuit_error.log"
     },
     {
+        "uid": "Circuit Timed Events",
+        "append": true,
+        "watch": true,
+        "script": "timedEvents.js",
+        "sourceDir": "/root/projects/servers/circuit-crm-backend",
+        "logFile": "/root/logs/circuit_timed.log",
+        "outFile": "/root/logs/circuit_timed_out.log",
+        "errFile": "/root/logs/circuit_timed_error.log"
+    },
+    {
         "uid": "Telserve CRM",
         "append": true,
         "watch": true,
@@ -19,4 +29,5 @@
         "outFile": "/root/logs/telserve_out.log",
         "errFile": "/root/logs/telserve_error.log"
     }
+    
 ]

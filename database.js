@@ -25,7 +25,7 @@ const departments = [
       "E-marketing Unit",
     ]
   },
-  { name: "Logistics", units: ["Logistics support unit"] },
+  { name: "Logistics", units: ["Logistics support unit","Store"] },
   {
     name: "Admin", units: [
       "HR",
