@@ -328,7 +328,8 @@ module.exports = (app) => {
       const uid = req.cookies.uid;
       if (uid) {
         const user = await User.findById(uid);
-        if (user.privilage > 1) {
+        const task = user.tasks.find((t) => t.id == req.headers.id);
+        if (!task.bySuper) {
           user.reports.push({ content: `Deleted Task <b>${user.tasks.find((t) => t.id == req.headers.id).title}</b>` })
           user.tasks = user.tasks.filter((t) => t.id != req.headers.id);
         } else {
