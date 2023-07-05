@@ -478,7 +478,6 @@ module.exports = (app) => {
       if (isWoo) {
         try {
           const d = await api.put(`products/${product.wid}`, { price, featured:product.featured, stock_quantity: Number(qty), manage_stock:true })
-          console.log(d.data)
         } catch (error) {
           console.log(error)
           console.log("Unable to Sync Product with id",product.id,"With Woo")
@@ -1034,7 +1033,6 @@ module.exports = (app) => {
         if(Boolean(product.wid)){
           try {
             const p = await api.put(`products/${product.wid}`,{stock_quantity:product.qty,manage_stock:true})
-            console.log(p.data)
           } catch (error) {
             console.log("Unable to Sync Product With Id",product.id)
           }
