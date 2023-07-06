@@ -727,13 +727,14 @@ module.exports = (app) => {
     const { uid } = req.cookies;
     if (uid) {
       try {
-        const user = await User.findById(uid)
+        // const user = await User.findById(uid)
         const {id,status} = req.body;
         const delivery = await Transfer.findById(id)
         delivery.status = status;
         if(status >= 3){
           delivery.ended = new Date();
         }
+        res.json({delivery})
         delivery.save()
       } catch (err) {
         console.log(err)
