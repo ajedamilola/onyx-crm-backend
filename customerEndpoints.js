@@ -19,7 +19,7 @@ module.exports = (app) => {
   ];
 
   app.get("/test/:name", (req, res) => {
-    sendMail("damilola@circuitcity.com.ng",req.params.name,"Hello","THis is a test");
+    sendMail("damilola@circuitcity.com.ng", req.params.name, "Hello", "THis is a test");
     res.send("Ok")
   })
 
@@ -488,15 +488,15 @@ module.exports = (app) => {
       const isWoo = Boolean(customer.wid);
       if (req.files && req.files.image) {
         customer.image =
-        "data:image/webp;base64," + (await encode64(req.files.image.data));
+          "data:image/webp;base64," + (await encode64(req.files.image.data));
       }
-      if(isWoo){
+      if (isWoo) {
         try {
           const data = {
-            first_name:name.split(" ")[0],last_name:name.split(" ")[1] || "",email,avatar_url:customer.image,phone
+            first_name: name.split(" ")[0], last_name: name.split(" ")[1] || "", email, avatar_url: customer.image, phone
           }
           // console.log(`customer/${customer.wid}`)
-          await api.put(`customers/${customer.wid}`,data)
+          await api.put(`customers/${customer.wid}`, data)
         } catch (error) {
           console.log(error)
           console.log("Unable To Sync Customer with woo")
@@ -695,29 +695,52 @@ module.exports = (app) => {
     }
   })
 
-  app.post("/delivery", async (req,res)=>{
-    const {uid} = req.cookies;
-    if(uid){
+  app.post("/delivery", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
       try {
-        const {location,customerWooId,items,wooOrderId }  = req.body;
+        const { location, customerWooId, items, wooOrderId } = req.body;
         const delivery = new Transfer({
-          customer:customerWooId,
-          items:items.map(i=>({product:i.productId,qty:i.quantity})),
-          completed:false,
-          order:wooOrderId,
-          location
+          customer: customerWooId,
+          items: items.map(i => ({ product: i.productId, qty: i.quantity })),
+          completed: false,
+          order: wooOrderId,
+          location,
+          status: 1,
+          started: new Date()
         })
-        const order = await Order.findOne({wid:wooOrderId});
-        order.delivery  = true;
+        const order = await Order.findOne({ wid: wooOrderId });
+        order.delivery = true;
         order.save()
         delivery.save()
-        res.json({delivery, order})
+        res.json({ delivery, order })
       } catch (error) {
         console.log(error)
-        res.json({err:"Server Error, Try again later"})
+        res.json({ err: "Server Error, Try again later" })
       }
-    }else{
-      res.json({err:"Unauthenticated Request"})
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+  })
+
+  app.patch("/delivery", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const {id,status} = req.body;
+        const delivery = await Transfer.findById(id)
+        delivery.status = status;
+        if(status >= 3){
+          delivery.ended = new Date();
+        }
+        delivery.save()
+      } catch (err) {
+        console.log(err)
+        res.json({ err: "An Error Occured" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
     }
   })
 

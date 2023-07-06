@@ -73,7 +73,7 @@ async function sendMail(sender, recipient, subject, body, template = "base", cus
   console.log("Import1")
   ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content: body, ...customData }, (err, html) => {
     if (!err) {
-      require("fs").writeFileSync("temp.html", html, {});
+      // require("fs").writeFileSync("temp.html", html, {});
       const mailOptions = {
         from: sender,
         to: recipient,

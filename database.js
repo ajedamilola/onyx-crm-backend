@@ -35,6 +35,7 @@ const departments = [
   },
 ]
 
+
 const ContactInstance = {
   date: Date,
   successful: Boolean,
@@ -107,6 +108,7 @@ const userStructure = new mongoose.Schema({
   privilage: Number,
   canAddProducts: { type: Boolean, default: false },
   account: { type: Boolean, default: false },
+  canViewInventory:Boolean,
   dateAdded: {
     default: () => new Date(),
     type: Date,
@@ -280,7 +282,20 @@ const transfer = new mongoose.Schema({
   items: [{ product: String, qty: String }],
   completed: Boolean,
   customer: String,
-  order: String
+  order: String,
+  ref:{
+    type:String,
+    default:()=>random.generate({charset:"numeric",length:6})
+  },
+  status:Number,
+  started:{
+    type:Date,
+    default:()=>new Date()
+  },
+  ended:{
+    type:Date,
+    default:()=>new Date()
+  }
 })
 
 const order = new mongoose.Schema({
