@@ -152,19 +152,11 @@ module.exports = (app) => {
               user.signature,
               customer.name
             );
-            if (!err) {
-              user.reports.push({ content: `Sent Email with subject:<b>${subject}</b> to customer named <b>${customer.name}</b> with id <b>${customer.code}</b>` })
-              customer.emails.push(data);
-              customer.save();
-              user.save();
-              res.json(customer.emails[customer.emails.length - 1]);
-            } else {
-              console.log("Mail Error Is HEre ",err);
-              
-              res.json({
-                err: "Unable To Send Emails At the moment. try again later",
-              });
-            }
+            user.reports.push({ content: `Sent Email with subject:<b>${subject}</b> to customer named <b>${customer.name}</b> with id <b>${customer.code}</b>` })
+            customer.emails.push(data);
+            customer.save();
+            user.save();
+            res.json(customer.emails[customer.emails.length - 1]);
           } catch (err) {
             res.send({ err: "Unable To Send Mail Try again later" });
           }
@@ -730,13 +722,13 @@ module.exports = (app) => {
     if (uid) {
       try {
         // const user = await User.findById(uid)
-        const {id,status} = req.body;
+        const { id, status } = req.body;
         const delivery = await Transfer.findById(id)
         delivery.status = status;
-        if(status >= 3){
+        if (status >= 3) {
           delivery.ended = new Date();
         }
-        res.json({delivery})
+        res.json({ delivery })
         delivery.save()
       } catch (err) {
         console.log(err)
