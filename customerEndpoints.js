@@ -159,6 +159,7 @@ module.exports = (app) => {
               user.save();
               res.json(customer.emails[customer.emails.length - 1]);
             } else {
+              console.log(err)
               res.json({
                 err: "Unable To Send Emails At the moment. try again later",
               });
