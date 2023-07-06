@@ -294,6 +294,17 @@ module.exports = (app) => {
           if (!element.bySuper) {
             user.tasks[index] = task;
           } else {
+            // console.log(`<img src="${user.image}" style='width:40px;height:40px;border-radius:100px; margin-left:10px'/>`)
+            const admin = await User.findById(element.admin);
+            sendMail(user.email, admin?.email || "info@circuitcity.com.ng", "Task Completion Request", `
+              <h2>Task <b>${element.title}</b></h2>
+              <p>
+                Was Marked Completed By 
+                <b>${user.image ? `<img src="${user.image}" style='width:40px;height:40px;border-radius:100px; margin-left:10px'/>` : ""} ${user.name}</b>
+              </p>
+              <br />
+              <a href='https://circuit-crm.vercel.app/#/agents/${user.id}' style='text-decoration:none;padding:10px;background-color:green;text-align:center;margin:auto;margin-bottom:10px;color:white'>Check</a>
+            `)
             msg = "Report Sent Successfully";
             user.tasks[index].pendingDelete = true;
           }
@@ -479,10 +490,10 @@ module.exports = (app) => {
       const isWoo = Boolean(product.wid)
       if (isWoo) {
         try {
-          const d = await api.put(`products/${product.wid}`, { price, featured:product.featured, stock_quantity: Number(qty), manage_stock:true })
+          const d = await api.put(`products/${product.wid}`, { price, featured: product.featured, stock_quantity: Number(qty), manage_stock: true })
         } catch (error) {
           console.log(error)
-          console.log("Unable to Sync Product with id",product.id,"With Woo")
+          console.log("Unable to Sync Product with id", product.id, "With Woo")
         }
       }
       product.save();
@@ -537,6 +548,12 @@ module.exports = (app) => {
       });
       const admin = await User.findById(req.cookies.uid);
       Agent.reports.push({ content: `Task <b>${title}</b> Was assigned By ${admin.name}` })
+      sendMail(admin.email, Agent.email, "New Task Assignment", `
+          Task <b>${title}</b> Was assigned To You By ${admin.name}
+           <hr />
+           <h4>Details:</h4>
+           <p>${description}</p>
+      `)
       Agent.save();
 
       res.json({ newTask: Agent.tasks[Agent.tasks.length - 1] });
@@ -1032,11 +1049,11 @@ module.exports = (app) => {
         const product = await Product.findById(id);
         product.logs.push({ qty, cost, description: reason, date });
         product.qty += Number(qty);
-        if(Boolean(product.wid)){
+        if (Boolean(product.wid)) {
           try {
-            const p = await api.put(`products/${product.wid}`,{stock_quantity:product.qty,manage_stock:true})
+            const p = await api.put(`products/${product.wid}`, { stock_quantity: product.qty, manage_stock: true })
           } catch (error) {
-            console.log("Unable to Sync Product With Id",product.id)
+            console.log("Unable to Sync Product With Id", product.id)
           }
         }
         product.save();
