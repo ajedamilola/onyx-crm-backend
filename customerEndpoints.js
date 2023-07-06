@@ -1,5 +1,4 @@
-const { text } = require("express");
-const { Customer, User, Transfer, Order, api } = require("./database");
+const { Customer, User, Transfer, Order, api, Product } = require("./database");
 const { encode64, sendMail } = require("./functions");
 const nodemailer = require("nodemailer");
 module.exports = (app) => {
@@ -728,8 +727,20 @@ module.exports = (app) => {
         if (status >= 3) {
           delivery.ended = new Date();
         }
-        res.json({ delivery })
         delivery.save()
+        if (status == 3) {
+          delivery.items.forEach(async item => {
+            const product = await Product.findById(item.product)
+            if (product) {
+              product.qty -= item.qty;
+              product.save()
+              if (Boolean(product.wid)) {
+                await api.put(`products/${product.wid}`, { stock_quantity: Number(product.qty), manage_stock: true })
+              }
+            }
+          })
+        }
+        res.json({ delivery })
       } catch (err) {
         console.log(err)
         res.json({ err: "An Error Occured" })
