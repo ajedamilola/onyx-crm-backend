@@ -832,7 +832,8 @@ module.exports = (app) => {
         }
         data.words_amt = toWords.convert(total)
         order.save();
-        sendMail(`${user.name}<${user.email}>`, customer?.email || "ajedamilola2005@gmail.com", paid ? "Purchase Reciept" : "PROFORMA INVOICE", "", "invoice", data);
+        // const name = order.billing.first_name + " " +  order.billing.last_name
+        sendMail(`${user.name}<${user.email}>`, order.billing.email, paid ? "Purchase Reciept" : "PROFORMA INVOICE", "", "invoice", data,  customer?.email || "ajedamilola2005@gmail.com");
         res.json({ order })
       } catch (err) {
         console.log(err)
