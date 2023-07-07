@@ -48,11 +48,35 @@ require("./customerEndpoints")(app)
 //     console.log(val.err || "Email Check success");
 // });
 app.get("/test", (req, res) => {
-    sendMail("damilola@circuitcity.com.ng", "ajedamilola2005@gmail.com", "Weekly Report", "", "report", {
-        name: "Aje",
-        type: "Weekly",
-        image: "",
-        events: [{ content: "Demo", date: "12/may/2023", }]
+    const formatter = new Intl.NumberFormat("en-US");
+    const data = {
+        subtotal: 50000,
+        vat: 200,
+        total: 50200,
+        items: [
+            {
+                name: "Yam",
+                price: 200,
+                quantity:5
+            },
+            {
+                name: "Eggs",
+                price: 100,
+                quantity:6
+            }
+        ],
+        date:new Date().toDateString(),
+        inv_id:"23345-6678",
+        paid:true,
+        customer:"John Doe",
+        order_id:344
+    }
+    ejs.renderFile("templates/email/invoice.ejs", data, (err,html) => {
+        if(!err){
+            res.send(html);
+        }else{
+            console.log(err)
+            res.send(err)
+        }
     })
-    res.send("Ok")
 })

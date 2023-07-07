@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<% const formatter=new Intl.NumberFormat("en-US"); %>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Perfoma Invoice</title>
+    </head>
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid rgb(122, 122, 122);
+            border-collapse: collapse;
+        }
+
+        tr {
+            height: 40px;
+        }
+    </style>
+
+    <body style="margin: 20px 10%; font-family: poppins,'sans-serif';">
+        <div style="display: flex;justify-content: space-between;flex-direction: row;">
+            <div style="width: 45.5%;">
+                <img src="https://www.businesslist.com.ng/img/ng/n/1498070188-15-circuit-city-mall-ltd.jpg"
+                    style="width: min(50%,200px)" />
+                <div style="padding:5px;border: 1px solid #ccc; margin-bottom: 10px">
+                    Suite 201, Plot 308, The Kings
+                    Plaza, Ahmadu Bello Way, Kado
+                    Abuja- F.C.T
+                </div>
+                <div style="border: 1px solid #ccc;text-align: center;padding: 10px 0px;">
+                    Client Name: <b>
+                        <%= customer %>
+                    </b>
+                </div>
+
+            </div>
+            <div style="width: 5%;"></div>
+            <div style="width: 45.5%;">
+                <div
+                    style="padding: 0px 30px;background-color: #00cc44;font-weight: bold; font-size: 2.5em;color: white;text-align: center;">
+
+                    <% if (paid) { %>
+                        PAYMENT <br /> RECIEPT
+                        <% }else{ %>
+                            PROFORMA<br />INVOICE
+                            <% } %>
+                </div>
+                <table style="width: 100%;border-collapse: collapse;">
+                    <tr style="height: 40px;border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                        <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                            Date
+                        </th>
+                        <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                            No
+                        </th>
+                    </tr>
+                    <tr style="height: 40px;border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                        <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                            <%= date %>
+                        </th>
+                        <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                            <%= inv_id %>
+                        </th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <% if (paid) { %>
+            <div style="border: 1px solid #bbb; padding: 30px; text-align: center; margin: 20px 0px;">
+                Payment For Order <b>
+                    <%= order_id %>
+                </b>
+            </div>
+            <% }else{ %>
+                <u>
+                    <h2 style="text-align: center;">
+                        Quotation For Order <b>
+                            <%= order_id %>
+                        </b>
+                    </h2>
+                </u>
+                <% } %>
+                    <table style="width: 100%;text-align: center;border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                        <thead>
+                            <tr style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;height: 48px;">
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">S/N</th>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">Description</th>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">QTY</th>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">UNIT PRICE</th>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% items.forEach(item=>{ %>
+                                <tr style="height: 48px;border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                                    <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                                        <%= items.indexOf(item)+1 %>
+                                    </td>
+                                    <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                                        <%= item.name %>
+                                    </td>
+                                    <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                                        <%= item.qty %>
+                                    </td>
+                                    <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                                        ₦<%= formatter.format(item.price) %>
+                                    </td>
+                                    <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                                        ₦<%= formatter.format(item.qty * item.price) %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                        <tfoot>
+                            <tr style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;height: 48px;">
+                                <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
+                                <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
+                                <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">Subtotal</th>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">₦<%= formatter.format(subtotal) %>
+                                </th>
+                            </tr>
+                            <tr style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;height: 48px;">
+                                <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">VAT 7.5%</th>
+                                <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
+                                <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"><i>₦<%= formatter.format(vat) %></i></th>
+                            </tr>
+                            <tr style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;height: 48px;">
+                                <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></th>
+                                <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">TOTAL</th>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">₦<%= formatter.format(total) %>
+                                </th>
+                            </tr>
+                            <% if (!Boolean(paid)) { %>
+                                <tr style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;height: 48px;">
+                                    <td colspan="5">
+                                        Please Note that the price is subject to change due to price fluctuation
+                                    </td>
+                                </tr>
+                                <% } %>
+                        </tfoot>
+                    </table>
+                    <div style="padding: 10px 40px;border: 1px solid #bbb;text-align: center; margin: 20px 0px;">
+                        Amounts In Words: <b>
+                            <%= words_amt %>
+                        </b>
+                    </div>
+                    <% if (paid) { %>
+                        <div style="border: 1px solid #bbb;text-align: center;">
+                            <p style="font-size: 1.2em;padding: 10px 40px;">
+                                Payment Recieved From <b>
+                                    <%= customer %>
+                                </b>
+                            </p>
+                            <div
+                                style="border-top: 1px solid #ccc; background-color: #fafafa; padding: 10px;text-align: center;">
+                                THANK YOU FOR YOUR PROMPT PAYMENT.
+                            </div>
+                        </div>
+                        <% } else { %>
+                            <div style="padding: 10px 40px;border: 1px solid #bbb;text-align: center;">
+                                <u>Payment Details</u> <br /><br />
+                                Acct Name: <b>Circuit City Mall limited</b><br />
+                                Bank: <b>Access Bank</b><br />
+                                Acct No: <b>1224169175</b>
+                            </div>
+                            <% } %>
+                                <footer style="text-align: center;margin-top: 50px;">
+                                    Tel: <a href="tel:09030000123">09030000123</a> |
+                                    email: <a href="mailto:info@circuitcity.com.ng">info@circuitcity.com.ng</a>
+                                    | website:
+                                    <a href="https://circuitcity.com.ng">circuitcity.com.ng</a>
+                                    <br />
+                                    <small style="padding-top: 30px;">This Invoice Was Auto-Generated With Circuit City
+                                        CRM</small>
+                                </footer>
+    </body>
+
+</html>

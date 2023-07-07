@@ -1,6 +1,8 @@
 const { Customer, User, Transfer, Order, api, Product } = require("./database");
 const { encode64, sendMail } = require("./functions");
 const nodemailer = require("nodemailer");
+const random = require("randomstring")
+const { ToWords } = require("to-words")
 module.exports = (app) => {
   const plans = [
     {
@@ -741,6 +743,97 @@ module.exports = (app) => {
           })
         }
         res.json({ delivery })
+      } catch (err) {
+        console.log(err)
+        res.json({ err: "An Error Occured" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+  })
+
+  app.patch("/order", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const { _id, status } = req.body;
+        const order = await Order.findById(_id);
+        order.status = status || order.status;
+        order.save()
+        res.json({ order })
+      } catch (err) {
+        console.log(err)
+        res.json({ err: "An Error Occured" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+  })
+
+  app.post("/invoice", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const toWords = new ToWords({
+          localeCode: 'en-NG',
+          converterOptions: {
+            currency: true,
+            ignoreDecimal: false,
+            ignoreZeroCurrency: false,
+            doNotAddOnly: false,
+            currencyOptions: { // can be used to override defaults for the selected locale
+              name: 'Naira',
+              plural: 'Naira',
+              symbol: '₦',
+              fractionalUnit: {
+                name: 'Kobo',
+                plural: 'Kobo',
+                symbol: 'K',
+              },
+            }
+          }
+        })
+        const user = await User.findById(uid)
+        const { orderId, paid } = req.body;
+        const order = await Order.findById(orderId);
+        const inv_id = random.generate({ charset: "numeric", length: 6 }) + "-" + random.generate({ charset: "numeric", length: 3 });
+        const data = {
+          subtotal: 0,
+          vat: 0,
+          total: 0,
+          items: [],
+          date: new Date().toDateString(),
+          inv_id,
+          paid,
+          customer: "",
+          order_id: order.wid,
+          words_amt: ""
+        }
+        let subtotal = 0;
+        let vat = 0;
+        let total = 0;
+        data.items = await Promise.all(order.lineItems.map(async item => {
+          const product = await Product.findOne({ wid: item.productId });
+          subtotal += product.price * item.quantity;
+          return { name: product?.name || "Not Found", price: product.price, qty: item.quantity }
+        }))
+        const customer = await Customer.findOne({ wid: order.customer })
+        vat = subtotal * 0.075;
+        total = subtotal + vat;
+        data.subtotal = subtotal;
+        data.vat = vat;
+        data.total = total;
+        data.customer = customer?.name || "Not Found";
+        if (paid) {
+          order.recieptSent = true;
+        } else {
+          order.invoiceSent = true;
+        }
+        data.words_amt = toWords.convert(total)
+        order.save();
+        sendMail(`${user.name}<${user.email}>`, customer?.email || "ajedamilola2005@gmail.com", paid ? "Purchase Reciept" : "PROFORMA INVOICE", "", "invoice", data);
+        res.json({ order })
       } catch (err) {
         console.log(err)
         res.json({ err: "An Error Occured" })

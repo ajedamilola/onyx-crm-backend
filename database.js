@@ -314,7 +314,9 @@ const order = new mongoose.Schema({
   status: String,
   billing: mongoose.SchemaTypes.Mixed,
   shipping: mongoose.SchemaTypes.Mixed,
-  delivery: Boolean
+  delivery: Boolean,
+  invoiceSent:Boolean,
+  recieptSent:Boolean
 })
 
 const User = mongoose.model("user", userStructure);
