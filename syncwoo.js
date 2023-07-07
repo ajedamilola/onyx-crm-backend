@@ -47,7 +47,7 @@ async function Sync() {
         image: wooProduct.images[0]?.src,
         category: wooProduct.categories[0]?.name || "Uncategorized",
         qty: wooProduct.stock_quantity || 0,
-        wid: id
+        wid: id,
       });
       product.save();
     } else {

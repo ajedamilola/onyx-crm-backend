@@ -814,7 +814,7 @@ module.exports = (app) => {
         let vat = 0;
         let total = 0;
         data.items = await Promise.all(order.lineItems.map(async item => {
-          const product = await Product.findOne({ wid: item.productId });
+          const product = await Product.findOne({ $or:[{wid: item.productId},{_id:item.productId}] }) ;
           subtotal += product.price * item.quantity;
           return { name: product?.name || "Not Found", price: product.price, qty: item.quantity }
         }))
@@ -827,13 +827,14 @@ module.exports = (app) => {
         data.customer = customer?.name || "Not Found";
         if (paid) {
           order.recieptSent = true;
+          order.datePaid = new Date();
         } else {
           order.invoiceSent = true;
         }
         data.words_amt = toWords.convert(total)
         order.save();
         // const name = order.billing.first_name + " " +  order.billing.last_name
-        sendMail(`${user.name}<${user.email}>`, order.billing.email, paid ? "Purchase Reciept" : "PROFORMA INVOICE", "", "invoice", data,  customer?.email || "ajedamilola2005@gmail.com");
+        sendMail(`${user.name}<${user.email}>`, order.billing.email, paid ? "Purchase Reciept" : "PROFORMA INVOICE", "", "invoice", data, customer?.email || "ajedamilola2005@gmail.com");
         res.json({ order })
       } catch (err) {
         console.log(err)
@@ -842,6 +843,45 @@ module.exports = (app) => {
     } else {
       res.json({ err: "Unauthenticated Request" })
     }
+  })
+
+  app.post("/order", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const { cid, items, shipping } = req.body;
+        const customer = await Customer.findById(cid)
+
+        let total = 0;
+        const lineItems = await Promise.all(items.map(async it => {
+          const product = await Product.findById(it.product);
+          total += product?.price;
+          return ({ productId: it.product, quantity: it.qty, price: product?.price })
+        }))
+
+        console.log(lineItems)
+
+        const order = new Order({
+          lineItems,
+          billing: customer.address,
+          customer:cid,
+          shipping,
+          dateCreated: new Date(),
+          total,
+          totalTax: total * 0.075,
+          status:"processing"
+        })
+        order.save()
+        res.json({ order })
+      } catch (err) {
+        console.log(err)
+        res.json({ err: "An Error Occured" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+
   })
 
   //#endregion

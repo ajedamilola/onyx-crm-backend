@@ -1066,6 +1066,7 @@ module.exports = (app) => {
       res.json({ err: "Unauthenticated Request" })
     }
   })
+
 };
 
 function isInPriorMonth(date) {

@@ -301,7 +301,13 @@ const transfer = new mongoose.Schema({
 const order = new mongoose.Schema({
   wid: String,
   number: String,
-  orderKey: String,
+  orderKey: {
+    type:String,
+    default:()=>random.generate({
+      charset:"numeric",
+      length:7
+    })
+  },
   version: String,
   dateCreated: Date,
   dateModified: Date,
@@ -316,7 +322,7 @@ const order = new mongoose.Schema({
   shipping: mongoose.SchemaTypes.Mixed,
   delivery: Boolean,
   invoiceSent:Boolean,
-  recieptSent:Boolean
+  recieptSent:Boolean,
 })
 
 const User = mongoose.model("user", userStructure);
