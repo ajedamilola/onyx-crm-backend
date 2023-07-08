@@ -860,8 +860,6 @@ module.exports = (app) => {
           return ({ productId: it.product, quantity: it.qty, price: product?.price })
         }))
 
-        console.log(lineItems)
-
         const order = new Order({
           lineItems,
           billing: customer.address,

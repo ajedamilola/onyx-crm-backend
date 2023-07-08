@@ -118,7 +118,8 @@ module.exports = (app) => {
         sid,
         department,
         units,
-        canViewInventory
+        canViewInventory,
+        canCreateOrders
       } = req.body;
       const user = await User.findById(id);
       user.email = email;
@@ -131,6 +132,7 @@ module.exports = (app) => {
       user.department = Number(department);
       user.units = JSON.parse(units)
       user.canViewInventory = canViewInventory;
+      user.canCreateOrders = canCreateOrders;
       // user.account = account;
       if (req.files && req.files.image) {
         user.image =

@@ -113,6 +113,7 @@ const userStructure = new mongoose.Schema({
     default: () => new Date(),
     type: Date,
   },
+  canCreateOrders:Boolean,
   canAddCustomers: { type: Boolean, default: false },
   image: String,
   checkIns: [Date],
