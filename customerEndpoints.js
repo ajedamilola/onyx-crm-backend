@@ -704,7 +704,8 @@ module.exports = (app) => {
           status: 1,
           started: new Date()
         })
-        const order = await Order.findOne({ wid: wooOrderId });
+        console.log(wooOrderId)
+        const order = await Order.findOne({ $or: [{ wid: wooOrderId }, { orderKey: wooOrderId }] });
         order.delivery = true;
         order.save()
         delivery.save()
@@ -814,7 +815,7 @@ module.exports = (app) => {
         let vat = 0;
         let total = 0;
         data.items = await Promise.all(order.lineItems.map(async item => {
-          const product = await Product.findOne({ $or:[{wid: item.productId},{_id:item.productId}] }) ;
+          const product = await Product.findOne({ $or: [{ wid: item.productId }, { _id: item.productId }] });
           subtotal += product.price * item.quantity;
           return { name: product?.name || "Not Found", price: product.price, qty: item.quantity }
         }))
@@ -863,12 +864,12 @@ module.exports = (app) => {
         const order = new Order({
           lineItems,
           billing: customer.address,
-          customer:cid,
+          customer: cid,
           shipping,
           dateCreated: new Date(),
           total,
           totalTax: total * 0.075,
-          status:"processing"
+          status: "processing"
         })
         order.save()
         res.json({ order })
