@@ -761,6 +761,10 @@ module.exports = (app) => {
         const { _id, status } = req.body;
         const order = await Order.findById(_id);
         order.status = status || order.status;
+        if(Boolean(order.wid)){
+          api.put(`orders/${order.wid}`,{status})
+          // console.log(`/orders/${order.wid}`)
+        }
         order.save()
         res.json({ order })
       } catch (err) {

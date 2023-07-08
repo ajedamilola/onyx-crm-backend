@@ -550,7 +550,7 @@ module.exports = (app) => {
       });
       const admin = await User.findById(req.cookies.uid);
       Agent.reports.push({ content: `Task <b>${title}</b> Was assigned By ${admin.name}` })
-      sendMail(admin.email, Agent.email, "New Task Assignment", `
+      sendMail(`${admin.name} <${admin.email}>`, Agent.email, "New Task Assignment", `
           Task <b>${title}</b> Was assigned To You By ${admin.name}
            <hr />
            <h4>Details:</h4>
