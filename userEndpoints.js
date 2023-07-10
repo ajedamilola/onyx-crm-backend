@@ -1008,6 +1008,8 @@ module.exports = (app) => {
             isInRange = r.date.toDateString() == today.toDateString();
           }
           if (r.manual && isInRange) {
+            r.seen = true;
+            r.save();
             return { content: r.content, date: r.date.toDateString() }
           } else {
             return null
