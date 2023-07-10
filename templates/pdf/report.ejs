@@ -1,0 +1,31 @@
+<div style="max-width: 90%; margin: auto;">
+    <!-- <% if (Boolean(image) && image.includes("data")) { %>
+        <img style='width: 50px;height:50px;border-radius: 200px' src="<%- image %>" />
+    <% } %> -->
+    <h3 style="font-weight: bold; font-size: 1.2em;">
+        <%= name %>'s Report <span class='badge bg-info'>
+                (<%= type %>)
+            </span>
+    </h3>
+    <table style="width: 100vw; gap: 0px; text-align: center;background-color: white;margin: auto;border-radius: 20px;">
+        <thead>
+            <tr style="height: 50px;font-weight: bold;">
+                <th>#</th>
+                <th>Event</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% events.forEach((event)=>{ %>
+                <tr style="border-bottom: 1px solid #bbb;height: 50px;width: 100%;">
+                    <td style="text-align: center;"><%- events.indexOf(event)+1 %></td>
+                    <td style="text-align: center;"><%- event.content %></td>
+                    <td style="text-align: center;"><%- event.date %></td>
+                </tr>
+                <% }) %>
+        </tbody>
+    </table>
+
+</div>
+<hr />
+<small style="margin-top: 30px;">Generated From CRM</small>

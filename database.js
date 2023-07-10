@@ -134,7 +134,8 @@ const userStructure = new mongoose.Schema({
     due: Date,
     admin: String,
     reported: Boolean
-  }]
+  }],
+  reportFiles:[String]
 });
 
 const customerStructure = new mongoose.Schema({
@@ -368,5 +369,6 @@ module.exports = {
   Order,
   api,
   privilages,
-  userTypes
+  userTypes,
+  departments
 };

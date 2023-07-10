@@ -7,6 +7,14 @@ var Imap = require('imap')
 var { simpleParser } = require("mailparser")
 const ejs = require("ejs")
 const request = require("request")
+var pdfMake = require("pdfmake/build/pdfmake");
+var pdfFonts = require("pdfmake/build/vfs_fonts");
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
+var fs = require('fs');
+var jsdom = require("jsdom");
+var { JSDOM } = jsdom;
+var htmlToPdfMake = require("html-to-pdfmake");
+
 
 async function hashPassword(password) {
   return new Promise((resolve) => {
@@ -25,52 +33,7 @@ async function verifyPassword(password, hash) {
 }
 
 
-async function sendMail(sender, recipient, subject, body, template = "base", customData={}, cc="") {
-  const agent = await User.findOne({ email: sender });
-  // if (agent.mailPassword) {
-  //   const transporter = nodemailer.createTransport({
-  //     host: process.env.MAILSERVER,
-  //     // name:"",
-  //     port: 465,
-  //     secure: true, // true for 465, false for other ports
-  //     auth: {
-  //       user: sender, // generated ethereal user
-  //       // pass: agent.mailPassword, // generated ethereal password
-  //       pass: agent.mailPassword, // generated ethereal password
-  //     },
-  //     // tls:{
-  //     //   // servername:process.env.MAILSERVER,
-  //     //   rejectUnauthorized: true,
-  //     //   minVersion: "TLSv1.2"
-  //     // }
-  //   });
-
-  //   ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content: body, ...customData }, (err, html) => {
-  //     if (!err) {
-  //       const mailOptions = {
-  //         from: sender,
-  //         to: recipient,
-  //         subject,
-  //         html
-  //       };
-  //       require("fs").writeFileSync("test.html",html,{});
-  //       transporter.sendMail(mailOptions, (err, info) => {
-  //         if (err) {
-  //           console.log(err)
-  //         }else{
-  //           console.log("Mail Sent SUccessfully")
-  //         }
-  //         return err == null;
-  //       })
-  //     } else {
-  //       console.log(err)
-  //     }
-  //   })
-  // } else {
-  //   console.log("Mailpassword Not Set")
-  //   return false
-  // }
-  console.log("Import1")
+async function sendMail(sender, recipient, subject, body, template = "base", customData = {}, cc = "", attachments = {}) {
   ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content: body, ...customData }, (err, html) => {
     if (!err) {
       // require("fs").writeFileSync("temp.html", html, {});
@@ -80,14 +43,19 @@ async function sendMail(sender, recipient, subject, body, template = "base", cus
         subject,
         html
       };
+      const files = {}
+      Object.keys(attachments).forEach((key)=>{
+        files[key] = fs.createReadStream(attachments[key])
+      })
       request.post({
         url: "http://new.circuitcity.com.ng/send-mail.php",
-        form: {
+        formData: {
           title: subject,
-          content:html,
+          content: html,
           sender,
           recipient,
-          cc
+          cc,
+          ...files
         }
       }, (err, res, body) => {
         if (err) {
@@ -265,6 +233,19 @@ function isInCurrentWeek(date) {
   return date >= currentWeekStart && date <= currentWeekEnd;
 }
 
+const generatePDF = (htmlData = "<p>No Data,/p>", savePath) => new Promise((resolve, reject) => {
+  var { window } = new JSDOM("");
+  const pdfMakeData = htmlToPdfMake(htmlData,{window});
+  pdfMake.createPdf({
+    content: [pdfMakeData]
+  }).getBuffer(buffer => {
+    fs.writeFileSync(savePath,buffer)
+    resolve(true)
+  })
+
+
+})
+
 
 module.exports = {
   hashPassword,
@@ -273,5 +254,6 @@ module.exports = {
   sendMail,
   getDay,
   getInbox,
-  isInCurrentWeek
+  isInCurrentWeek,
+  generatePDF
 };
