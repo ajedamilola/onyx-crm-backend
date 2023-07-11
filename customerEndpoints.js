@@ -819,7 +819,7 @@ module.exports = (app) => {
         let vat = 0;
         let total = 0;
         data.items = await Promise.all(order.lineItems.map(async item => {
-          const product = await Product.findOne({ $or: [{ wid: item.productId }, { _id: item.productId }] });
+          const product = item.productId.length==24 ? await Product.findById(item.productId) : await Product.findOne({wid:item.productId})
           subtotal += product.price * item.quantity;
           return { name: product?.name || "Not Found", price: product.price, qty: item.quantity }
         }))

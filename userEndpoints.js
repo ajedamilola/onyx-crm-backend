@@ -653,8 +653,25 @@ module.exports = (app) => {
     //TODO: Add support for files attachment
     if (req.cookies.uid) {
       const { content, recipient } = req.body;
+      const files = []
+      if (req.files) {
+        if (typeof (req.files.k.length) == "number") {
+          req.files.k.forEach(file => {
+            const extension = file.mimetype.split("/")[1].split("+")[0];
+            const name = random.generate(20);
+            file.mv(process.env.FILE_ROOT + `/chat/${name}.${extension}`)
+            files.push(`${name}.${extension}`);
+          });
+        } else {
+          const file = req.files.k;
+          const extension = file.mimetype.split("/")[1].split("+")[0];
+          const name = random.generate(20);
+          file.mv(process.env.FILE_ROOT + `/chat/${name}.${extension}`)
+          files.push(`${name}.${extension}`);
+        }
+      }
       const chat = new Chat({
-        content, sender: req.cookies.uid, recipient, files: []
+        content, sender: req.cookies.uid, recipient, files
       })
       chat.save()
       res.json({ chat })
@@ -663,8 +680,20 @@ module.exports = (app) => {
     }
   });
 
-  app.delete("/chat", async (req, res) => {
-
+  app.delete("/chat/:id", async (req, res) => {
+    try {
+      const chat = await Chat.findById(req.params.id)
+      chat.files.forEach(file=>{
+        if(fs.existsSync(process.env.FILE_ROOT+`/chat/${file}`)){
+          fs.unlink(process.env.FILE_ROOT+`/chat/${file}`,()=>{})
+        }
+      })
+      chat.delete()
+      res.json({ msg: "Done" })
+    } catch (error) {
+      console.log(error)
+      res.json({ err: "An Error Occured" })
+    }
   });
 
   app.post("/request", async (req, res) => {
