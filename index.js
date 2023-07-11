@@ -33,9 +33,10 @@ corsOptions = {
 };
 process.title = "CircuitCity";
 
+app.use("/static",express.static(process.env.FILE_ROOT))
 app.use(require("body-parser")({ extended: false, limit: '7mb' }))
 app.use(require("cookie-parser")("secret"))
-app.use(require("cors")(corsOptions));
+app.use(require("cors")(corsOptions))
 app.use(require("express-fileupload")())
 require("./userEndpoints")(app);
 require("./customerEndpoints")(app)

@@ -658,7 +658,10 @@ module.exports = (app) => {
         if (typeof (req.files.k.length) == "number") {
           req.files.k.forEach(file => {
             const extension = file.mimetype.split("/")[1].split("+")[0];
-            const name = random.generate(20);
+            const name = (
+              extension == "png" || extension == "jpeg" || extension == "jpg" || extension == "webp" ||
+              extension == "svg" || extension == "gif" || extension == "jfif" || extension == "webm" || 
+              extension == "mp4" || extension == "avi" || extension == "m4a" || extension == "ogg" || extension == "mp3") ? random.generate(20) : file.name.substring(0,file.name.lastIndexOf("."));
             file.mv(process.env.FILE_ROOT + `/chat/${name}.${extension}`)
             files.push(`${name}.${extension}`);
           });
@@ -683,9 +686,9 @@ module.exports = (app) => {
   app.delete("/chat/:id", async (req, res) => {
     try {
       const chat = await Chat.findById(req.params.id)
-      chat.files.forEach(file=>{
-        if(fs.existsSync(process.env.FILE_ROOT+`/chat/${file}`)){
-          fs.unlink(process.env.FILE_ROOT+`/chat/${file}`,()=>{})
+      chat.files.forEach(file => {
+        if (fs.existsSync(process.env.FILE_ROOT + `/chat/${file}`)) {
+          fs.unlink(process.env.FILE_ROOT + `/chat/${file}`, () => { })
         }
       })
       chat.delete()
