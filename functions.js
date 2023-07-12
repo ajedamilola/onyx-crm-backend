@@ -11,7 +11,7 @@ var fs = require('fs');
 const puppeteer = require("puppeteer");
 console.log("initializing Puppeter In the background")
 var browser = null;
- puppeteer.launch({ headless: "new" }).then((brow)=>{
+ puppeteer.launch({ headless: "new","args":["--no-sandbox"] }).then((brow)=>{
   browser = brow;
   console.log("puppeter Initialized! ✅✅")
 });
