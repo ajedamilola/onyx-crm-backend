@@ -9,12 +9,6 @@ const ejs = require("ejs")
 const request = require("request")
 var fs = require('fs');
 const puppeteer = require("puppeteer");
-console.log("initializing Puppeter In the background")
-var browser = null;
- puppeteer.launch({ headless: "new","args":["--no-sandbox"] }).then((brow)=>{
-  browser = brow;
-  console.log("puppeter Initialized! ✅✅")
-});
 
 async function hashPassword(password) {
   return new Promise((resolve) => {
@@ -233,6 +227,7 @@ function isInCurrentWeek(date) {
 }
 
 const generatePDF = async (htmlData = "<p>No Data,/p>", savePath) => {
+  const browser = await puppeteer.launch({ headless: "new","args":["--no-sandbox"] });
   const page = await browser.newPage();
   await page.setContent(htmlData, { waitUntil: "load" })
   const pdf = await page.pdf({ format: 'A4' });
