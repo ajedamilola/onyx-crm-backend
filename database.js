@@ -224,7 +224,11 @@ const chat = new mongoose.Schema({
   content: String,
   sender: String,
   recipient: String,
-  files: [String]
+  files: [String],
+  date:{
+    type:String,
+    default:()=>new Date()
+  }
 });
 
 const request = new mongoose.Schema({

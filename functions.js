@@ -7,14 +7,14 @@ var Imap = require('imap')
 var { simpleParser } = require("mailparser")
 const ejs = require("ejs")
 const request = require("request")
-var pdfMake = require("pdfmake/build/pdfmake");
-var pdfFonts = require("pdfmake/build/vfs_fonts");
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
 var fs = require('fs');
-var jsdom = require("jsdom");
-var { JSDOM } = jsdom;
-var htmlToPdfMake = require("html-to-pdfmake");
-
+const puppeteer = require("puppeteer");
+console.log("initializing Puppeter In the background")
+var browser = null;
+ puppeteer.launch({ headless: "new" }).then((brow)=>{
+  browser = brow;
+  console.log("puppeter Initialized! ✅✅")
+});
 
 async function hashPassword(password) {
   return new Promise((resolve) => {
@@ -44,7 +44,7 @@ async function sendMail(sender, recipient, subject, body, template = "base", cus
         html
       };
       const files = {}
-      Object.keys(attachments).forEach((key)=>{
+      Object.keys(attachments).forEach((key) => {
         files[key] = fs.createReadStream(attachments[key])
       })
       request.post({
@@ -102,7 +102,6 @@ async function encode64(data, large = false, jpeg = false) {
 }
 
 var inlineBase64 = require("nodemailer-plugin-inline-base64");
-const { User } = require("./database");
 
 
 function getDay(index) {
@@ -233,19 +232,18 @@ function isInCurrentWeek(date) {
   return date >= currentWeekStart && date <= currentWeekEnd;
 }
 
-const generatePDF = (htmlData = "<p>No Data,/p>", savePath) => new Promise((resolve, reject) => {
-  var { window } = new JSDOM("");
-  const pdfMakeData = htmlToPdfMake(htmlData,{window});
-  pdfMake.createPdf({
-    content: [pdfMakeData]
-  }).getBuffer(buffer => {
-    fs.writeFileSync(savePath,buffer)
-    resolve(true)
-  })
+const generatePDF = async (htmlData = "<p>No Data,/p>", savePath) => {
+  const page = await browser.newPage();
+  await page.setContent(htmlData, { waitUntil: "load" })
+  const pdf = await page.pdf({ format: 'A4' });
+  fs.writeFile(savePath, pdf, () => { })
+  await page.close();
+  return true;
+}
 
-
+process.on("SIGQUIT",(e)=>{
+  console.log("Killed")
 })
-
 
 module.exports = {
   hashPassword,

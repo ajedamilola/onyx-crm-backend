@@ -1,5 +1,5 @@
 const express = require("express");
-const { sendMail } = require("./functions");
+const { sendMail, generatePDF } = require("./functions");
 const fs = require("fs")
 const https = require("https")
 const http = require("http")
@@ -49,35 +49,8 @@ require("./customerEndpoints")(app)
 //     console.log(val.err || "Email Check success");
 // });
 app.get("/test", (req, res) => {
-    const formatter = new Intl.NumberFormat("en-US");
-    const data = {
-        subtotal: 50000,
-        vat: 200,
-        total: 50200,
-        items: [
-            {
-                name: "Yam",
-                price: 200,
-                quantity:5
-            },
-            {
-                name: "Eggs",
-                price: 100,
-                quantity:6
-            }
-        ],
-        date:new Date().toDateString(),
-        inv_id:"23345-6678",
-        paid:true,
-        customer:"John Doe",
-        order_id:344
-    }
-    ejs.renderFile("templates/email/invoice.ejs", data, (err,html) => {
-        if(!err){
-            res.send(html);
-        }else{
-            console.log(err)
-            res.send(err)
-        }
+    ejs.renderFile("templates/email/base.ejs",{content:"Hello Woorld"},(err,sty)=>{
+        generatePDF(sty,"test.pdf")
+        res.send("Done")
     })
 })

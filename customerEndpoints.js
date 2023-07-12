@@ -1,8 +1,9 @@
 const { Customer, User, Transfer, Order, api, Product } = require("./database");
-const { encode64, sendMail } = require("./functions");
+const { encode64, sendMail, generatePDF } = require("./functions");
 const nodemailer = require("nodemailer");
 const random = require("randomstring")
 const { ToWords } = require("to-words")
+const ejs = require("ejs")
 module.exports = (app) => {
   const plans = [
     {
@@ -812,7 +813,7 @@ module.exports = (app) => {
           inv_id,
           paid,
           customer: "",
-          order_id: order.wid,
+          order_id: order.wid || order.orderKey,
           words_amt: ""
         }
         let subtotal = 0;
@@ -839,7 +840,11 @@ module.exports = (app) => {
         data.words_amt = toWords.convert(total)
         order.save();
         // const name = order.billing.first_name + " " +  order.billing.last_name
-        sendMail(`${user.name}<${user.email}>`, order.billing.email, paid ? "Purchase Reciept" : "PROFORMA INVOICE", "", "invoice", data, customer?.email || "ajedamilola2005@gmail.com");
+        const path = `${process.env.FILE_ROOT}/${paid?"reciepts":"invoices"}/${inv_id}.pdf`;
+        const rawInvoiceHTML = await ejs.renderFile("templates/email/invoice.ejs",data);
+        await generatePDF(rawInvoiceHTML,path);
+        const attachments = [path]
+        sendMail(`${user.name}<${user.email}>`, order?.billing?.email || "", paid ? "Purchase Reciept" : "PROFORMA INVOICE", `Find the Attachment Below For Invoice <b>${inv_id}</b>`, "base", {}, customer?.email || "ajedamilola2005@gmail.com",attachments);
         res.json({ order })
       } catch (err) {
         console.log(err)

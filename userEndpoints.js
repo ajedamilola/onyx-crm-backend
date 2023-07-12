@@ -175,10 +175,12 @@ module.exports = (app) => {
         const annoucements = await Annoucement.find({});
         const orders = await Order.find({});
         const deliveries = await Transfer.find({})
-        const chats = await Chat.find().or([
-          { "recipient": user.id },
-          { "sender": user.id }
-        ])
+        const chats = await Chat.find({
+          $or: [
+            { "recipient": user.id },
+            { "sender": user.id }
+          ]
+        }).sort({date:-1}).limit(100)
         res.cookie("uid", user.id, {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
@@ -230,6 +232,13 @@ module.exports = (app) => {
         const annoucements = await Annoucement.find({});
         const orders = await Order.find({})
         const deliveries = await Transfer.find({})
+        const chats = await Chat.find({
+          $or: [
+            { "recipient": user.id },
+            { "sender": user.id }
+          ]
+        }).sort({date:-1}).limit(100)
+
         res.cookie("uid", user.id, {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
@@ -254,7 +263,8 @@ module.exports = (app) => {
           emails,
           tickets,
           orders,
-          deliveries
+          deliveries,
+          chats
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });
@@ -660,8 +670,8 @@ module.exports = (app) => {
             const extension = file.mimetype.split("/")[1].split("+")[0];
             const name = (
               extension == "png" || extension == "jpeg" || extension == "jpg" || extension == "webp" ||
-              extension == "svg" || extension == "gif" || extension == "jfif" || extension == "webm" || 
-              extension == "mp4" || extension == "avi" || extension == "m4a" || extension == "ogg" || extension == "mp3") ? random.generate(20) : file.name.substring(0,file.name.lastIndexOf("."));
+              extension == "svg" || extension == "gif" || extension == "jfif" || extension == "webm" ||
+              extension == "mp4" || extension == "avi" || extension == "m4a" || extension == "ogg" || extension == "mp3") ? random.generate(20) : file.name.substring(0, file.name.lastIndexOf("."));
             file.mv(process.env.FILE_ROOT + `/chat/${name}.${extension}`)
             files.push(`${name}.${extension}`);
           });
