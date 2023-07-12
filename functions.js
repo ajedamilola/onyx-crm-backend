@@ -232,7 +232,7 @@ const generatePDF = async (htmlData = "<p>No Data,/p>", savePath) => {
   await page.setContent(htmlData, { waitUntil: "load" })
   const pdf = await page.pdf({ format: 'A4' });
   fs.writeFile(savePath, pdf, () => { })
-  await page.close();
+  await browser.close()
   return true;
 }
 
