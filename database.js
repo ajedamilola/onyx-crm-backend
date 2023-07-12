@@ -348,7 +348,14 @@ const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:
 const dbName = process.env.NODE_ENV == "development" ? "circuit-crm" : "circuitcity";
 console.log(connString)
 mongoose.set('strictQuery', false)
-mongoose.connect(connString, { dbName }, (err) => {
+mongoose.connect(connString, { dbName }, async (err) => {
+  if(!err){
+    let info = await Info.findOne()
+    if(!info){
+      info = new Info({balance:0,transactions:[]});
+      info.save()
+    }
+  }
   return console.log("Database", err ? "Connection Failed with " + err : "Connection Successful");
 })
 
@@ -371,6 +378,7 @@ module.exports = {
   Ticket,
   Transfer,
   Order,
+  Info,
   api,
   privilages,
   userTypes,

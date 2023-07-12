@@ -236,10 +236,6 @@ const generatePDF = async (htmlData = "<p>No Data,/p>", savePath) => {
   return true;
 }
 
-process.on("SIGQUIT",(e)=>{
-  console.log("Killed")
-})
-
 module.exports = {
   hashPassword,
   verifyPassword,
