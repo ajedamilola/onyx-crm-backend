@@ -4,4 +4,5 @@ temp.*
 .env
 nogit
 .todo
+..env.swp
 package-lock.json
