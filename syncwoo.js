@@ -178,8 +178,4 @@ setInterval(() => {
     Sync();
   }
 }, 1000 * 60 * 30)
-
-
-//TODO: Updaing Of Products To WOO
-//TODO: Fetching And Updating Of Orders
 module.exports = api;

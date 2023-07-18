@@ -25,7 +25,7 @@ const departments = [
       "E-marketing Unit",
     ]
   },
-  { name: "Logistics", units: ["Logistics support unit","Store"] },
+  { name: "Logistics", units: ["Logistics support unit", "Store"] },
   {
     name: "Admin", units: [
       "HR",
@@ -108,12 +108,12 @@ const userStructure = new mongoose.Schema({
   privilage: Number,
   canAddProducts: { type: Boolean, default: false },
   account: { type: Boolean, default: false },
-  canViewInventory:Boolean,
+  canViewInventory: Boolean,
   dateAdded: {
     default: () => new Date(),
     type: Date,
   },
-  canCreateOrders:Boolean,
+  canCreateOrders: Boolean,
   canAddCustomers: { type: Boolean, default: false },
   image: String,
   checkIns: [Date],
@@ -135,7 +135,7 @@ const userStructure = new mongoose.Schema({
     admin: String,
     reported: Boolean
   }],
-  reportFiles:[String]
+  reportFiles: [String]
 });
 
 const customerStructure = new mongoose.Schema({
@@ -191,10 +191,10 @@ const productLog = new mongoose.Schema({
   },
   description: String,
   qty: Number,
-  cost:Number,
-  ref:{
-    type:String,
-    default:()=>random.generate({length:4,charset:"numeric"})
+  cost: Number,
+  ref: {
+    type: String,
+    default: () => random.generate({ length: 4, charset: "numeric" })
   }
 })
 const productsStructure = new mongoose.Schema({
@@ -225,9 +225,9 @@ const chat = new mongoose.Schema({
   sender: String,
   recipient: String,
   files: [String],
-  date:{
-    type:String,
-    default:()=>new Date()
+  date: {
+    type: Date,
+    default: () => new Date()
   }
 });
 
@@ -289,18 +289,18 @@ const transfer = new mongoose.Schema({
   completed: Boolean,
   customer: String,
   order: String,
-  ref:{
-    type:String,
-    default:()=>random.generate({charset:"numeric",length:6})
+  ref: {
+    type: String,
+    default: () => random.generate({ charset: "numeric", length: 6 })
   },
-  status:Number,
-  started:{
-    type:Date,
-    default:()=>new Date()
+  status: Number,
+  started: {
+    type: Date,
+    default: () => new Date()
   },
-  ended:{
-    type:Date,
-    default:()=>new Date()
+  ended: {
+    type: Date,
+    default: () => new Date()
   }
 })
 
@@ -308,10 +308,10 @@ const order = new mongoose.Schema({
   wid: String,
   number: String,
   orderKey: {
-    type:String,
-    default:()=>random.generate({
-      charset:"numeric",
-      length:7
+    type: String,
+    default: () => random.generate({
+      charset: "numeric",
+      length: 7
     })
   },
   version: String,
@@ -327,8 +327,37 @@ const order = new mongoose.Schema({
   billing: mongoose.SchemaTypes.Mixed,
   shipping: mongoose.SchemaTypes.Mixed,
   delivery: Boolean,
-  invoiceSent:Boolean,
-  recieptSent:Boolean,
+  invoiceSent: Boolean,
+  recieptSent: Boolean,
+})
+
+const partPayment = new mongoose.Schema({
+  target: Number,
+  customer: String,
+  targetDate: String,
+  expense: Boolean,
+  initiator: String,
+  ref:{
+    type:String,
+    default:()=>random.generate(7).toUpperCase(),
+  },
+  payments: [{
+    amount: Number,
+    date: Date,
+    successful: Boolean,
+    pending: Boolean,
+    /**
+     * Reason Transaction Is Pending so pending must be true to display this message
+     */
+    reason:String,
+    ref:{
+      type:String,
+      default:()=>random.generate({
+        length:7,
+        charset:"numerical"
+      })
+    }
+  }],
 })
 
 const User = mongoose.model("user", userStructure);
@@ -338,10 +367,11 @@ const Category = mongoose.model("category", category);
 const Chat = mongoose.model("chat", chat);
 const Annoucement = mongoose.model("announcement", announcement);
 const Request = mongoose.model("request", request);
-const Info = mongoose.model("information", info);
+const Info = mongoose.model("account_info", info);
 const Ticket = mongoose.model("ticket", ticket)
 const Transfer = mongoose.model("delivery", transfer);
 const Order = mongoose.model("order", order);
+const PartPayment = mongoose.model("part_payment", partPayment);
 
 // const dbName  = "main";
 const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb://crud:dbnetrix%23%40@127.0.0.1:27017/?authMechanism=DEFAULT"
@@ -349,10 +379,10 @@ const dbName = process.env.NODE_ENV == "development" ? "circuit-crm" : "circuitc
 console.log(connString)
 mongoose.set('strictQuery', false)
 mongoose.connect(connString, { dbName }, async (err) => {
-  if(!err){
+  if (!err) {
     let info = await Info.findOne()
-    if(!info){
-      info = new Info({balance:0,transactions:[]});
+    if (!info) {
+      info = new Info({ balance: 0, transactions: [] });
       info.save()
     }
   }
@@ -379,6 +409,7 @@ module.exports = {
   Transfer,
   Order,
   Info,
+  PartPayment,
   api,
   privilages,
   userTypes,

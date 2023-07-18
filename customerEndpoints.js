@@ -762,8 +762,8 @@ module.exports = (app) => {
         const { _id, status } = req.body;
         const order = await Order.findById(_id);
         order.status = status || order.status;
-        if(Boolean(order.wid)){
-          api.put(`orders/${order.wid}`,{status})
+        if (Boolean(order.wid)) {
+          api.put(`orders/${order.wid}`, { status })
           // console.log(`/orders/${order.wid}`)
         }
         order.save()
@@ -820,11 +820,11 @@ module.exports = (app) => {
         let vat = 0;
         let total = 0;
         data.items = await Promise.all(order.lineItems.map(async item => {
-          const product = item.productId.length==24 ? await Product.findById(item.productId) : await Product.findOne({wid:item.productId})
+          const product = item.productId.length == 24 ? await Product.findById(item.productId) : await Product.findOne({ wid: item.productId })
           subtotal += product.price * item.quantity;
           return { name: product?.name || "Not Found", price: product.price, qty: item.quantity }
         }))
-        const customer = await Customer.findOne({ wid: order.customer })
+        const customer = Boolean(order.wid) ? await Customer.findOne({ wid: order.customer }) : await Customer.findById(order.customer)
         vat = subtotal * 0.075;
         total = subtotal + vat;
         data.subtotal = subtotal;
@@ -840,11 +840,11 @@ module.exports = (app) => {
         data.words_amt = toWords.convert(total)
         order.save();
         // const name = order.billing.first_name + " " +  order.billing.last_name
-        const path = `${process.env.FILE_ROOT}/${paid?"reciepts":"invoices"}/${inv_id}.pdf`;
-        const rawInvoiceHTML = await ejs.renderFile("templates/email/invoice.ejs",data);
-        await generatePDF(rawInvoiceHTML,path);
+        const path = `${process.env.FILE_ROOT}/${paid ? "reciepts" : "invoices"}/${inv_id}.pdf`;
+        const rawInvoiceHTML = await ejs.renderFile("templates/email/invoice.ejs", data);
+        await generatePDF(rawInvoiceHTML, path);
         const attachments = [path]
-        sendMail(`${user.name}<${user.email}>`, order?.billing?.email || "", paid ? "Purchase Reciept" : "PROFORMA INVOICE", `Find the Attachment Below For Invoice <b>${inv_id}</b>`, "base", {}, customer?.email || "ajedamilola2005@gmail.com",attachments);
+        sendMail(`${user.name}<${user.email}>`, order?.billing?.email || customer?.email || "", paid ? "Purchase Reciept" : "PROFORMA INVOICE", `Find the Attachment Below For Invoice <b>${inv_id}</b>`, "base", {}, customer?.email || "", attachments);
         res.json({ order })
       } catch (err) {
         console.log(err)

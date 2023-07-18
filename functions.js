@@ -227,7 +227,7 @@ function isInCurrentWeek(date) {
 }
 
 const generatePDF = async (htmlData = "<p>No Data,/p>", savePath) => {
-  const browser = await puppeteer.launch({ headless: "new","args":["--no-sandbox"] });
+  const browser = await puppeteer.launch({ headless: "new", "args": ["--no-sandbox"] });
   const page = await browser.newPage();
   await page.setContent(htmlData, { waitUntil: "load" })
   const pdf = await page.pdf({ format: 'A4' });

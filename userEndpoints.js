@@ -13,6 +13,7 @@ const {
   api,
   departments,
   Info,
+  PartPayment,
 } = require("./database");
 const formatter = new Intl.NumberFormat("en-US");
 const random = require("randomstring")
@@ -674,16 +675,18 @@ module.exports = (app) => {
     if (uid) {
       try {
         const user = await User.findById(uid)
-        const allChats = await Chat.find({$or: [
-          { "recipient": user.id },
-          { "sender": user.id }
-        ]}).sort({date:-1})
+        const allChats = await Chat.find({
+          $or: [
+            { "recipient": user.id },
+            { "sender": user.id }
+          ]
+        }).sort({ date: -1 })
         const endIndex = Number(req.params.page) * 50;
         const startIndex = endIndex - 50;
-        const chats = allChats.slice(startIndex,endIndex);
+        const chats = allChats.slice(startIndex, endIndex);
         console.log(allChats)
-        res.json({chats})
-        
+        res.json({ chats })
+
       } catch (err) {
         console.log(err)
         res.json({ err: "An Error Occured" })
@@ -693,7 +696,6 @@ module.exports = (app) => {
     }
   })
   app.post("/chat", async (req, res) => {
-    //TODO: Add support for files attachment
     if (req.cookies.uid) {
       const { content, recipient } = req.body;
       const files = []
@@ -1234,6 +1236,48 @@ module.exports = (app) => {
     } else {
       res.json({ err: "Unauthenticated Request" })
     }
+  })
+
+  app.post("/payment", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const { targetAmount, type, targetDate, firstPayment, customer, reason } = req.body;
+        let payment = {};
+        const date = targetDate || new Date();
+        if (type == "expense") {
+          payment = new PartPayment({
+            target: targetAmount, targetDate: date, expense: true,
+            initiator: uid,
+            payments: [
+              {
+                amount: targetAmount,
+                date,
+                successful: true,
+                pending: false,
+                reason: reason
+              }
+            ]
+          })
+        } else {
+          payment = new PartPayment({
+            initiator: uid, target: targetAmount, expense: false,
+            initiator: uid, payments: [firstPayment], customer
+          })
+        }
+        user.reports.push(`Recorded An ${type=="expense" ? "<span class='text-warning'>Expense</span>" : "<span class='text-warning'>Income</span>"} With Payment Ref Of <b>${payment.ref}</b>`)
+        payment.save()
+        res.json({payment})
+
+      } catch (err) {
+        console.log(err)
+        res.json({ err: "An Error Occured" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+
   })
 
 };
