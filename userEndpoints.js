@@ -391,11 +391,11 @@ module.exports = (app) => {
     } catch (err) {
       res.json({ err: "Database Error Try again later" });
       const user = await User.findById(req.cookies.uid);
-      console.log("An Error Occured",{
-        user:{name:user.name,email:user.email,privilage:user.privilage,customers:user.customers,department:user.department,units:user.units},
-        task:req.headers.id,
-        cookie:req.cookies,
-        tasks:user.tasks,
+      console.log("An Error Occured", {
+        user: { name: user.name, email: user.email, privilage: user.privilage, customers: user.customers, department: user.department, units: user.units },
+        task: req.headers.id,
+        cookie: req.cookies,
+        tasks: user.tasks,
       })
       // console.log(new Date().toLocaleString(), "===>  ", err);
     }
@@ -1128,7 +1128,7 @@ module.exports = (app) => {
           }
         } else if (user.privilage == 1) {
           //Head Of Unit
-          const users = await User.find({ department: user.department, units: { $in: user.units }, privilage: 1 })
+          const users = await User.find({ department: user.department, units: { $in: user.units }, privilage: 0 })
           // console.log(users)
           const attachements = []
           await Promise.all(users.map(async user => {
@@ -1218,6 +1218,33 @@ module.exports = (app) => {
     }
   })
 
+  app.patch("/event", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const { id, content, date } = req.body
+        for (let i = 0; i < user.reports.length; i++) {
+          const report = user.reports[i];
+          if (report.id == id) {
+            report.content = content;
+            report.date = date;
+            report.edited = true;
+            break;
+          }
+        }
+        user.save()
+        res.json({ user })
+      } catch (err) {
+        console.log(err)
+        res.json({ err: "An Error Occured" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+
+  })
+
   app.post("/product-log", async (req, res) => {
     const { uid } = req.cookies;
     if (uid) {
@@ -1273,9 +1300,9 @@ module.exports = (app) => {
             initiator: uid, payments: [firstPayment], customer
           })
         }
-        user.reports.push(`Recorded An ${type=="expense" ? "<span class='text-warning'>Expense</span>" : "<span class='text-warning'>Income</span>"} With Payment Ref Of <b>${payment.ref}</b>`)
+        user.reports.push(`Recorded An ${type == "expense" ? "<span class='text-warning'>Expense</span>" : "<span class='text-warning'>Income</span>"} With Payment Ref Of <b>${payment.ref}</b>`)
         payment.save()
-        res.json({payment})
+        res.json({ payment })
 
       } catch (err) {
         console.log(err)

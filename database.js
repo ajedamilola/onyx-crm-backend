@@ -94,7 +94,8 @@ const report = new mongoose.Schema({
   content: String,
   date: { type: Date, default: () => new Date() },
   seen: { type: Boolean, default: false },
-  manual: Boolean
+  manual: Boolean,
+  edited:Boolean
 })
 
 const sentReport = new mongoose.Schema({ date: Date, rType: String, title: String })
