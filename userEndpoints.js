@@ -380,7 +380,7 @@ module.exports = (app) => {
             }
           });
         }
-
+        throw "Ur Papa"
         user.save();
         res.json({ msg: "Ok" });
       } else {
@@ -390,7 +390,14 @@ module.exports = (app) => {
       }
     } catch (err) {
       res.json({ err: "Database Error Try again later" });
-      console.log(new Date().toLocaleString(), "===>  ", err);
+      const user = await User.findById(req.cookies.uid);
+      console.log("An Error Occured",{
+        user:{name:user.name,email:user.email,privilage:user.privilage,customers:user.customers,department:user.department,units:user.units},
+        task:req.headers.id,
+        cookie:req.cookies,
+        tasks:user.tasks,
+      })
+      // console.log(new Date().toLocaleString(), "===>  ", err);
     }
   });
 
