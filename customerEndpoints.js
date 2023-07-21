@@ -1,9 +1,30 @@
-const { Customer, User, Transfer, Order, api, Product } = require("./database");
+const { Customer, User, Transfer, Order, api, Product, Info } = require("./database");
 const { encode64, sendMail, generatePDF } = require("./functions");
 const nodemailer = require("nodemailer");
 const random = require("randomstring")
 const { ToWords } = require("to-words")
 const ejs = require("ejs")
+
+const toWords = new ToWords({
+  localeCode: 'en-NG',
+  converterOptions: {
+    currency: true,
+    ignoreDecimal: false,
+    ignoreZeroCurrency: false,
+    doNotAddOnly: false,
+    currencyOptions: { // can be used to override defaults for the selected locale
+      name: 'Naira',
+      plural: 'Naira',
+      symbol: '₦',
+      fractionalUnit: {
+        name: 'Kobo',
+        plural: 'Kobo',
+        symbol: 'K',
+      },
+    }
+  }
+})
+
 module.exports = (app) => {
   const plans = [
     {
@@ -781,36 +802,19 @@ module.exports = (app) => {
     const { uid } = req.cookies;
     if (uid) {
       try {
-        const toWords = new ToWords({
-          localeCode: 'en-NG',
-          converterOptions: {
-            currency: true,
-            ignoreDecimal: false,
-            ignoreZeroCurrency: false,
-            doNotAddOnly: false,
-            currencyOptions: { // can be used to override defaults for the selected locale
-              name: 'Naira',
-              plural: 'Naira',
-              symbol: '₦',
-              fractionalUnit: {
-                name: 'Kobo',
-                plural: 'Kobo',
-                symbol: 'K',
-              },
-            }
-          }
-        })
+
         const user = await User.findById(uid)
         const { orderId, paid } = req.body;
         const order = await Order.findById(orderId);
         const inv_id = random.generate({ charset: "numeric", length: 6 }) + "-" + random.generate({ charset: "numeric", length: 3 });
+        order.invId = order.invId || inv_id
         const data = {
           subtotal: 0,
           vat: 0,
           total: 0,
           items: [],
           date: new Date().toDateString(),
-          inv_id,
+          inv_id:order.invId,
           paid,
           customer: "",
           order_id: order.wid || order.orderKey,
@@ -819,11 +823,16 @@ module.exports = (app) => {
         let subtotal = 0;
         let vat = 0;
         let total = 0;
+        let amountPaid = 0;
         data.items = await Promise.all(order.lineItems.map(async item => {
           const product = item.productId.length == 24 ? await Product.findById(item.productId) : await Product.findOne({ wid: item.productId })
           subtotal += product.price * item.quantity;
           return { name: product?.name || "Not Found", price: product.price, qty: item.quantity }
         }))
+        order.paymentHistory.forEach(history=>{
+          amountPaid += history.amount;
+        })
+        data.amountPaid = amountPaid;
         const customer = Boolean(order.wid) ? await Customer.findOne({ wid: order.customer }) : await Customer.findById(order.customer)
         vat = subtotal * 0.075;
         total = subtotal + vat;
@@ -840,7 +849,7 @@ module.exports = (app) => {
         data.words_amt = toWords.convert(total)
         order.save();
         // const name = order.billing.first_name + " " +  order.billing.last_name
-        const path = `${process.env.FILE_ROOT}/${paid ? "reciepts" : "invoices"}/${inv_id}.pdf`;
+        const path = `${process.env.FILE_ROOT}/${paid ? "reciepts" : "invoices"}/${order.invId}.pdf`;
         const rawInvoiceHTML = await ejs.renderFile("templates/email/invoice.ejs", data);
         await generatePDF(rawInvoiceHTML, path);
         const attachments = [path]
@@ -889,6 +898,94 @@ module.exports = (app) => {
     } else {
       res.json({ err: "Unauthenticated Request" })
     }
+
+  })
+
+  app.post("/order/payment", async (req, res) => {
+    const { id, amount, date } = req.body;
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const order = await Order.findById(id)
+        order.paymentHistory.push({
+          amount, date
+        })
+        user.reports.push({ content: `Added Payment Record On Order With Id <b>${order.orderKey}</b>` })
+
+        user.save()
+
+
+        //Receipt Control
+        const inv_id = random.generate({ charset: "numeric", length: 6 }) + "-" + random.generate({ charset: "numeric", length: 3 });
+        let subtotal = 0;
+        let vat = 0;
+        let total = 0;
+        const data = {
+          subtotal: 0,
+          vat: 0,
+          total: 0,
+          items: [],
+          date: new Date().toDateString(),
+          inv_id:order.invId || inv_id,
+          paid:false,
+          customer: "",
+          order_id: order.wid || order.orderKey,
+          words_amt: "",
+          amountPaid:0
+        }
+        data.items = await Promise.all(order.lineItems.map(async item => {
+          const product = item.productId.length == 24 ? await Product.findById(item.productId) : await Product.findOne({ wid: item.productId })
+          subtotal += product.price * item.quantity;
+          return { name: product?.name || "Not Found", price: product.price, qty: item.quantity }
+        }))
+        order.paymentHistory.forEach(history=>{
+          data.amountPaid += history.amount;
+        })
+        total = subtotal + vat;
+        vat = subtotal * 0.075;
+        if(data.amountPaid >= total){
+          data.paid = true;
+          order.status = "completed";
+        }
+        const customer = Boolean(order.wid) ? await Customer.findOne({ wid: order.customer }) : await Customer.findById(order.customer)
+        data.subtotal = subtotal;
+        data.vat = vat;
+        data.total = total;
+        data.customer = customer?.name || "Not Found";
+        order.datePaid = new Date();
+        data.words_amt = toWords.convert(total)
+        order.invId = order.invId || inv_id;
+        order.save();
+        // const name = order.billing.first_name + " " +  order.billing.last_name
+        const path = `${process.env.FILE_ROOT}/invoices/${order.invId}.pdf`;
+        const rawInvoiceHTML = await ejs.renderFile("templates/email/invoice.ejs", data);
+        await generatePDF(rawInvoiceHTML, path);
+        res.json({ order })
+
+        //Adding the Transaction History
+        const info  = await Info.findOne()
+        info.transactions.push({
+          title:"Order Payment",
+          description:"Payment Was Made For Order "+order.wid || order.orderKey,
+          amount,
+          sender:customer._id,
+          recipient:uid,
+          isCustomer:true
+        })
+        info.balance+=amount;
+        info.save();
+        const attachments = [path]
+        sendMail(`${user.name}<${user.email}>`,order?.billing?.email || customer?.email || "", order.status=="completed" ? "Purchase Reciept" : "PROFORMA INVOICE", `Find the Attachment Below For Invoice <b>${order.invId || inv_id}</b>`, "base", {}, customer?.email || "", attachments);
+        
+      } catch (err) {
+        console.log(err)
+        res.json({ err: "An Error Occured" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+
 
   })
 

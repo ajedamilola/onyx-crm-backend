@@ -95,7 +95,7 @@ const report = new mongoose.Schema({
   date: { type: Date, default: () => new Date() },
   seen: { type: Boolean, default: false },
   manual: Boolean,
-  edited:Boolean
+  edited: Boolean
 })
 
 const sentReport = new mongoose.Schema({ date: Date, rType: String, title: String })
@@ -330,6 +330,10 @@ const order = new mongoose.Schema({
   delivery: Boolean,
   invoiceSent: Boolean,
   recieptSent: Boolean,
+  paymentHistory: [{
+    amount: Number, date: Date
+  }],
+  invId:String
 })
 
 const partPayment = new mongoose.Schema({
@@ -338,9 +342,9 @@ const partPayment = new mongoose.Schema({
   targetDate: String,
   expense: Boolean,
   initiator: String,
-  ref:{
-    type:String,
-    default:()=>random.generate(7).toUpperCase(),
+  ref: {
+    type: String,
+    default: () => random.generate(7).toUpperCase(),
   },
   payments: [{
     amount: Number,
@@ -350,12 +354,12 @@ const partPayment = new mongoose.Schema({
     /**
      * Reason Transaction Is Pending so pending must be true to display this message
      */
-    reason:String,
-    ref:{
-      type:String,
-      default:()=>random.generate({
-        length:7,
-        charset:"numerical"
+    reason: String,
+    ref: {
+      type: String,
+      default: () => random.generate({
+        length: 7,
+        charset: "numerical"
       })
     }
   }],

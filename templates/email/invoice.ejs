@@ -83,19 +83,23 @@
                     </h2>
                 </u>
                 <% } %>
-                    <table style="width: 100%;text-align: center;border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                    <table
+                        style="width: 100%;text-align: center;border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
                         <thead>
                             <tr style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;height: 48px;">
                                 <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">S/N</th>
-                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">Description</th>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">Description
+                                </th>
                                 <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">QTY</th>
-                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">UNIT PRICE</th>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">UNIT PRICE
+                                </th>
                                 <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">TOTAL</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% items.forEach(item=>{ %>
-                                <tr style="height: 48px;border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
+                                <tr
+                                    style="height: 48px;border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
                                     <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">
                                         <%= items.indexOf(item)+1 %>
                                     </td>
@@ -119,27 +123,33 @@
                                 <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
                                 <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
                                 <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
-                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">Subtotal</th>
-                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">₦<%= formatter.format(subtotal) %>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">Subtotal
+                                </th>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">₦<%=
+                                        formatter.format(subtotal) %>
                                 </th>
                             </tr>
                             <tr style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;height: 48px;">
                                 <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
-                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">VAT 7.5%</th>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">VAT 7.5%
+                                </th>
                                 <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
                                 <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
-                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"><i>₦<%= formatter.format(vat) %></i></th>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"><i>₦<%=
+                                            formatter.format(vat) %></i></th>
                             </tr>
                             <tr style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;height: 48px;">
                                 <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
                                 <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></th>
                                 <td style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;"></td>
                                 <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">TOTAL</th>
-                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">₦<%= formatter.format(total) %>
+                                <th style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;">₦<%=
+                                        formatter.format(total) %>
                                 </th>
                             </tr>
                             <% if (!Boolean(paid)) { %>
-                                <tr style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;height: 48px;">
+                                <tr
+                                    style="border: 1px solid rgb(122, 122, 122);border-collapse: collapse;height: 48px;">
                                     <td colspan="5">
                                         Please Note that the price is subject to change due to price fluctuation
                                     </td>
@@ -165,22 +175,34 @@
                             </div>
                         </div>
                         <% } else { %>
-                            <div style="padding: 10px 40px;border: 1px solid #bbb;text-align: center;">
-                                <u>Payment Details</u> <br /><br />
-                                Acct Name: <b>Circuit City Mall limited</b><br />
-                                Bank: <b>Access Bank</b><br />
-                                Acct No: <b>1224169175</b>
-                            </div>
-                            <% } %>
-                                <footer style="text-align: center;margin-top: 50px;">
-                                    Tel: <a href="tel:09030000123">09030000123</a> |
-                                    email: <a href="mailto:info@circuitcity.com.ng">info@circuitcity.com.ng</a>
-                                    | website:
-                                    <a href="https://circuitcity.com.ng">circuitcity.com.ng</a>
-                                    <br />
-                                    <small style="padding-top: 30px;">This Invoice Was Auto-Generated With Circuit City
-                                        CRM</small>
-                                </footer>
+                            <% if (amountPaid> 0) { %>
+                                <div
+                                    style="border: 1px solid #ccc; background-color: #fafafa; padding: 10px;text-align: center;">
+                                    Total Amount Paid : <b>
+                                        ₦<%= formatter.format(amountPaid) %>
+                                    </b><br />
+                                    Balance :<b>
+                                        ₦<%= formatter.format(total - amountPaid) %>
+                                    </b><br />
+                                </div>
+                                <% } %>
+                                    <div style="padding: 10px 40px;border: 1px solid #bbb;text-align: center;">
+                                        <u>Payment Details</u> <br /><br />
+                                        Acct Name: <b>Circuit City Mall limited</b><br />
+                                        Bank: <b>Access Bank</b><br />
+                                        Acct No: <b>1224169175</b>
+                                    </div>
+                                    <% } %>
+                                        <footer style="text-align: center;margin-top: 50px;">
+                                            Tel: <a href="tel:09030000123">09030000123</a> |
+                                            email: <a href="mailto:info@circuitcity.com.ng">info@circuitcity.com.ng</a>
+                                            | website:
+                                            <a href="https://circuitcity.com.ng">circuitcity.com.ng</a>
+                                            <br />
+                                            <small style="padding-top: 30px;">This Invoice Was Auto-Generated With
+                                                Circuit City
+                                                CRM</small>
+                                        </footer>
     </body>
 
 </html>
