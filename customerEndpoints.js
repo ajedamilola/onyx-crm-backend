@@ -967,7 +967,7 @@ module.exports = (app) => {
         const info  = await Info.findOne()
         info.transactions.push({
           title:"Order Payment",
-          description:"Payment Was Made For Order "+order.wid || order.orderKey,
+          description:`Payment Was Made For Order ${order.wid || order.orderKey}`,
           amount,
           sender:customer._id,
           recipient:uid,
@@ -987,6 +987,10 @@ module.exports = (app) => {
     }
 
 
+  })
+
+  app.get("/order/payment", (req,res)=>{
+    res.send("<h1>Hello</h1>")
   })
 
   //#endregion

@@ -78,7 +78,7 @@ module.exports = (app) => {
               err: "You do not have enough clearance for this action",
             });
           } else {
-            //good to go
+            
             const { name, email, privilage, password, sid, department, units } = req.body;
             const agent = new User({
               name,

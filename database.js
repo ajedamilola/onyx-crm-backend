@@ -256,7 +256,11 @@ const Transaction = new mongoose.Schema({
   amount: Number,
   sender: String,
   recipient: String,
-  isCustomer: Boolean
+  isCustomer: Boolean,
+  date: {
+    type: Date,
+    default: () => new Date()
+  }
 })
 
 const info = new mongoose.Schema({
@@ -333,7 +337,7 @@ const order = new mongoose.Schema({
   paymentHistory: [{
     amount: Number, date: Date
   }],
-  invId:String
+  invId: String
 })
 
 const partPayment = new mongoose.Schema({
