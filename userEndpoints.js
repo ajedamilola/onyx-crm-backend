@@ -369,7 +369,7 @@ module.exports = (app) => {
       const uid = req.cookies.uid;
       if (uid) {
         const user = await User.findById(uid);
-        const task = user.tasks.find((t) => t.id == req.headers.id);
+        const task = user.tasks.find(t => t._id == req.headers.id || t.id==req.headers.id);
         if (!task.bySuper) {
           user.reports.push({ content: `Deleted Task <b>${user.tasks.find((t) => t.id == req.headers.id).title}</b>` })
           user.tasks = user.tasks.filter((t) => t.id != req.headers.id);
@@ -380,7 +380,6 @@ module.exports = (app) => {
             }
           });
         }
-        throw "Ur Papa"
         user.save();
         res.json({ msg: "Ok" });
       } else {
