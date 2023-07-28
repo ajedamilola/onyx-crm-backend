@@ -250,7 +250,7 @@ const announcement = new mongoose.Schema({
   beyond: Boolean
 })
 
-const Transaction = new mongoose.Schema({
+const transaction = new mongoose.Schema({
   title: String,
   description: String,
   amount: Number,
@@ -264,10 +264,7 @@ const Transaction = new mongoose.Schema({
 })
 
 const info = new mongoose.Schema({
-  balance: Number,
-  transactions: [
-    Transaction
-  ]
+  balance: Number
 })
 
 const ticket = new mongoose.Schema({
@@ -381,6 +378,7 @@ const Ticket = mongoose.model("ticket", ticket)
 const Transfer = mongoose.model("delivery", transfer);
 const Order = mongoose.model("order", order);
 const PartPayment = mongoose.model("part_payment", partPayment);
+const Transaction = mongoose.model("transaction",transaction)
 
 // const dbName  = "main";
 const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb://crud:dbnetrix%23%40@127.0.0.1:27017/?authMechanism=DEFAULT"
@@ -419,6 +417,7 @@ module.exports = {
   Order,
   Info,
   PartPayment,
+  Transaction,
   api,
   privilages,
   userTypes,

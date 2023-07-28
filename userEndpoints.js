@@ -14,6 +14,7 @@ const {
   departments,
   Info,
   PartPayment,
+  Transaction,
 } = require("./database");
 const formatter = new Intl.NumberFormat("en-US");
 const random = require("randomstring")
@@ -178,8 +179,7 @@ module.exports = (app) => {
         const orders = await Order.find({});
         const deliveries = await Transfer.find({})
         const info = await Info.findOne()
-        info.transactions.reverse();
-        info.transactions = info.transactions.slice(0, 100)
+        const transactions = await Transaction.find().sort({$natural:-1}).limit(100)
         const chats = await Chat.find({
           $or: [
             { "recipient": user.id },
@@ -212,7 +212,10 @@ module.exports = (app) => {
           tickets,
           orders,
           deliveries,
-          info
+          info:{
+            balance:info.balance,
+            transactions
+          }
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });
@@ -239,8 +242,7 @@ module.exports = (app) => {
         const orders = await Order.find({})
         const deliveries = await Transfer.find({})
         const info = await Info.findOne()
-        info.transactions.reverse();
-        info.transactions = info.transactions.slice(0, 100)
+        const transactions = await Transaction.find().sort({$natural:-1}).limit(100)
 
         const chats = await Chat.find({
           $or: [
@@ -275,7 +277,10 @@ module.exports = (app) => {
           orders,
           deliveries,
           chats,
-          info
+          info:{
+            balance:info.balance,
+            transactions
+          }
         });
       } else {
         res.json({ err: "Invalid Credentials Procided" });
@@ -888,6 +893,21 @@ module.exports = (app) => {
               voucher.approveDate = new Date();
               msg = confirmed ? "Voucher Has Been Confirmed Successfully" : "Voucher Has Been Declined Successfully";
               user.reports.push({ content: `Voucher With Ref <b class='copy'>${voucher.code}</b> Was ${confirmed ? "<b class='text-success'>Confirmed</b>" : "<b class='text-danger'>Declined</b>"}` })
+              if(confirmed){
+                const transaction = new Transaction({
+                  amount:voucher.amount,
+                  sender:admin.id,
+                  recipient:user.id,
+                  date:new Date(),
+                  description:`Voucher <b>${voucher.code}</b> Worth <b>₦${formatter.format(voucher.amount)}</b> was accepted`,
+                  isCustomer:false,
+                  title:"Voucher Acceptance"
+                })
+                transaction.save()
+                const info = await Info.findOne()
+                info.balance-=voucher.amount;
+                info.save()
+              }
             } else {
               if (confirmed) {
                 voucher.pending = true;
