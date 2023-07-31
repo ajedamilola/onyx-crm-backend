@@ -814,7 +814,7 @@ module.exports = (app) => {
           total: 0,
           items: [],
           date: new Date().toDateString(),
-          inv_id:order.invId,
+          inv_id: order.invId,
           paid,
           customer: "",
           order_id: order.wid || order.orderKey,
@@ -829,7 +829,7 @@ module.exports = (app) => {
           subtotal += product.price * item.quantity;
           return { name: product?.name || "Not Found", price: product.price, qty: item.quantity }
         }))
-        order.paymentHistory.forEach(history=>{
+        order.paymentHistory.forEach(history => {
           amountPaid += history.amount;
         })
         data.amountPaid = amountPaid;
@@ -872,12 +872,13 @@ module.exports = (app) => {
         const { cid, items, shipping } = req.body;
         const customer = await Customer.findById(cid)
 
-        let total = 0;
+        let subtotal = 0;
         const lineItems = await Promise.all(items.map(async it => {
           const product = await Product.findById(it.product);
-          total += product?.price;
+          subtotal += product?.price * it.qty;
           return ({ productId: it.product, quantity: it.qty, price: product?.price })
         }))
+        const tax = subtotal * 0.075;
 
         const order = new Order({
           lineItems,
@@ -885,8 +886,8 @@ module.exports = (app) => {
           customer: cid,
           shipping,
           dateCreated: new Date(),
-          total,
-          totalTax: total * 0.075,
+          total: subtotal + tax,
+          totalTax: tax,
           status: "processing"
         })
         order.save()
@@ -927,24 +928,24 @@ module.exports = (app) => {
           total: 0,
           items: [],
           date: new Date().toDateString(),
-          inv_id:order.invId || inv_id,
-          paid:false,
+          inv_id: order.invId || inv_id,
+          paid: false,
           customer: "",
           order_id: order.wid || order.orderKey,
           words_amt: "",
-          amountPaid:0
+          amountPaid: 0
         }
         data.items = await Promise.all(order.lineItems.map(async item => {
           const product = item.productId.length == 24 ? await Product.findById(item.productId) : await Product.findOne({ wid: item.productId })
           subtotal += product.price * item.quantity;
           return { name: product?.name || "Not Found", price: product.price, qty: item.quantity }
         }))
-        order.paymentHistory.forEach(history=>{
+        order.paymentHistory.forEach(history => {
           data.amountPaid += history.amount;
         })
         total = subtotal + vat;
         vat = subtotal * 0.075;
-        if(data.amountPaid >= total){
+        if (data.amountPaid >= total) {
           data.paid = true;
           order.status = "completed";
         }
@@ -964,20 +965,20 @@ module.exports = (app) => {
         res.json({ order })
 
         //Adding the Transaction History
-        const info  = await Info.findOne()
+        const info = await Info.findOne()
         info.transactions.push({
-          title:"Order Payment",
-          description:`Payment Was Made For Order ${order.wid || order.orderKey}`,
+          title: "Order Payment",
+          description: `Payment Was Made For Order ${order.wid || order.orderKey}`,
           amount,
-          sender:customer._id,
-          recipient:uid,
-          isCustomer:true
+          sender: customer._id,
+          recipient: uid,
+          isCustomer: true
         })
-        info.balance+=amount;
+        info.balance += amount;
         info.save();
         const attachments = [path]
-        sendMail(`${user.name}<${user.email}>`,order?.billing?.email || customer?.email || "", order.status=="completed" ? "Purchase Reciept" : "PROFORMA INVOICE", `Find the Attachment Below For Invoice <b>${order.invId || inv_id}</b>`, "base", {}, customer?.email || "", attachments);
-        
+        sendMail(`${user.name}<${user.email}>`, order?.billing?.email || customer?.email || "", order.status == "completed" ? "Purchase Reciept" : "PROFORMA INVOICE", `Find the Attachment Below For Invoice <b>${order.invId || inv_id}</b>`, "base", {}, customer?.email || "", attachments);
+
       } catch (err) {
         console.log(err)
         res.json({ err: "An Error Occured" })
@@ -989,7 +990,7 @@ module.exports = (app) => {
 
   })
 
-  app.get("/order/payment", (req,res)=>{
+  app.get("/order/payment", (req, res) => {
     res.send("<h1>Hello</h1>")
   })
 

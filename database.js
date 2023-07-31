@@ -383,6 +383,9 @@ const Transaction = mongoose.model("transaction",transaction)
 // const dbName  = "main";
 const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb://crud:dbnetrix%23%40@127.0.0.1:27017/?authMechanism=DEFAULT"
 const dbName = process.env.NODE_ENV == "development" ? "circuit-crm" : "circuitcity";
+
+// const connString = "mongodb://crud:dbnetrix%23%40@139.84.233.172:27017/?authMechanism=DEFAULT"
+// const dbName = "circuitcity";
 console.log(connString)
 mongoose.set('strictQuery', false)
 mongoose.connect(connString, { dbName }, async (err) => {
