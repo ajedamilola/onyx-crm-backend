@@ -85,7 +85,7 @@ const voucher = new mongoose.Schema({
   approved: Boolean,
   message: String,
   date: Date,
-  approveDate: String,
+  approveDate: Date,
 
   confirmed: Boolean
 })
