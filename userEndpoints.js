@@ -374,13 +374,13 @@ module.exports = (app) => {
       const uid = req.cookies.uid;
       if (uid) {
         const user = await User.findById(uid);
-        const task = user.tasks.find(t => t._id == req.headers.id || t.id==req.headers.id);
+        const task = user.tasks.find(t => t.id==req.headers.id);
         if (!task.bySuper) {
           user.reports.push({ content: `Deleted Task <b>${user.tasks.find((t) => t.id == req.headers.id).title}</b>` })
           user.tasks = user.tasks.filter((t) => t.id != req.headers.id);
         } else {
           user.tasks.forEach((task) => {
-            if (task._id == req.headers.id) {
+            if (task.id == req.headers.id) {
               task.pendingDelete = true;
             }
           });
@@ -393,13 +393,14 @@ module.exports = (app) => {
         });
       }
     } catch (err) {
-      res.json({ err: "Database Error Try again later" });
+      res.json({ err: "Unknown Error Try again later" });
       const user = await User.findById(req.cookies.uid);
       console.log("An Error Occured", {
         user: { name: user.name, email: user.email, privilage: user.privilage, customers: user.customers, department: user.department, units: user.units },
         task: req.headers.id,
         cookie: req.cookies,
         tasks: user.tasks,
+        err,
       })
       // console.log(new Date().toLocaleString(), "===>  ", err);
     }

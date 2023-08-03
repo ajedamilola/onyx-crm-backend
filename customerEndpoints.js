@@ -629,14 +629,22 @@ module.exports = (app) => {
     try {
       const customer = await Customer.findById(customerid);
       var t = {};
-      customer.tasks.forEach((task) => {
-        if (task._id == taskid) {
-          task.comments.push({ content, sender })
-          t = task;
-        }
-      });
+      const task = customer.tasks.find(ta => ta.id == taskid)
+      task.comments.push({ content, sender })
+
+      if (req.files) {
+        Object.keys(req.files).forEach(key => {
+          const file = req.files[key]
+          const tm = Date.now()
+          customer.tasks[customer.tasks.indexOf(task)].comments[task.comments.length - 1].files.push(tm+"-"+file.name)
+          file.mv(`${process.env.FILE_ROOT}/customerTasks/${tm}-${file.name}`, (err) => {
+            if (!err) {
+            }
+          })
+        })
+      }
       customer.save();
-      res.json({ task: t });
+      res.json({ task });
     } catch (error) {
       console.log(error);
       res.json({ err: "Database Error Try again later" });

@@ -169,7 +169,12 @@ const customerStructure = new mongoose.Schema({
       admin: String,
       needPayment: Boolean,
       comments: [
-        { content: String, sender: String }
+        {
+          content: String, sender: String,
+          files: {
+            type: [String], default: []
+          }
+        }
       ]
     },
   ],
@@ -378,7 +383,7 @@ const Ticket = mongoose.model("ticket", ticket)
 const Transfer = mongoose.model("delivery", transfer);
 const Order = mongoose.model("order", order);
 const PartPayment = mongoose.model("part_payment", partPayment);
-const Transaction = mongoose.model("transaction",transaction)
+const Transaction = mongoose.model("transaction", transaction)
 
 // const dbName  = "main";
 const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb://crud:dbnetrix%23%40@127.0.0.1:27017/?authMechanism=DEFAULT"
