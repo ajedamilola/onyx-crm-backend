@@ -1135,6 +1135,7 @@ module.exports = (app) => {
             },
           });
           if (hous.length > 0) {
+            user.reports.push({content:`Sent A Report For the ${req.params.type} on ${new Date().toLocaleString()}`})
             user.sentReports.push({ date: new Date(), rType: req.params.type, title: req.body.title })
             hous.forEach(admin => {
               sendMail(user.email, admin.email, `${user.name}'s ${req.params.type} Report`, "", "report", {
