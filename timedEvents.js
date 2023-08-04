@@ -13,7 +13,7 @@ async function checkTasks() {
         //loop thorugh all thier tasks
 
         user.tasks.forEach(async task => {
-            if (task.bySuper) {
+            if (task.bySuper && !task.bySelf) {
                 const dueDate = task.date;
                 if (today > dueDate) {
                     //This Task is due add it to the list of task history
