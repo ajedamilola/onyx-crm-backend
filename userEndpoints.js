@@ -79,7 +79,7 @@ module.exports = (app) => {
               err: "You do not have enough clearance for this action",
             });
           } else {
-            
+
             const { name, email, privilage, password, sid, department, units } = req.body;
             const agent = new User({
               name,
@@ -179,7 +179,7 @@ module.exports = (app) => {
         const orders = await Order.find({});
         const deliveries = await Transfer.find({})
         const info = await Info.findOne()
-        const transactions = await Transaction.find().sort({$natural:-1}).limit(100)
+        const transactions = await Transaction.find().sort({ $natural: -1 }).limit(100)
         const chats = await Chat.find({
           $or: [
             { "recipient": user.id },
@@ -193,7 +193,7 @@ module.exports = (app) => {
           sameSite: "none"
         });
         const agents = (await User.find({})).map((u) =>
-          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department } : u
+          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department, units:u.units } : u
         );
         const emails = user.mailPassword ? await getInbox(user.email, user.mailPassword) : []
         const tickets = user.privilage < 1 ? await Ticket.find({ raiser: user._id }) : await Ticket.find({});
@@ -212,8 +212,8 @@ module.exports = (app) => {
           tickets,
           orders,
           deliveries,
-          info:{
-            balance:info.balance,
+          info: {
+            balance: info.balance,
             transactions
           }
         });
@@ -242,7 +242,7 @@ module.exports = (app) => {
         const orders = await Order.find({})
         const deliveries = await Transfer.find({})
         const info = await Info.findOne()
-        const transactions = await Transaction.find().sort({$natural:-1}).limit(100)
+        const transactions = await Transaction.find().sort({ $natural: -1 }).limit(100)
 
         const chats = await Chat.find({
           $or: [
@@ -258,7 +258,7 @@ module.exports = (app) => {
           sameSite: "none"
         });
         const agents = (await User.find({})).map((u) =>
-          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department } : u
+          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department, units:u.units } : u
         );
         const tickets = user.privilage < 1 ? await Ticket.find({ raiser: user._id }) : await Ticket.find({});
         const emails = await getInbox(user.email, user.mailPassword)
@@ -277,8 +277,8 @@ module.exports = (app) => {
           orders,
           deliveries,
           chats,
-          info:{
-            balance:info.balance,
+          info: {
+            balance: info.balance,
             transactions
           }
         });
@@ -350,6 +350,48 @@ module.exports = (app) => {
     }
   });
 
+  app.patch("/task/make-admin", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const { id, aid } = req.body;
+        const task = user.tasks.find(task => task.id == id)
+        task.bySuper = true
+        task.admin = aid;
+        task.bySelf = true;
+        user.save()
+        res.json({ task })
+      } catch (err) {
+        console.log(err)
+        res.json({ err: "An Error Occured" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+
+  })
+
+  app.patch("/task/admin-approve", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const { sid, tid } = req.body
+        const user = await User.findById(sid)
+        const task = user.tasks.find(t => t.id == tid)
+        task.bySelf = false;
+        user.save()
+        res.json({ user })
+      } catch (err) {
+        console.log(err)
+        res.json({ err: "An Error Occured" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+
+  })
+
   app.patch("/agent/doneTask", async (req, res) => {
     try {
       const { agent, task } = req.body;
@@ -374,7 +416,7 @@ module.exports = (app) => {
       const uid = req.cookies.uid;
       if (uid) {
         const user = await User.findById(uid);
-        const task = user.tasks.find(t => t.id==req.headers.id);
+        const task = user.tasks.find(t => t.id == req.headers.id);
         if (!task.bySuper) {
           user.reports.push({ content: `Deleted Task <b>${user.tasks.find((t) => t.id == req.headers.id).title}</b>` })
           user.tasks = user.tasks.filter((t) => t.id != req.headers.id);
@@ -894,19 +936,19 @@ module.exports = (app) => {
               voucher.approveDate = new Date();
               msg = confirmed ? "Voucher Has Been Confirmed Successfully" : "Voucher Has Been Declined Successfully";
               user.reports.push({ content: `Voucher With Ref <b class='copy'>${voucher.code}</b> Was ${confirmed ? "<b class='text-success'>Confirmed</b>" : "<b class='text-danger'>Declined</b>"}` })
-              if(confirmed){
+              if (confirmed) {
                 const transaction = new Transaction({
-                  amount:voucher.amount,
-                  sender:admin.id,
-                  recipient:user.id,
-                  date:new Date(),
-                  description:`Voucher <b>${voucher.code}</b> Worth <b>₦${formatter.format(voucher.amount)}</b> was accepted`,
-                  isCustomer:false,
-                  title:"Voucher Acceptance"
+                  amount: voucher.amount,
+                  sender: admin.id,
+                  recipient: user.id,
+                  date: new Date(),
+                  description: `Voucher <b>${voucher.code}</b> Worth <b>₦${formatter.format(voucher.amount)}</b> was accepted`,
+                  isCustomer: false,
+                  title: "Voucher Acceptance"
                 })
                 transaction.save()
                 const info = await Info.findOne()
-                info.balance-=voucher.amount;
+                info.balance -= voucher.amount;
                 info.save()
               }
             } else {
@@ -1135,7 +1177,7 @@ module.exports = (app) => {
             },
           });
           if (hous.length > 0) {
-            user.reports.push({content:`Sent A Report For the ${req.params.type} on ${new Date().toLocaleString()}`})
+            user.reports.push({ content: `Sent A Report For the ${req.params.type} on ${new Date().toLocaleString()}` })
             user.sentReports.push({ date: new Date(), rType: req.params.type, title: req.body.title })
             hous.forEach(admin => {
               sendMail(user.email, admin.email, `${user.name}'s ${req.params.type} Report`, "", "report", {

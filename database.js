@@ -104,7 +104,7 @@ const userStructure = new mongoose.Schema({
   email: String,
   password: String,
   customers: [mongoose.SchemaTypes.ObjectId],
-  tasks: [{ ...ContactInstance, bySuper: false, admin: String }],
+  tasks: [{ ...ContactInstance, bySuper: false, admin: String, bySelf:Boolean }],
   //privilages
   privilage: Number,
   canAddProducts: { type: Boolean, default: false },
