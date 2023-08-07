@@ -116,6 +116,7 @@ const userStructure = new mongoose.Schema({
   },
   canCreateOrders: Boolean,
   canAddCustomers: { type: Boolean, default: false },
+  isEngineer:Boolean,
   image: String,
   checkIns: [Date],
   signature: String,
@@ -136,7 +137,7 @@ const userStructure = new mongoose.Schema({
     admin: String,
     reported: Boolean
   }],
-  reportFiles: [String]
+  reportFiles: [String],
 });
 
 const customerStructure = new mongoose.Schema({

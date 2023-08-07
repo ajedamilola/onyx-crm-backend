@@ -626,28 +626,36 @@ module.exports = (app) => {
 
   app.post("/customer/task/comment", async (req, res) => {
     const { customerid, taskid, admin, content, sender } = req.body;
-    try {
-      const customer = await Customer.findById(customerid);
-      var t = {};
-      const task = customer.tasks.find(ta => ta.id == taskid)
-      task.comments.push({ content, sender })
+    const { uid } = req.cookies
+    if (uid) {
+      try {
+        const customer = await Customer.findById(customerid);
+        var t = {};
+        const task = customer.tasks.find(ta => ta.id == taskid)
+        task.comments.push({ content, sender })
 
-      if (req.files) {
-        Object.keys(req.files).forEach(key => {
-          const file = req.files[key]
-          const tm = Date.now()
-          customer.tasks[customer.tasks.indexOf(task)].comments[task.comments.length - 1].files.push(tm+"-"+file.name)
-          file.mv(`${process.env.FILE_ROOT}/customerTasks/${tm}-${file.name}`, (err) => {
-            if (!err) {
-            }
+        if (req.files) {
+          Object.keys(req.files).forEach(key => {
+            const file = req.files[key]
+            const tm = Date.now()
+            customer.tasks[customer.tasks.indexOf(task)].comments[task.comments.length - 1].files.push(tm + "-" + file.name)
+            file.mv(`${process.env.FILE_ROOT}/customerTasks/${tm}-${file.name}`, (err) => {
+              if (!err) {
+              }
+            })
           })
-        })
+        }
+        const user = await User.findById(uid)
+        user.reports.push({content:`Added A Report update on report with title <b>${task.title}</b>`})
+        user.save()
+        customer.save();
+        res.json({ task });
+      } catch (error) {
+        console.log(error);
+        res.json({ err: "Database Error Try again later" });
       }
-      customer.save();
-      res.json({ task });
-    } catch (error) {
-      console.log(error);
-      res.json({ err: "Database Error Try again later" });
+    } else {
+      res.json({ err: "Unable to authenticate Request. Re-Login and try again" })
     }
   })
 
