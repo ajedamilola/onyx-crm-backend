@@ -1203,6 +1203,7 @@ module.exports = (app) => {
               if (req.params.type == "week") {
                 isInRange = isInCurrentWeek(r.date);
               } else {
+                console.log(r)
                 isInRange = r.date.toDateString() == today.toDateString();
               }
               if (r.manual && isInRange) {
