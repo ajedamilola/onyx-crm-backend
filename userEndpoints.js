@@ -1200,10 +1200,12 @@ module.exports = (app) => {
             //Individuual Memebers Action
             const events = user.reports.map(r => {
               let isInRange = false;
+              if(!r.date){
+                console.log(r)
+              }
               if (req.params.type == "week") {
                 isInRange = isInCurrentWeek(r.date);
               } else {
-                console.log(r)
                 isInRange = r.date.toDateString() == today.toDateString();
               }
               if (r.manual && isInRange) {
