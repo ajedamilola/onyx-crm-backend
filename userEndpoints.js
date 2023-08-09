@@ -1201,7 +1201,7 @@ module.exports = (app) => {
             const events = user.reports.map(r => {
               let isInRange = false;
               if(!r.date){
-                console.log(r)
+                r.date = new Date()
               }
               if (req.params.type == "week") {
                 isInRange = isInCurrentWeek(r.date);
