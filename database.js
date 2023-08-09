@@ -98,6 +98,15 @@ const report = new mongoose.Schema({
   edited: Boolean
 })
 
+const leave = new mongoose.Schema({
+  type:Number,
+  approved:Boolean,
+  approvalDate:Boolean,
+  expiring:Boolean,
+  pending:Boolean,
+  admin:String
+})
+
 const sentReport = new mongoose.Schema({ date: Date, rType: String, title: String })
 const userStructure = new mongoose.Schema({
   name: String,
@@ -138,6 +147,7 @@ const userStructure = new mongoose.Schema({
     reported: Boolean
   }],
   reportFiles: [String],
+  leave
 });
 
 const customerStructure = new mongoose.Schema({
