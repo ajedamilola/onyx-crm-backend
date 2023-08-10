@@ -1399,7 +1399,7 @@ module.exports = (app) => {
         user.reports.push({ content: `Requested A <b>${leaveTypes[type]}</b> Leave` })
         const ad = await User.findById(admin)
         ad.reports.push({ content: `${user.name} Sent You a <b>${leaveTypes[type]} Leave</b>  Request` })
-        sendMail("cpms@circuitcity.com.ng", ad.email, "Leave Request", `${user.name} Sent you a <b>${leaveTypes[type]} Leave</b> Request
+        sendMail("crpms@circuitcity.com.ng", ad.email, "Leave Request", `${user.name} Sent you a <b>${leaveTypes[type]} Leave</b> Request
         <div style='text-align:center'>
           <a href='https://trixmanager.com/#/agents/${user._id}'><button style='padding:10px;background-color:green,border-width:0px'>See</button></a>
         </div>
