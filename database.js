@@ -99,12 +99,15 @@ const report = new mongoose.Schema({
 })
 
 const leave = new mongoose.Schema({
-  type:Number,
+  ltype:Number,
   approved:Boolean,
-  approvalDate:Boolean,
-  expiring:Boolean,
+  approvalDate:Date,
+  expiring:Date,
   pending:Boolean,
-  admin:String
+  admin:String,
+  request:Date,
+  open:Boolean,
+  reason:String
 })
 
 const sentReport = new mongoose.Schema({ date: Date, rType: String, title: String })
@@ -381,6 +384,7 @@ const partPayment = new mongoose.Schema({
     }
   }],
 })
+const leaveTypes = ["Standard","Emergency","Health"]
 
 const User = mongoose.model("user", userStructure);
 const Customer = mongoose.model("customer", customerStructure);
@@ -440,5 +444,6 @@ module.exports = {
   api,
   privilages,
   userTypes,
-  departments
+  departments,
+  leaveTypes
 };

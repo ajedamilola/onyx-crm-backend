@@ -15,6 +15,7 @@ const {
   Info,
   PartPayment,
   Transaction,
+  leaveTypes,
 } = require("./database");
 const formatter = new Intl.NumberFormat("en-US");
 const random = require("randomstring")
@@ -195,7 +196,7 @@ module.exports = (app) => {
           sameSite: "none"
         });
         const agents = (await User.find({})).map((u) =>
-          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department, units:u.units } : u
+          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department, units: u.units } : u
         );
         const emails = user.mailPassword ? await getInbox(user.email, user.mailPassword) : []
         const tickets = user.privilage < 1 ? await Ticket.find({ raiser: user._id }) : await Ticket.find({});
@@ -260,7 +261,7 @@ module.exports = (app) => {
           sameSite: "none"
         });
         const agents = (await User.find({})).map((u) =>
-          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department, units:u.units } : u
+          user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department, units: u.units } : u
         );
         const tickets = user.privilage < 1 ? await Ticket.find({ raiser: user._id }) : await Ticket.find({});
         const emails = await getInbox(user.email, user.mailPassword)
@@ -1200,7 +1201,7 @@ module.exports = (app) => {
             //Individuual Memebers Action
             const events = user.reports.map(r => {
               let isInRange = false;
-              if(!r.date){
+              if (!r.date) {
                 r.date = new Date()
               }
               if (req.params.type == "week") {
@@ -1380,6 +1381,62 @@ module.exports = (app) => {
       res.json({ err: "Unauthenticated Request" })
     }
 
+  })
+
+  app.post("/leave", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const user = await User.findById(uid)
+        const { type, admin, reason } = req.body;
+        user.leave = { open: true };
+        user.leave.admin = admin;
+        user.leave.pending = true;
+        user.leave.approved = false;
+        user.leave.ltype = type;
+        user.leave.reason = reason
+        user.leave.requestDate = new Date()
+        user.reports.push({ content: `Requested A <b>${leaveTypes[type]}</b> Leave` })
+        const ad = await User.findById(admin)
+        ad.reports.push({ content: `${user.name} Sent You a <b>${leaveTypes[type]} Leave</b>  Request` })
+        sendMail("cpms@circuitcity.com.ng", ad.email, "Leave Request", `${user.name} Sent you a <b>${leaveTypes[type]} Leave</b> Request
+        <div style='text-align:center'>
+          <a href='https://trixmanager.com/#/agents/${user._id}'><button style='padding:10px;background-color:green,border-width:0px'>See</button></a>
+        </div>
+        `)
+        ad.save()
+        user.save()
+        res.json({ user })
+      } catch (error) {
+        console.log(error)
+        res.json({ err: "Unknown error try again later" })
+      }
+    } else {
+      res.json({ err: 'Unauthenticated request re-login and try again' })
+    }
+  })
+
+  app.patch("/leave-status", async (req, res) => {
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        const { id, approved, date } = req.body;
+        const user = await User.findById(id)
+        user.leave.approved = approved
+        user.leave.pending = false;
+        user.leave.approvalDate = new Date()
+        user.leave.expiring = date
+        const admin = await User.findById(user.leave.admin);
+        user.save()
+        user.reports.push({ content: `Leave Request was ${approved ? "Accepted" : 'Rejected'} by ${admin.name}` })
+        res.json({leave:user.leave})
+      } catch (error) {
+        res.json({ err: "Unknown error try again later" })
+        console.log(error)
+      }
+    } else {
+      res.json({ err: "Unauthenticated Reqquest Re Login and try again later" })
+    }
   })
 
 };
