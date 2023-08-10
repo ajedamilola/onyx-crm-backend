@@ -1159,6 +1159,9 @@ module.exports = (app) => {
         if (user.privilage == 0) {
           const events = user.reports.map(r => {
             let isInRange = false;
+            if(r.date){
+              r.date = new Date()
+            }
             if (req.params.type == "week") {
               isInRange = isInCurrentWeek(r.date);
             } else {
@@ -1166,7 +1169,6 @@ module.exports = (app) => {
             }
             if (r.manual && isInRange) {
               r.seen = true;
-              r.save();
               return { content: r.content, date: r.date.toDateString() }
             } else {
               return null
