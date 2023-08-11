@@ -198,7 +198,8 @@ module.exports = (app) => {
         const agents = (await User.find({})).map((u) =>
           user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department, units: u.units } : u
         );
-        const emails = user.mailPassword ? await getInbox(user.email, user.mailPassword) : []
+        // const emails = user.mailPassword ? await getInbox(user.email, user.mailPassword) : []
+        const emails = []
         const tickets = user.privilage < 1 ? await Ticket.find({ raiser: user._id }) : await Ticket.find({});
 
         // console.log(emails)
@@ -211,7 +212,7 @@ module.exports = (app) => {
           agents,
           annoucements,
           chats,
-          emails,
+          // emails,
           tickets,
           orders,
           deliveries,
@@ -264,7 +265,8 @@ module.exports = (app) => {
           user.privilage < 1 ? { _id: u.id, image: u.image, name: u.name, privilage: u.privilage, department: u.department, units: u.units } : u
         );
         const tickets = user.privilage < 1 ? await Ticket.find({ raiser: user._id }) : await Ticket.find({});
-        const emails = await getInbox(user.email, user.mailPassword)
+        // const emails = user.mailPassword ?  await getInbox(user.email, user.mailPassword) : []
+        emails = []
         user.reports.push({ content: `Logged In` })
         user.save()
 

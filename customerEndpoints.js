@@ -492,12 +492,13 @@ module.exports = (app) => {
 
   app.patch("/customer", async (req, res) => {
     try {
-      const { name, email, company, phone, id, active, address, setUpCost, area } = req.body;
+      const { name, email, company, phone, id, active, address, setUpCost, area, engineer } = req.body;
       const customer = await Customer.findById(id);
       customer.name = name;
       customer.email = email;
       customer.company = company;
       customer.phone = phone;
+      customer.engineer = engineer;
       customer.address = address;
       customer.setUpCost = setUpCost;
       customer.area = area.toUpperCase() || customer.area
@@ -546,6 +547,27 @@ module.exports = (app) => {
       return res.json({ err: "Databse Error Try again later" });
     }
   });
+
+  app.post("/assignToEngineer", async (req, res) => {
+    try {
+      if (req.cookies.uid) {
+        const { customerId, agent } = req.body;
+        const customer = await Customer.findById(customerId);
+        customer.engineer = agent;
+        const user = await User.findById(agent)
+        user.reports.push({ content: `Customer ${customer.name} with Id <b class='copy'>${customer.code}</b> Was Assigned To An Engineer` })
+        user.save()
+        customer.save();
+        return res.json({ msg: "Ok" });
+      } else {
+        return res.json({ err: "Unathenticated Request" });
+      }
+    } catch (err) {
+      console.log(err);
+      return res.json({ err: "Databse Error Try again later" });
+    }
+  });
+
 
   app.post("/setIntervalMessage", async (req, res) => {
     try {
@@ -646,7 +668,7 @@ module.exports = (app) => {
           })
         }
         const user = await User.findById(uid)
-        user.reports.push({content:`Added A Report update on report with title <b>${task.title}</b>`})
+        user.reports.push({ content: `Added A Report update on report with title <b>${task.title}</b>` })
         user.save()
         customer.save();
         res.json({ task });

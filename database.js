@@ -168,6 +168,7 @@ const customerStructure = new mongoose.Schema({
   emails: [ContactInstance],
   purchases: [Purchase],
   handler: mongoose.SchemaTypes.ObjectId,
+  engineer: String,
   invitor: mongoose.SchemaTypes.ObjectId,
   mainProduct: mongoose.SchemaTypes.ObjectId,
   company: String,
