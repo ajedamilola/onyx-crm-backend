@@ -761,17 +761,19 @@ module.exports = (app) => {
       if (req.files) {
         if (typeof (req.files.k.length) == "number") {
           req.files.k.forEach(file => {
-            const extension = file.mimetype.split("/")[1].split("+")[0];
+            const splited = file.name.split(".")
+            const extension = splited[splited.length - 1];
             const name = (
               extension == "png" || extension == "jpeg" || extension == "jpg" || extension == "webp" ||
               extension == "svg" || extension == "gif" || extension == "jfif" || extension == "webm" ||
               extension == "mp4" || extension == "avi" || extension == "m4a" || extension == "ogg" || extension == "mp3") ? random.generate(20) : file.name.substring(0, file.name.lastIndexOf("."));
             file.mv(process.env.FILE_ROOT + `/chat/${name}.${extension}`)
-            files.push(`${name}.${extension}`);
+            files.push(name + "." + extension);
           });
         } else {
           const file = req.files.k;
-          const extension = file.mimetype.split("/")[1].split("+")[0];
+          const splited = file.name.split(".")
+          const extension = splited[splited.length - 1];
           const name = random.generate(20);
           file.mv(process.env.FILE_ROOT + `/chat/${name}.${extension}`)
           files.push(`${name}.${extension}`);
@@ -1161,7 +1163,7 @@ module.exports = (app) => {
         if (user.privilage == 0) {
           const events = user.reports.map(r => {
             let isInRange = false;
-            if(r.date){
+            if (r.date) {
               r.date = new Date()
             }
             if (req.params.type == "week") {
@@ -1433,7 +1435,7 @@ module.exports = (app) => {
         const admin = await User.findById(user.leave.admin);
         user.save()
         user.reports.push({ content: `Leave Request was ${approved ? "Accepted" : 'Rejected'} by ${admin.name}` })
-        res.json({leave:user.leave})
+        res.json({ leave: user.leave })
       } catch (error) {
         res.json({ err: "Unknown error try again later" })
         console.log(error)
