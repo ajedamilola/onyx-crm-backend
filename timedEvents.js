@@ -1,6 +1,7 @@
-const { User } = require("./database");
+const { User, leaveTypes } = require("./database");
 const { sendMail } = require("./functions");
-process.title = "CircuitCity_TimedJobs";
+process.title = "CircuitCity-BackgroundJobs";
+
 async function checkTasks() {
     const today = new Date();
     const users = await User.find();
@@ -61,7 +62,7 @@ async function checkTasks() {
                     ]
                 })
                 const cc = copies.map(a => a.email).join(",");
-                sendMail(user.email, hr.email, "Task Deadline Missed", "", "failedTask", {
+                sendMail("crpms@circuitcity.com.ng", hr.email, "Task Deadline Missed", "", "failedTask", {
                     name: user.name,
                     tasks: failed
                 }, cc)
@@ -76,8 +77,32 @@ async function checkTasks() {
     })
 }
 
+async function checkLeaves() {
+    const today = new Date();
+    const users = await User.find();
+    users.forEach(user=>{
+        if(user.leave && user.leave.open && !user.leave.pending && user.leave.approved){
+            //so this user has a leave that is active and ongoing
+            if(user.leave.expiring < today){
+                //Take Action and stop the leave
+                user.leave.open = false;
+                user.leave.pending = true;
+                user.leave.approved = false;
+                user.save()
+                sendMail("Circuit City CRPMS <crpms@circuitcity.com.ng>",user.email,"Leave Expiry",`
+                <div style='text-align:center'> 
+                Your <b>${leaveTypes[user.leave.ltype]}</b> leave Period has <b>EXPIRED</b> and you are expected to resume back to your duties<br />
+                <a href='https://trixmanager.com/'><button style='padding:7px 17px;background-color:green;border-width:0px; color:white'>View Dashboard</button></a>
+                </div>
+                `)
+            }
+        }
+    })
+}
+
 checkTasks()
-setInterval(()=>{
-    //High Priority Every 30 Minutes
+setInterval(() => {
+    //Medium Priority Background Events 2Hours
     checkTasks()
-},1000 * 60 * 30)
+    checkLeaves()
+}, 1000 * 60 * 60 * 2)
