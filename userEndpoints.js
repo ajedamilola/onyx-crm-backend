@@ -1165,7 +1165,7 @@ module.exports = (app) => {
         if (user.privilage == 0) {
           const events = user.reports.map(r => {
             let isInRange = false;
-            if (r.date) {
+            if (!r.date) {
               r.date = new Date()
             }
             if (req.params.type == "week") {
