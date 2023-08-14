@@ -128,7 +128,8 @@ module.exports = (app) => {
         units,
         canViewInventory,
         canCreateOrders,
-        isEngineer
+        isEngineer,
+        days
       } = req.body;
       const user = await User.findById(id);
       user.email = email;
@@ -143,6 +144,7 @@ module.exports = (app) => {
       user.canViewInventory = canViewInventory;
       user.canCreateOrders = canCreateOrders;
       user.isEngineer = isEngineer;
+      user.workDays = JSON.parse(days)
       // user.account = account;
       if (req.files && req.files.image) {
         user.image =
@@ -1394,7 +1396,7 @@ module.exports = (app) => {
     if (uid) {
       try {
         const user = await User.findById(uid)
-        const { type, admin, reason } = req.body;
+        const { type, admin, reason, date } = req.body;
         user.leave = { open: true };
         user.leave.admin = admin;
         user.leave.pending = true;
@@ -1402,6 +1404,16 @@ module.exports = (app) => {
         user.leave.ltype = type;
         user.leave.reason = reason
         user.leave.requestDate = new Date()
+        user.leave.expiring = date;
+        if (req.files && req.files.document) {
+          const { document } = req.files;
+          const segment = document.name.split(".")
+          const extension = segment[segment.length - 1]
+          const name = user.name.replace(/ /g,"-")
+          user.leave.document = `${name}.${extension}`
+          document.mv(process.env.FILE_ROOT + `/leaves/${name}.${extension}`, () => {
+          })
+        }
         user.reports.push({ content: `Requested A <b>${leaveTypes[type]}</b> Leave` })
         const ad = await User.findById(admin)
         ad.reports.push({ content: `${user.name} Sent You a <b>${leaveTypes[type]} Leave</b>  Request` })

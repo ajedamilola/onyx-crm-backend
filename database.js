@@ -99,15 +99,17 @@ const report = new mongoose.Schema({
 })
 
 const leave = new mongoose.Schema({
-  ltype:Number,
-  approved:Boolean,
-  approvalDate:Date,
-  expiring:Date,
-  pending:Boolean,
-  admin:String,
-  request:Date,
-  open:Boolean,
-  reason:String
+  ltype: Number,
+  approved: Boolean,
+  approvalDate: Date,
+  expiring: Date,
+  pending: Boolean,
+  admin: String,
+  request: Date,
+  open: Boolean,
+  reason: String,
+  expectedDate: Date,
+  document: String,
 })
 
 const sentReport = new mongoose.Schema({ date: Date, rType: String, title: String })
@@ -116,7 +118,7 @@ const userStructure = new mongoose.Schema({
   email: String,
   password: String,
   customers: [mongoose.SchemaTypes.ObjectId],
-  tasks: [{ ...ContactInstance, bySuper: false, admin: String, bySelf:Boolean }],
+  tasks: [{ ...ContactInstance, bySuper: false, admin: String, bySelf: Boolean }],
   //privilages
   privilage: Number,
   canAddProducts: { type: Boolean, default: false },
@@ -128,7 +130,7 @@ const userStructure = new mongoose.Schema({
   },
   canCreateOrders: Boolean,
   canAddCustomers: { type: Boolean, default: false },
-  isEngineer:Boolean,
+  isEngineer: Boolean,
   image: String,
   checkIns: [Date],
   signature: String,
@@ -150,7 +152,11 @@ const userStructure = new mongoose.Schema({
     reported: Boolean
   }],
   reportFiles: [String],
-  leave
+  leave,
+  workDays: {
+    type:[Number],
+    default:[1,2,3,4,5]
+  }
 });
 
 const customerStructure = new mongoose.Schema({
@@ -385,7 +391,7 @@ const partPayment = new mongoose.Schema({
     }
   }],
 })
-const leaveTypes = ["Standard","Emergency","Health"]
+const leaveTypes = ["Standard", "Emergency", "Health"]
 
 const User = mongoose.model("user", userStructure);
 const Customer = mongoose.model("customer", customerStructure);
