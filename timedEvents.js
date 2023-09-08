@@ -123,13 +123,13 @@ async function checkAttendance() {
      * @param {Number} days 
      */
     function alert(user, days) {
-        sendMail("Management System <cprms@circuitcity.com.ng>", user.email, "CRM Abscence",
+        sendMail("Management System <cprms@circuitcity.com.ng>", user.email, "CPRMS Abscence",
             `
             Hi ${user.name},
             <br /><br />
             We noticed that you have missed signing in for ${days} day(s). Please make sure to sign in regularly to keep track of your attendance, task and designated duties.
             <br />
-            If you have any questions or concerns, feel free to reach out to us through.
+            If you have any questions or concerns, feel free to reach out to us through <a href="mailto:crpms@circuitcity.com.ng">crpms@circuitcity.com.ng</a>.
             <br />
             <br />
             Best regards,<br />
@@ -153,11 +153,12 @@ async function checkAttendance() {
     })
 }
 
-checkAttendance()
+checkTasks()
+
 setInterval(() => {
     //Medium Priority Background Events 2Hours
-    // checkTasks()
-    // checkLeaves()
+    checkTasks()
+    checkLeaves()
 }, 1000 * 60 * 60 * 2)
 
 setInterval(() => {
