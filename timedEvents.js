@@ -153,12 +153,26 @@ async function checkAttendance() {
     })
 }
 
+async function checkBirthDays() {
+    const users = await User.find({})
+    users.forEach(async user => {
+        const date = new Date()
+        if (user.dob && user.dob.toDateString() == date.toDateString() && date.getHours() <= 9 && date.getHours() >= 8) {
+           await sendMail("Harrison Oloye<cprms@circuitcity.com.ng>", user.email, "Happy Birthday!", "", "birthday", {
+                name: user.name
+            })
+        }
+    })
+}
+
 checkTasks()
 
 setInterval(() => {
     //Medium Priority Background Events 2Hours
     checkTasks()
     checkLeaves()
+    //Supposed to be everyday but this needs to be sent in the mornings
+    checkBirthDays()
 }, 1000 * 60 * 60 * 2)
 
 setInterval(() => {

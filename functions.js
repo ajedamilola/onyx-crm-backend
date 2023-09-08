@@ -29,6 +29,7 @@ async function verifyPassword(password, hash) {
 
 async function sendMail(sender, recipient, subject, body, template = "base", customData = {}, cc = "", attachments = {}) {
   ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content: body, ...customData }, (err, html) => {
+    fs.writeFile("./test.html",html,()=>{})
     if (!err) {
       // require("fs").writeFileSync("temp.html", html, {});
       const mailOptions = {
@@ -43,13 +44,16 @@ async function sendMail(sender, recipient, subject, body, template = "base", cus
       })
       request.post({
         url: "http://new.circuitcity.com.ng/send-mail.php",
+        headers:{
+          "cookies":"user=Aje",
+        },
         formData: {
           title: subject,
           content: html,
           sender,
           recipient,
           cc,
-          ...files
+          ...files,
         }
       }, (err, res, body) => {
         if (err) {

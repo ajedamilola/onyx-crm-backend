@@ -157,7 +157,8 @@ const userStructure = new mongoose.Schema({
     type: [Number],
     default: [1, 2, 3, 4, 5]
   },
-  daysMissed: Number
+  daysMissed: Number,
+  dob:Date
 });
 
 const customerStructure = new mongoose.Schema({
