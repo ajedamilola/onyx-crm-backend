@@ -4,6 +4,7 @@ const nodemailer = require("nodemailer");
 const random = require("randomstring")
 const { ToWords } = require("to-words")
 const ejs = require("ejs")
+const pth = require("path")
 
 const toWords = new ToWords({
   localeCode: 'en-NG',
@@ -876,6 +877,7 @@ module.exports = (app) => {
         total = subtotal + vat;
         data.subtotal = subtotal;
         data.vat = vat;
+        data.usevat  = order.usevat
         data.total = total;
         data.customer = customer?.name || "Not Found";
         if (paid) {
@@ -924,9 +926,10 @@ module.exports = (app) => {
           customer: cid,
           shipping,
           dateCreated: new Date(),
-          total: subtotal + tax,
+          total: subtotal,
           totalTax: tax,
-          status: "processing"
+          status: "processing",
+          usevat: true
         })
         order.save()
         res.json({ order })
@@ -991,6 +994,7 @@ module.exports = (app) => {
         data.subtotal = subtotal;
         data.vat = vat;
         data.total = total;
+        data.usevat  = order.usevat
         data.customer = customer?.name || "Not Found";
         order.datePaid = new Date();
         data.words_amt = toWords.convert(total)
@@ -1026,6 +1030,99 @@ module.exports = (app) => {
     }
 
 
+  })
+
+  app.get("/order/payment/preview/:id", async (req, res) => {
+    const { id, amount, date } = req.params;
+    const { uid } = req.cookies;
+    if (uid) {
+      try {
+        // const user = await User.findById(uid)
+        const order = await Order.findById(id)
+
+
+        //Receipt Control
+        const inv_id = random.generate({ charset: "numeric", length: 6 }) + "-" + random.generate({ charset: "numeric", length: 3 });
+        let subtotal = 0;
+        let vat = 0;
+        let total = 0;
+        const data = {
+          subtotal: 0,
+          vat: 0,
+          total: 0,
+          items: [],
+          date: new Date().toDateString(),
+          inv_id: order.invId || inv_id,
+          paid: false,
+          customer: "",
+          order_id: order.wid || order.orderKey,
+          words_amt: "",
+          amountPaid: 0,
+          footnote: "This The Invoice might change when you are sending the invoice to client"
+        }
+        data.items = await Promise.all(order.lineItems.map(async item => {
+          const product = item.productId.length == 24 ? await Product.findById(item.productId) : await Product.findOne({ wid: item.productId })
+          subtotal += product.price * item.quantity;
+          return { name: product?.name || "Not Found", price: product.price, qty: item.quantity }
+        }))
+        order.paymentHistory.forEach(history => {
+          data.amountPaid += history.amount;
+        })
+        total = subtotal + vat;
+        vat = subtotal * 0.075;
+        if (data.amountPaid >= total) {
+          data.paid = true;
+          order.status = "completed";
+        }
+        const customer = Boolean(order.wid) ? await Customer.findOne({ wid: order.customer }) : await Customer.findById(order.customer)
+        data.subtotal = subtotal;
+        data.vat = vat;
+        data.total = total;
+        data.usevat  = order.usevat
+        if (order?.billing?.first_name) {
+          data.customer = order?.billing?.first_name + " " + order.shipping?.last_name
+        } else {
+          data.customer = customer?.name || "Not Found"
+        }
+        order.datePaid = new Date();
+        data.words_amt = toWords.convert(total)
+        order.invId = order.invId || inv_id;
+        order.save();
+        // const name = order.billing.first_name + " " +  order.billing.last_name
+        const path = `${process.env.FILE_ROOT}/invoices/${order.invId}.pdf`;
+        const rawInvoiceHTML = await ejs.renderFile("templates/email/invoice.ejs", data);
+        await generatePDF(rawInvoiceHTML, path);
+        res.sendFile(pth.resolve(path))
+
+
+      } catch (err) {
+        console.log(err)
+        res.json({ err: "An Error Occured" })
+      }
+    } else {
+      res.json({ err: "Unauthenticated Request" })
+    }
+
+
+  })
+
+  app.patch("/order/vat", async (req, res) => {
+    try {
+      if (!req.cookies.uid) return res.json({ err: "Unauthenticated Request" })
+      const { id } = req.body
+      const order = await Order.findById(id)
+      order.usevat = !order.usevat
+      if(order.usevat){
+        order.totalTax = order.total * 0.075
+      }else{
+        order.totalTax = 0;
+      }
+      order.save()
+      res.json({ order })
+    } catch (error) {
+      console.log(error)
+      res.json({ err: "An error has occured" })
+    }
   })
 
   app.get("/order/payment", (req, res) => {

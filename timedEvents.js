@@ -2,6 +2,22 @@ const { User, leaveTypes } = require("./database");
 const { sendMail } = require("./functions");
 process.title = "CircuitCity-BackgroundJobs";
 
+function areLastTwoDatesTwoDaysApart(dateArray) {
+    if (dateArray.length < 1) {
+        return false; // Not enough dates to check
+    }
+
+    const currentDate = new Date();
+    const recentDate = dateArray[dateArray.length - 1];
+    const secondRecentDate = dateArray[dateArray.length - 2];
+
+    // console.log(dateArray)
+    // Calculate the difference in days between the recent date and the current date
+    let daysApart = 0;
+    daysApart = Math.floor((currentDate - recentDate) / (1000 * 60 * 60 * 24));
+    return daysApart;
+}
+
 async function checkTasks() {
     const today = new Date();
     const users = await User.find();
@@ -80,16 +96,16 @@ async function checkTasks() {
 async function checkLeaves() {
     const today = new Date();
     const users = await User.find();
-    users.forEach(user=>{
-        if(user.leave && user.leave.open && !user.leave.pending && user.leave.approved){
+    users.forEach(user => {
+        if (user.leave && user.leave.open && !user.leave.pending && user.leave.approved) {
             //so this user has a leave that is active and ongoing
-            if(user.leave.expiring < today){
+            if (user.leave.expiring < today) {
                 //Take Action and stop the leave
                 user.leave.open = false;
                 user.leave.pending = true;
                 user.leave.approved = false;
                 user.save()
-                sendMail("Circuit City CRPMS <crpms@circuitcity.com.ng>",user.email,"Leave Expiry",`
+                sendMail("Circuit City CRPMS <crpms@circuitcity.com.ng>", user.email, "Leave Expiry", `
                 <div style='text-align:center'> 
                 Your <b>${leaveTypes[user.leave.ltype]}</b> leave Period has <b>EXPIRED</b> and you are expected to resume back to your duties<br />
                 <a href='https://trixmanager.com/'><button style='padding:7px 17px;background-color:green;border-width:0px; color:white'>View Dashboard</button></a>
@@ -100,9 +116,51 @@ async function checkLeaves() {
     })
 }
 
-checkTasks()
+async function checkAttendance() {
+    /**
+     * 
+     * @param {any} user 
+     * @param {Number} days 
+     */
+    function alert(user, days) {
+        sendMail("Management System <cprms@circuitcity.com.ng>", user.email, "CRM Abscence",
+            `
+            Hi ${user.name},
+            <br /><br />
+            We noticed that you have missed signing in for ${days} day(s). Please make sure to sign in regularly to keep track of your attendance, task and designated duties.
+            <br />
+            If you have any questions or concerns, feel free to reach out to us through.
+            <br />
+            <br />
+            Best regards,<br />
+            Circuit City<br />
+            For any further issues or complaint about login in or using the CRM, please reach out to the our Technical Team
+                `
+        )
+
+        user.daysMissed = days;
+        user.save()
+    }
+    const users = await User.find()
+    users.forEach(user => {
+        const daysMissed = areLastTwoDatesTwoDaysApart(user.checkIns);
+        if (daysMissed >= 2) {
+            alert(user, daysMissed)
+        } else {
+            user.daysMissed = 0;
+            user.save(0)
+        }
+    })
+}
+
+checkAttendance()
 setInterval(() => {
     //Medium Priority Background Events 2Hours
-    checkTasks()
-    checkLeaves()
+    // checkTasks()
+    // checkLeaves()
 }, 1000 * 60 * 60 * 2)
+
+setInterval(() => {
+    //Least Priority will be sent everyday
+    checkAttendance()
+}, 1000 * 60 * 60 * 24)

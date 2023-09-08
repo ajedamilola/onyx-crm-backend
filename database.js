@@ -154,9 +154,10 @@ const userStructure = new mongoose.Schema({
   reportFiles: [String],
   leave,
   workDays: {
-    type:[Number],
-    default:[1,2,3,4,5]
-  }
+    type: [Number],
+    default: [1, 2, 3, 4, 5]
+  },
+  daysMissed: Number
 });
 
 const customerStructure = new mongoose.Schema({
@@ -360,7 +361,8 @@ const order = new mongoose.Schema({
   paymentHistory: [{
     amount: Number, date: Date
   }],
-  invId: String
+  invId: String,
+  usevat: Boolean
 })
 
 const partPayment = new mongoose.Schema({
