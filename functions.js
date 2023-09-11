@@ -29,7 +29,7 @@ async function verifyPassword(password, hash) {
 
 async function sendMail(sender, recipient, subject, body, template = "base", customData = {}, cc = "", attachments = {}) {
   ejs.renderFile(`${__dirname}/templates/email/${template}.ejs`, { content: body, ...customData }, (err, html) => {
-    fs.writeFile("./test.html",html,()=>{})
+    // fs.writeFile("./test.html",html,()=>{})
     if (!err) {
       // require("fs").writeFileSync("temp.html", html, {});
       const mailOptions = {
