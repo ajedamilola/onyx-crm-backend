@@ -14,8 +14,8 @@ if (fs.existsSync("/root/certificates")) {
             // Provide the private and public key to the server by reading each
             // file's content with the readFileSync() method.
             {
-                key: fs.readFileSync("/root/certificates/new_key.key"),
-                cert: fs.readFileSync("/root/certificates/new_cert.crt"),
+                key: fs.readFileSync("/etc/letsencrypt/live/linux.circuitcity.com.ng/privkey.pem"),
+                cert: fs.readFileSync("/etc/letsencrypt/live/linux.circuitcity.com.ng/fullchain.pem"),
             },
             app
         )
