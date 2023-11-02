@@ -129,7 +129,7 @@ module.exports = (app) => {
         canViewInventory,
         canCreateOrders,
         isEngineer,
-        days,dob
+        days, dob
       } = req.body;
       const user = await User.findById(id);
       user.email = email;
@@ -678,6 +678,7 @@ module.exports = (app) => {
     const { title, description, beyond, departments } = req.body;
     const { uid } = req.cookies;
     const user = await User.findById(uid);
+    const users = await User.find();
     try {
       const annoucement = new Annoucement({
         title,
@@ -687,11 +688,30 @@ module.exports = (app) => {
         beyond,
         verified: user.privilage >= 2
       });
-      console.log(departments)
       annoucement.save();
 
       user.reports.push({ content: `Sent An Announcemet titled: ${title}` });
       user.save()
+      console.log(users.map(u => {
+        if (!departments || departments.length == 0) {
+          return u.email
+        } else {
+          if (departments.some(d => d == u.department)) {
+            return u.email
+          }
+        }
+      }).join(", "))
+      if (user.privilage >= 2) {
+        sendMail(user.email, users.map(u => {
+          if (!departments || departments.length == 0) {
+            return u.email
+          } else {
+            if (departments.some(d => d == u.department)) {
+              return u.email
+            }
+          }
+        }).join(", "), annoucement.title, annoucement.description)
+      }
       res.json({ annoucement });
     } catch (error) {
       console.log(error);
@@ -721,8 +741,10 @@ module.exports = (app) => {
       const annoucement = await Annoucement.findById(id)
       annoucement.verified = true;
       annoucement.save()
+      const users = await User.find()
       const user = await User.findById(annoucement.sender);
       user.reports.push({ content: `Announcement <b>${annoucement.title}</b> Has Been verified for viewing by an Admin or HOD` })
+      sendMail(user.email, users.map(u => u.email).join(", "), annoucement.title, annoucement.description)
       user.save()
       res.json({ annoucement });
     } catch (error) {
@@ -1410,7 +1432,7 @@ module.exports = (app) => {
           const { document } = req.files;
           const segment = document.name.split(".")
           const extension = segment[segment.length - 1]
-          const name = user.name.replace(/ /g,"-")
+          const name = user.name.replace(/ /g, "-")
           user.leave.document = `${name}.${extension}`
           document.mv(process.env.FILE_ROOT + `/leaves/${name}.${extension}`, () => {
           })
