@@ -296,7 +296,7 @@ module.exports = (app) => {
       try {
         const priv = (await User.findById(req.cookies.uid)).privilage;
         const customer = await Customer.findById(req.headers.customer);
-        if (priv > 1) {
+        if (priv >= 1) {
           customer.purchases = customer.purchases.filter(
             (p) => p.id !== req.headers.purchase
           );
@@ -393,7 +393,7 @@ module.exports = (app) => {
         const user = await User.findById(uid);
         const { id } = req.headers;
         const customer = await Customer.findById(req.headers.customer);
-        if (user.privilage > 1) {
+        if (user.privilage >= 1) {
           customer.texts = customer.texts.filter((t) => t._id != id);
         } else {
           customer.texts.forEach((text) => {
@@ -420,7 +420,7 @@ module.exports = (app) => {
         const user = await User.findById(uid);
         const { id } = req.headers;
         const customer = await Customer.findById(req.headers.customer);
-        if (user.privilage > 1) {
+        if (user.privilage >= 1) {
           customer.calls = customer.calls.filter((t) => t._id != id);
         } else {
           customer.calls.forEach((call) => {
@@ -447,7 +447,7 @@ module.exports = (app) => {
         const user = await User.findById(uid);
         const { id } = req.headers;
         const customer = await Customer.findById(req.headers.customer);
-        if (user.privilage > 1) {
+        if (user.privilage >= 1) {
           customer.emails = customer.emails.filter((t) => t._id != id);
         } else {
           customer.emails.forEach((email) => {
@@ -591,7 +591,7 @@ module.exports = (app) => {
     try {
       if (req.cookies.uid) {
         const user = await User.findById(req.cookies.uid);
-        if (user.privilage > 1) {
+        if (user.privilage >= 1) {
           await Customer.findByIdAndDelete(req.headers.customer);
           res.json({ msg: "Ok" });
         } else {

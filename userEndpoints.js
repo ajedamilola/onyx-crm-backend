@@ -75,7 +75,7 @@ module.exports = (app) => {
         const { uid } = req.cookies;
         const user = User.findById(uid);
         if (user) {
-          if (user.privilage < 2) {
+          if (user.privilage <= 2) {
             res.json({
               err: "You do not have enough clearance for this action",
             });
@@ -90,7 +90,6 @@ module.exports = (app) => {
               image: d_productImage,
               sid,
               canAddProducts: false,
-              department: Number(department || 0), units: JSON.parse(units)
             });
             if (req.files && req.files.image) {
               agent.image =
@@ -139,8 +138,6 @@ module.exports = (app) => {
       user.canAddCustomers = canAddCustomers;
       user.account = account;
       user.sid = sid;
-      user.department = Number(department);
-      user.units = JSON.parse(units)
       user.canViewInventory = canViewInventory;
       user.canCreateOrders = canCreateOrders;
       user.isEngineer = isEngineer;

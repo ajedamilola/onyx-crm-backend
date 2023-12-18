@@ -158,7 +158,7 @@ const userStructure = new mongoose.Schema({
     default: [1, 2, 3, 4, 5]
   },
   daysMissed: Number,
-  dob:Date
+  dob: Date
 });
 
 const customerStructure = new mongoose.Schema({
@@ -239,7 +239,8 @@ const productsStructure = new mongoose.Schema({
   logs: {
     type: [productLog],
     default: []
-  }
+  },
+  barcode: String
 });
 
 const category = new mongoose.Schema({
@@ -412,7 +413,7 @@ const Transaction = mongoose.model("transaction", transaction)
 
 // const dbName  = "main";
 const connString = process.env.NODE_ENV == "development" ? "mongodb://127.0.0.1:27017" : "mongodb://crud:dbnetrix%23%40@127.0.0.1:27017/?authMechanism=DEFAULT"
-const dbName = process.env.NODE_ENV == "development" ? "circuit-crm" : "circuitcity";
+const dbName = "onyx-stores"
 
 // const connString = "mongodb://crud:dbnetrix%23%40@139.84.233.172:27017/?authMechanism=DEFAULT"
 // const dbName = "circuitcity";
