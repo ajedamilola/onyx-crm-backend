@@ -432,11 +432,7 @@ mongoose.connect(connString, { dbName }, async (err) => {
 
 const WooCommerceRestApi = require("@woocommerce/woocommerce-rest-api").default;
 
-const api = new WooCommerceRestApi({
-  url: "https://circuitcity.com.ng",
-  consumerKey: process.env.WOO_CONSUMER_KEY,
-  consumerSecret: process.env.WOO_SECRET_KEY,
-});
+const api = null;
 
 module.exports = {
   User,
