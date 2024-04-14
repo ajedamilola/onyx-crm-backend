@@ -976,9 +976,6 @@ module.exports = (app) => {
                   title: "Voucher Acceptance"
                 })
                 transaction.save()
-                const info = await Info.findOne()
-                info.balance -= voucher.amount;
-                info.save()
               }
             } else {
               if (confirmed) {
